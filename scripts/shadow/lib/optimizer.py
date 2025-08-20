@@ -24,7 +24,7 @@ VOTER_ABI_PATH = os.getenv('VOTER_ABI_PATH', 'abi/shadow/Voter.json')
 SHADOW_NFT_OWNER_ADDRESS = os.getenv("SHADOW_NFT_OWNER_ADDRESS", "")
 
 def load_json(path):
-    """Load the JSON file from votes dashboard the given path."""
+    """Load a JSON file from the given path."""
     if not os.path.exists(path):
         raise FileNotFoundError(f"{path} not found.")
     with open(path) as f:
@@ -361,11 +361,11 @@ def run_optimize(period=None, save=True, is_historical=False):
     logger.info(f"Optimizing for period {period}")
     
     if is_historical:
-        dashboard_path = input(f"Enter path to historical dashboard for period {period} (e.g., data/shadow/historical/{period}_votes_dashboard_ddmmyy.json): ")
+        dashboard_path = input(f"Enter path to historical dashboard for period {period} (e.g., input_data/shadow/historical/{period}_votes_dashboard_ddmmyy.json): ")
     else:
-        dashboard_path = f'data/shadow/{period}_votes_dashboard.json'
+        dashboard_path = f'input_data/shadow/{period}_votes_dashboard.json'
         if not os.path.exists(dashboard_path):
-            dashboard_path = 'data/shadow/votes_dashboard.json'
+            dashboard_path = 'input_data/shadow/votes_dashboard.json'
     
     try:
         dashboard = load_json(dashboard_path)
@@ -373,6 +373,12 @@ def run_optimize(period=None, save=True, is_historical=False):
             logger.warning(f"⚠️ Period mismatch: dashboard period is {dashboard.get('period')}, requested period is {period}")
     except FileNotFoundError:
         logger.error(f"❌ Dashboard not found at {dashboard_path}")
+        period_file = f'input_data/shadow/{period}_votes_dashboard.json'
+        generic_file = 'input_data/shadow/votes_dashboard.json'
+        logger.error(f"   Looked for: {dashboard_path}")
+        logger.error(f"   Also checked: {period_file} exists: {os.path.exists(period_file)}")
+        logger.error(f"   Also checked: {generic_file} exists: {os.path.exists(generic_file)}")
+        logger.error(f"   Have you run 'python scripts/shadow/shadow_manager.py fetch' first?")
         return None
     
     if not SHADOW_NFT_OWNER_ADDRESS:

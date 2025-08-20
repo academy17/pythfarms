@@ -167,12 +167,24 @@ def save_votes_dashboard(dashboard, period=None):
         date_str = date_obj.strftime("%d%m%y")
     else:
         date_str = datetime.datetime.now().strftime("%d%m%y")
+    
+    # Save period-specific file
     current_path = f'input_data/shadow/{period}_votes_dashboard.json'
     historical_path = f'input_data/shadow/historical/{period}_votes_dashboard_{date_str}.json'
+    
+    # Also save a generic dashboard file for compatibility
+    generic_path = 'input_data/shadow/votes_dashboard.json'
+    
     os.makedirs(os.path.dirname(current_path), exist_ok=True)
     with open(current_path, 'w') as f:
         json.dump(dashboard, f, indent=2)
     logger.info(f"✅ Saved current votes dashboard to {current_path}")
+    
+    # Save to generic path for easier access by optimizer
+    with open(generic_path, 'w') as f:
+        json.dump(dashboard, f, indent=2)
+    logger.info(f"✅ Saved current votes dashboard to generic path {generic_path}")
+    
     os.makedirs(os.path.dirname(historical_path), exist_ok=True)
     with open(historical_path, 'w') as f:
         json.dump(dashboard, f, indent=2)

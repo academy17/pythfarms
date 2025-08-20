@@ -1,258 +1,374 @@
-# PyThFarms README
+# Shadow Protocol Vote Fetcher & Optimizer
 
-A Python toolkit for indexing Aerodrome liquidity pools, filtering votable pools, enriching them with metadata, and computing live epoch‐to‐date fees & bribes (in USD) using CoinGecko. 
+This module provides two main tools for working with Shadow protocol voting data:
+
+- **fetch_votes**: Fetches pool data and on-chain votes for a given period, saving a dashboard JSON file for analytics and optimization. 
+- **optimizer**: Calculates the optimal allocation of your voting power to maximize bribe rewards, and compares your actual votes to the theoretical best.
+
+Argument:
+
+* `period` if specified, fetches votes for an elapsed period
+* `historical_dashboard_path` to past bribes and fees -- is only useful to recompute the optimal votes for a past epoch ( bcs then the API doesn't broadcast the bribes and fees any more)
+* we do not need any argument to see existing votes -- the `get_user_votes()`function in the shadow manager automatically fetches last (=existing) votes by the veNFT owner onchain
+
 
 ---
 
-## 📁 Project Structure
+## 1. fetch_votes.py
 
+### What It Does
+
+- Fetches pools from the Shadow API.
+- Fetches on-chain votes for each pool for the specified period.
+- Produces a dashboard file containing:
+  - `pool` (address)
+  - `symbol`
+  - `fee_last_7d_usd`
+  - `vol_last_7d`
+  - `bribes_usd`
+  - `pool_votes_period`
+- Saves the dashboard with the period number in the filename.
+
+### Usage
+
+This script is intended to be called from the manager (`shadow_manager.py`), but you can also run its functions directly.
+
+#### Main Function
+
+- `run_fetch(period=None, historical_dashboard_path=None)`
+
+  - `period` (optional): Integer period number to fetch. If not provided, fetches for the next period.
+  - `historical_dashboard_path` (optional): Path to an existing dashboard file for historical fetches.
+
+#### Flags (when used via manager)
+
+| Flag                       | Description                                         | Example                                                    |
+|----------------------------|-----------------------------------------------------|------------------------------------------------------------|
+| --period                   | Specify the period number to fetch                  | `--period 2899`                                            |
+| --historical_dashboard_path| Path to dashboard for historical fetch              | `--historical_dashboard_path data/shadow/2898_votes_dashboard.json` |
+
+
+
+#### Examples
+
+Fetch votes dashboard for the next period:
+```bash
+python shadow_manager.py fetch
 ```
-p y t h f a r m s/
-├── abi/
-│   ├── LpSugar.json
-│   ├── POOL_ABI.json
-│   ├── RewardsSugar.json
-│   ├── V2_FACTORY_ABI.json
-│   └── V3_FACTORY_ABI.json
-│
-├── data/
-│   ├── enriched_votable_pools.json
-│   ├── indexed_pools.json
-│   ├── live_epoch_fees_usd.json
-│   ├── sugar_pools.json
-│   ├── token_to_id.json
-│   └── votable_pools.json
-│
-├── scripts/
-│   ├── helper/
-│   │   └── 1_get_coingecko_token_ids.py
-│   │
-│   ├── 1_get_sugar_pools.py
-│   ├── 2_filter_votable_pools.py
-│   ├── 3_enriched_votable_pools.py
-│   └── 4_live_epoch_fees_with_coingecko.py
-│
-├── venv/                      ← Python virtual environment (ignored by Git)
-├── .env                       ← Environment variables (RPC URL, RewardsSugar address)
-├── .gitignore
-├── README.md
-└── requirements.txt
+
+Fetch votes dashboard for a specific period:
+```bash
+python shadow_manager.py fetch --period 2899
 ```
 
----
+Fetch historical votes for a previous period (using an existing dashboard):
+```bash
+python shadow_manager.py fetch --period 2898 --historical_dashboard_path data/shadow/historical/2898_votes_dashboard_170725.json
+```
 
-## 🛠️ Setup
+#### Output
 
-1. **Clone the repo** (if you haven’t already):
-
-   ```bash
-   git clone https://github.com/yourusername/pythfarms.git
-   cd pythfarms
-   ```
-
-2. **Create a Python virtual environment** and install dependencies:
-
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate      # macOS/Linux
-   venv\Scripts\activate         # Windows
-
-   pip install --upgrade pip
-   pip install -r requirements.txt
-   ```
-
-3. **Create a `.env` file** in the project root with the following variables:
-
-   ```
-   RPC_URL=<YOUR_BASE_RPC_ENDPOINT>
-   REWARDS_SUGAR_ADDRESS=<RewardsSugar_contract_address_on_Base>
-   ```
-
-   * `RPC_URL` must point to a Base‐compatible JSON‐RPC node (e.g. Ankr, Alchemy, etc.).
-   * `REWARDS_SUGAR_ADDRESS` is the deployed RewardsSugar contract on Base, e.g. `0x…`.
-
-4. **Verify your ABI files** are in `abi/`:
-
-   * `LpSugar.json`
-   * `POOL_ABI.json`
-   * `RewardsSugar.json`
-   * `V2_FACTORY_ABI.json`
-   * `V3_FACTORY_ABI.json`
+- `data/shadow/{period}_votes_dashboard.json`
+- `data/shadow/historical/{period}_votes_dashboard_{date}.json`
+- For historical fetches: `data/shadow/historical/{period}_historical_votes_dashboard.json`
 
 ---
 
-## 📑 Data Pipeline & Scripts
+## 2. optimizer.py
 
-Below is the recommended order to run each script. Each step writes a JSON file under `data/`:
-(You can also simply run the entire flow with ./run_all.sh)
-The optimized results will be printed to the console.
+### What It Does
 
-### 1. Fetch all Aerodrome pools via Sugar
+- Loads a dashboard file for a given period.
+- Fetches your voting power from the blockchain.
+- Calculates the optimal allocation of your votes to maximize bribe rewards.
+- For historical optimization, removes your actual votes from the dashboard and re-optimizes.
+- Saves or displays the results in human-readable and bot formats.
+
+### Example Output:
+```json
+
+{
+  "total_expected_usd": 561.21,
+  "allocations": [
+    {
+      "symbol": "CL-wS-GOGLZ-0.5%",
+      "pool": "0x1f4efc47e5a5ab6539d95a76e2dde6d74462acea",
+      "votes": 2695.6835792317534,
+      "pct": 45,
+      "exp_usd": 256.72
+    },
+    {
+      "symbol": "CL-wS-NAVI-2.0%",
+      "pool": "0x28f1bb2952ae8742b9e16fd515e3d01f4be6bc30",
+      "votes": 1766.5794435975142,
+      "pct": 29,
+      "exp_usd": 167.14
+    },
+    {
+      "symbol": "CL-USDC-stS-0.1093%",
+      "pool": "0x2bcb79fd1e0c4251b6f94daee25d4c6ff330cdf8",
+      "votes": 1537.1868359668588,
+      "pct": 26,
+      "exp_usd": 137.35
+    }
+  ],
+  "re_run": false,
+  "period": 2900
+}
+```
+
+
+### Usage
+
+Run via the manager (`shadow_manager.py`):
+
+#### Main Function
+
+- `run_optimize(period=None, save=True, is_historical=False)`
+
+  - `period` (optional): Period to optimize for. If not provided, uses the next period.
+  - `save` (optional): If `True`, saves results to file. If `False`, displays in terminal.
+  - `is_historical` (optional): If `True`, runs historical optimization.
+
+#### Flags (when used via manager)
+
+| Flag         | Description                                         | Example                                                    |
+|--------------|-----------------------------------------------------|------------------------------------------------------------|
+| --period     | Specify the period to optimize                      | `--period 2899`                                            |
+| --historical | Run historical optimization                         | `--historical`                                             |
+| --display    | Display results in terminal instead of saving       | `--display`                                                |
+
+#### Examples
+
+Optimize for the next period (default):
+```bash
+python shadow_manager.py optimize
+```
+
+Optimize for a specific period:
+```bash
+python shadow_manager.py optimize --period 2899
+```
+
+Run historical optimization (removes your actual votes and re-optimizes):
+```bash
+python shadow_manager.py optimize --period 2898 --historical
+```
+You will be prompted for the path to the historical dashboard file.
+
+Display results in the terminal:
+```bash
+python shadow_manager.py optimize --period 2899 --display
+```
+
+#### Output
+
+- Current optimization:
+  - `optimized_votes/shadow/{period}_optimized_votes_human.json`
+  - `optimized_votes/shadow/{period}_optimized_votes_bot.txt`
+  - Also saved to: `optimized_votes/shadow/optimized_votes_human.json` and `optimized_votes/shadow/optimized_votes_bot.txt`
+- Historical optimization:
+  - `optimized_votes/shadow/historical/{period}_historical_optimal_votes.json`
+  - `optimized_votes/shadow/historical/{period}_historical_optimal_votes_bot.txt`
+
+---
+
+## Analytics & Comparison
+
+
+
+## Notes
+
+- Make sure your `.env` file is set up with the correct RPC and contract addresses.
+- The pools are always fetched fresh from the API for each run (except for historical fetches).
+- For historical optimization, you must provide the dashboard file for the period you want to analyze.
+
+---
+
+
+# Aerodrome Finance Vote Fetcher & Optimizer
+
+This module provides three main tools for working with Aerodrome protocol voting data:
+
+- **fetch_votes**: Fetches pool data, on-chain votes, and relay votes, saving a dashboard JSON file for analytics and optimization.
+- **optimizer**: Calculates the optimal allocation of your voting power to maximize fees and bribe rewards.
+- **analytics**: Analyzes vote allocation performance and calculates expected returns.
+
+## 1. fetch_votes.py
+
+### What It Does
+
+- Fetches all pools from the LpSugar contract.
+- Filters for votable pools with active gauges.
+- Enriches pools with token symbols.
+- Fetches token prices from CoinGecko.
+- Retrieves fees and bribes for the current epoch from RewardsSugar.
+- Fetches relay votes if configured.
+- Produces a dashboard file containing:
+  - Pool information (address, symbol, type)
+  - Current fees and bribes
+  - On-chain vote weights
+  - Our NFT votes
+  - Relay votes (if applicable)
+
+### Usage
+
+This script is intended to be called from the manager (`aero_manager.py`):
 
 ```bash
-python scripts/1_get_sugar_pools.py
+python aero_manager.py fetch
 ```
 
-* **Input:** None
-* **Output:**
+#### Flags
 
-  * `data/sugar_pools.json`
+| Flag         | Description                            |
+|--------------|----------------------------------------|
+| --historical | Fetch historical data (not fully implemented yet) |
 
-    * Contains an array of all pools (basic volatile, V3, CL) as returned by LpSugar’s `all(...)`.
-* **What it does:**
+#### Output
 
-  1. Connects to LpSugar on Base.
-  2. Paginates through `all(limit, offset)` until all pools are fetched.
-  3. Saves them to `data/sugar_pools.json`.
+- `input_data/aero/votes_dashboard.json`
 
----
+## 2. optimizer.py
 
-### 2. Filter “votable” pools (active gauges only)
+### What It Does
+
+- Loads the votes dashboard file.
+- Calculates the optimal allocation of your votes to maximize fees and bribes using an equal-marginal algorithm.
+- Produces human-readable and bot-friendly output files.
+
+### Example Output:
+
+```json
+{
+  "total_expected_usd": 723.45,
+  "allocations": [
+    {
+      "symbol": "WETH/USDC",
+      "pool": "0x1234567890abcdef1234567890abcdef12345678",
+      "votes": 1245.6789,
+      "pct": 40,
+      "exp_usd": 312.45
+    },
+    {
+      "symbol": "AERO/USDC",
+      "pool": "0xabcdef1234567890abcdef1234567890abcdef12",
+      "votes": 987.6543,
+      "pct": 35,
+      "exp_usd": 254.32
+    },
+    {
+      "symbol": "wstETH/WETH",
+      "pool": "0x7890abcdef1234567890abcdef1234567890abcd",
+      "votes": 765.4321,
+      "pct": 25,
+      "exp_usd": 156.68
+    }
+  ]
+}
+```
+
+### Usage
+
+Run via the manager (aero_manager.py):
 
 ```bash
-python scripts/2_filter_votable_pools.py
+python scripts/aero/aero_manager.py optimize
 ```
 
-* **Input:**
+#### Flags
 
-  * `data/sugar_pools.json`
-* **Output:**
+| Flag      | Description                                         |
+|-----------|-----------------------------------------------------|
+| --display | Display results in terminal instead of saving files |
 
-  * `data/votable_pools.json`
+#### Output
 
-    * Subset of pools that have `gauge_alive == true`.
-* **What it does:**
+- optimized_votes_human.json: Human-readable JSON with vote allocations
+- optimized_votes_bot.txt: Bot-friendly format for submitting votes
 
-  1. Reads `sugar_pools.json`.
-  2. Keeps only those entries where `"gauge_alive": true`.
-  3. Writes the filtered array to `votable_pools.json`.
+## 3. analytics.py
 
----
+### What It Does
 
-### 3. Enrich votable pools with human‐readable symbols & token metadata
+- Analyzes vote allocation performance.
+- Calculates NFT value and expected returns.
+- Computes forecasted APR.
+- Optionally compares current votes with optimal allocation.
+
+### Usage
+
+Run via the manager (aero_manager.py):
 
 ```bash
-python scripts/3_enriched_votable_pools.py
+python scripts/aero/aero_manager.py analyze
 ```
 
-* **Input:**
+#### Flags
 
-  * `data/votable_pools.json`
-* **Output:**
+| Flag      | Description                                     |
+|-----------|-------------------------------------------------|
+| --compare | Compare with optimal allocation (if available)  |
 
-  * `data/enriched_votable_pools.json`
+#### Output
 
-    * Each pool object now has:
+- analytics_report.json: Latest analytics report
+- `analytics/aero/analytics_report_YYYYMMDD.json`: Date-stamped reports
 
-      * `symbol`: `"TOKEN0/TOKEN1"` (from ERC-20 calls)
-      * `token0`, `token1` (addresses)
-      * `decimals`, `liquidity`, `reserve0`, `reserve1`, etc., if pulled from the pool contract
-* **What it does:**
+### Example Output
 
-  1. Reads `votable_pools.json`.
-  2. For each pool:
+When running analytics, you'll see a summary like:
 
-     * Reads on-chain `token0.symbol()` and `token1.symbol()`.
-     * Attempts to read `pool.symbol()` (if available).
-     * Reads `decimals()`, reserves (`reserve0`, `reserve1`), etc.
-     * Populates a unified `symbol` field and any missing fields.
-  3. Saves enriched data to `enriched_votable_pools.json`.
+```
+================ ANALYTICS SUMMARY ================
+Voting Power: 5000
+Token Price: $0.45
+NFT Value: $2250.00
+Expected USD per Epoch: $723.45
+Forecasted APR: 16.72%
+==================================================
+```
 
----
+## Environment Setup
 
-### 4. Map Base token addresses → CoinGecko IDs
+Ensure your .env file contains the following variables:
+
+```
+RPC_URL=<Base network RPC URL>
+LP_SUGAR_ADDRESS=<LpSugar contract address>
+REWARDS_SUGAR_ADDRESS=<RewardsSugar contract address>
+VOTER_ADDRESS=<Voter contract address>
+VE_ADDRESS=<Ve contract address>
+NFT_ID=<Your veNFT ID>
+
+# for relay support
+RELAY_ACCOUNT=<Relay account address>
+RELAY_SUGAR_ADDRESS=<RelaySugar contract address>
+
+```
+
+## Command Reference
+
+Here's a quick reference for all available commands:
 
 ```bash
-python scripts/helper/1_get_coingecko_token_ids.py
+# Fetch votes data
+python scripts/aero/aero_manager.py fetch
+
+# Optimize votes
+python scripts/aero/aero_manager.py optimize
+python scripts/aero/aero_manager.py optimize --display
+
+# Analyze votes
+python scripts/aero/aero_manager.py analyze
+python scripts/aero/aero_manager.py analyze --compare
 ```
 
-* **Input:**
+## Notes
 
-  * `data/enriched_votable_pools.json`
-* **Output:**
-
-  * `data/token_to_id.json`
-
-    * `{ "0xTokenAddr…": "coingecko-id", … }`
-* **What it does:**
-
-  1. Reads all pools from `enriched_votable_pools.json`, extracts unique `token0`/`token1` addresses.
-  2. Fetches CoinGecko’s `/coins/list?include_platform=true`, which returns every CoinGecko coin with a `"platforms"` dictionary.
-  3. Builds a mapping for any coin whose `"platforms"` contain `"base": "<token_address>"`.
-  4. Writes out `{ contract_address: coingecko_id }` to `token_to_id.json`.
-
----
-
-### 5. Compute live‐epoch fees & bribes in USD (via CoinGecko)
-
-```bash
-python scripts/4_live_epoch_fees_with_coingecko.py
-```
-
-* **Input:**
-
-  * `data/enriched_votable_pools.json`
-  * `data/token_to_id.json`
-* **Output:**
-
-  * `data/live_epoch_fees_usd.json`
-
-    ```json
-    [
-      {
-        "pool":         "0xPoolAddress...",
-        "symbol":       "TOKEN0/TOKEN1",
-        "fee0_amount":  1234500000000000000,
-        "fee1_amount":  987650000000000000,
-        "fees_usd":     234.56,
-        "bribes_usd":   12.34,
-        "bribes": [
-          {
-            "token":        "0xBribeTokenAddr",
-            "symbol":       "BRIBSY",
-            "amount":       5000000000000000000,
-            "amount_token": 5.0,
-            "amount_usd":   7.50
-          },
-          {
-            "token":        "0xAnotherBribeToken",
-            "symbol":       "ABC",
-            "amount":       2000000,
-            "amount_token": 2.0,
-            "amount_usd":   4.84
-          }
-        ],
-        "total_usd":    246.90
-      },
-      …
-    ]
-    ```
-* **What it does:**
-
-  1. Reads `enriched_votable_pools.json` to get each pool’s `token0`/`token1`.
-  2. Reads `token_to_id.json` to map each token address → CoinGecko ID.
-  3. Calls CoinGecko’s `/simple/price?ids={comma-separated-ids}&vs_currencies=usd` in batches of ≲80 IDs at a time (to respect rate limits).
-  4. Builds a dictionary `{ contract_address: Decimal(usd_price) }` for each token.
-  5. For each pool:
-
-     * Uses Sugar’s `epochsByAddress(1, 0, poolAddress)` to fetch the “live” (current‐epoch) `LpEpoch` struct.
-     * Splits `fees[]` into `fee0_amount` (for `token0`) and `fee1_amount` (for `token1`).
-     * Converts each raw `feeX_amount` → decimal using `decimals()` and multiplies by the USD price to get `fees_usd`.
-     * Iterates `bribes[]`, computes detailed `{ token, symbol, amount, amount_token, amount_usd }` for each bribe token.
-     * Sums all bribe USD → `bribes_usd`.
-     * Computes `total_usd = fees_usd + bribes_usd`.
-     * Stores a JSON object per pool, sorted descending by `total_usd`.
-  6. Writes the final array to `live_epoch_fees_usd.json`.
-
----
-
-
-## 📦 requirements.txt
-
-```text
-web3==6.x.x
-python-dotenv
-requests
-tqdm
+- The pools are fetched fresh from on-chain data for each run.
+- Price data is fetched from CoinGecko during both fetch and analytics operations.
+- The optimizer uses an equal-marginal algorithm to maximize expected returns.
+- The dashboard is always saved to votes_dashboard.json as the primary data source.
 ```
 

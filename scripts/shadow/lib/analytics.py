@@ -87,16 +87,34 @@ def fetch_votes_for_period(rpc_url, voter_contract, nft_owner_address, abi_path,
 def compute_actual_return(historical_dashboard, user_votes):
     """Calculate the actual return from our votes using the historical dashboard data"""
     actual_return = Decimal(0)
+    if not user_votes or 'votes' not in user_votes or not user_votes['votes']:
+        logger.warning("No user votes to compute return")
+        return actual_return
+        
+    logger.info(f"Computing actual return from {len(user_votes['votes'])} user votes")
+    matched_pools = 0
+    
     for vote in user_votes['votes']:
         pool = vote['pool'].lower()
         V_user = Decimal(vote['weight']) / Decimal(10**18)
+        pool_found = False
+        
         for p in historical_dashboard['pools']:
             if p['pool'].lower() == pool:
+                pool_found = True
+                matched_pools += 1
                 W_final = Decimal(p['pool_votes_period'])
-                R = Decimal(p['bribes_usd'])
-                if W_final > 0:
-                    actual_return += R * (V_user / W_final)
+                R = Decimal(p.get('bribes_usd', 0))
+                if W_final > 0 and R > 0:
+                    pool_return = R * (V_user / W_final)
+                    actual_return += pool_return
+                    logger.info(f"Pool {p.get('symbol', pool)}: votes={V_user}, bribes=${R}, return=${pool_return}")
                 break
+                
+        if not pool_found:
+            logger.warning(f"Pool {pool} not found in dashboard")
+    
+    logger.info(f"Matched {matched_pools}/{len(user_votes['votes'])} pools, total expected return: ${actual_return}")
     return actual_return
 
 def run_analyze(period=None, compare=False, is_historical=False, dashboard_path=None, optimizer_path=None):
@@ -201,13 +219,27 @@ def run_analyze(period=None, compare=False, is_historical=False, dashboard_path=
         SHADOW_RPC_URL, SHADOW_VOTER_ADDRESS, SHADOW_NFT_OWNER_ADDRESS, VOTER_ABI_PATH, period
     )
     
+    # Always try to find a dashboard file for current votes APR calculation
+    if not dashboard_path:
+        if is_historical:
+            dashboard_path = f'input_data/shadow/historical/{period}_historical_votes_dashboard.json'
+            if not os.path.exists(dashboard_path):
+                dashboard_path = f'input_data/shadow/{period}_votes_dashboard.json'
+        else:
+            dashboard_path = f'input_data/shadow/{period}_votes_dashboard.json'
+            if not os.path.exists(dashboard_path):
+                dashboard_path = 'input_data/shadow/votes_dashboard.json'
+        
+        if not os.path.exists(dashboard_path):
+            logger.warning(f"Dashboard file not found at {dashboard_path} for APR calculation")
+    
     # Calculate APR from current votes if available
     current_votes_apr = Decimal('0')
-    if actual_votes and 'votes' in actual_votes:
+    if actual_votes and 'votes' in actual_votes and len(actual_votes['votes']) > 0:
         actual_votes['period'] = period
         
         # If we have dashboard data, calculate the current votes APR
-        if dashboard_path:
+        if dashboard_path and os.path.exists(dashboard_path):
             try:
                 dashboard = load_json(dashboard_path)
                 actual_return = compute_actual_return(dashboard, actual_votes)
@@ -216,27 +248,20 @@ def run_analyze(period=None, compare=False, is_historical=False, dashboard_path=
                     current_votes_apr = (actual_return * Decimal(52) / token_value * Decimal(100)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
                 
                 report['expected_apr_from_current_votes'] = float(current_votes_apr)
+                logger.info(f"Current votes APR calculated: {current_votes_apr}%")
             except Exception as e:
                 logger.error(f"Error calculating current votes APR: {e}")
+    else:
+        logger.info("No current votes found for APR calculation")
     
     report['current_votes'] = actual_votes
     
     
     if compare:
-        
-        if not dashboard_path:
-            if is_historical:
-                dashboard_path = f'input_data/shadow/historical/{period}_historical_votes_dashboard.json'
-                if not os.path.exists(dashboard_path):
-                    dashboard_path = f'inputdata/shadow/{period}_votes_dashboard.json'
-            else:
-                dashboard_path = f'input_data/shadow/{period}_votes_dashboard.json'
-                if not os.path.exists(dashboard_path):
-                    dashboard_path = 'input_data/shadow/votes_dashboard.json'
-            
-            if not os.path.exists(dashboard_path):
-                logger.warning(f"Dashboard file not found at {dashboard_path}")
-                dashboard_path = input(f"Enter path to votes dashboard for period {period}: ")
+        # Dashboard path should already be set from earlier
+        if not os.path.exists(dashboard_path):
+            logger.warning(f"Dashboard file not found at {dashboard_path} for comparison")
+            dashboard_path = input(f"Enter path to votes dashboard for period {period}: ")
         
         try:
             dashboard = load_json(dashboard_path)
@@ -292,8 +317,8 @@ def run_analyze(period=None, compare=False, is_historical=False, dashboard_path=
     print(f"Token Price: ${price_usd}")
     print(f"Token Value: ${token_value}")
     print(f"Expected USD This Epoch (Optimized): ${total_expected_usd}")
-    print(f"Current Votes APR: {report['expected_apr_from_current_votes']}%")
-    print(f"Optimized Votes APR: {optimized_votes_apr}%")
+    print(f"Current Votes Expected APR: {report['expected_apr_from_current_votes']}%")
+    print(f"Optimized Votes Expected APR: {optimized_votes_apr}%")
     
     if compare and 'comparison' in report:
         comp = report['comparison']
