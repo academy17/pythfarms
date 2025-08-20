@@ -177,29 +177,48 @@ def run_analyze(period=None, compare=False, is_historical=False, dashboard_path=
     
     
     token_value = (price_usd * voting_power).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-    apr_percent = (Decimal('0') if token_value == 0 else
+    
+    # Calculate optimized votes APR
+    optimized_votes_apr = (Decimal('0') if token_value == 0 else
                   (total_expected_usd * Decimal(52) / token_value * Decimal(100))
                   .quantize(Decimal('0.01'), rounding=ROUND_HALF_UP))
     
-    
+    # Initialize with default report structure
     report = {
         'xshadow_holder': SHADOW_NFT_OWNER_ADDRESS,
         'our_voting_power': float(voting_power),
         'token_price_usd': float(price_usd),
         'token_value_usd': float(token_value),
         'total_expected_usd_this_epoch_optimizer': float(total_expected_usd),
-        'forecasted_apr_percent': float(apr_percent),
+        'optimized_votes_apr': float(optimized_votes_apr),
+        'expected_apr_from_current_votes': 0.0,  # Default to 0 if no votes
     }
     
     
     
+    # Fetch actual votes for the period
     actual_votes = fetch_votes_for_period(
         SHADOW_RPC_URL, SHADOW_VOTER_ADDRESS, SHADOW_NFT_OWNER_ADDRESS, VOTER_ABI_PATH, period
     )
     
-    
-    if actual_votes:
+    # Calculate APR from current votes if available
+    current_votes_apr = Decimal('0')
+    if actual_votes and 'votes' in actual_votes:
         actual_votes['period'] = period
+        
+        # If we have dashboard data, calculate the current votes APR
+        if dashboard_path:
+            try:
+                dashboard = load_json(dashboard_path)
+                actual_return = compute_actual_return(dashboard, actual_votes)
+                
+                if token_value > 0:
+                    current_votes_apr = (actual_return * Decimal(52) / token_value * Decimal(100)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+                
+                report['expected_apr_from_current_votes'] = float(current_votes_apr)
+            except Exception as e:
+                logger.error(f"Error calculating current votes APR: {e}")
+    
     report['current_votes'] = actual_votes
     
     
@@ -207,13 +226,13 @@ def run_analyze(period=None, compare=False, is_historical=False, dashboard_path=
         
         if not dashboard_path:
             if is_historical:
-                dashboard_path = f'data/shadow/historical/{period}_historical_votes_dashboard.json'
+                dashboard_path = f'input_data/shadow/historical/{period}_historical_votes_dashboard.json'
                 if not os.path.exists(dashboard_path):
-                    dashboard_path = f'data/shadow/{period}_votes_dashboard.json'
+                    dashboard_path = f'inputdata/shadow/{period}_votes_dashboard.json'
             else:
-                dashboard_path = f'data/shadow/{period}_votes_dashboard.json'
+                dashboard_path = f'input_data/shadow/{period}_votes_dashboard.json'
                 if not os.path.exists(dashboard_path):
-                    dashboard_path = 'data/shadow/votes_dashboard.json'
+                    dashboard_path = 'input_data/shadow/votes_dashboard.json'
             
             if not os.path.exists(dashboard_path):
                 logger.warning(f"Dashboard file not found at {dashboard_path}")
@@ -272,8 +291,9 @@ def run_analyze(period=None, compare=False, is_historical=False, dashboard_path=
     print(f"Voting Power: {voting_power}")
     print(f"Token Price: ${price_usd}")
     print(f"Token Value: ${token_value}")
-    print(f"Expected USD This Epoch: ${total_expected_usd}")
-    print(f"Forecasted APR: {apr_percent}%")
+    print(f"Expected USD This Epoch (Optimized): ${total_expected_usd}")
+    print(f"Current Votes APR: {report['expected_apr_from_current_votes']}%")
+    print(f"Optimized Votes APR: {optimized_votes_apr}%")
     
     if compare and 'comparison' in report:
         comp = report['comparison']

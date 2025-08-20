@@ -167,8 +167,8 @@ def save_votes_dashboard(dashboard, period=None):
         date_str = date_obj.strftime("%d%m%y")
     else:
         date_str = datetime.datetime.now().strftime("%d%m%y")
-    current_path = f'data/shadow/{period}_votes_dashboard.json'
-    historical_path = f'data/shadow/historical/{period}_votes_dashboard_{date_str}.json'
+    current_path = f'input_data/shadow/{period}_votes_dashboard.json'
+    historical_path = f'input_data/shadow/historical/{period}_votes_dashboard_{date_str}.json'
     os.makedirs(os.path.dirname(current_path), exist_ok=True)
     with open(current_path, 'w') as f:
         json.dump(dashboard, f, indent=2)
@@ -202,7 +202,7 @@ def fetch_historical_votes(period, dashboard_path):
     dashboard['period'] = period
     dashboard['total_votes_period'] = float(get_total_votes_period(period))
 
-    out_path = f"data/shadow/historical/{period}_historical_votes_dashboard.json"
+    out_path = f"input_data/shadow/historical/{period}_historical_votes_dashboard.json"
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     with open(out_path, 'w') as f:
         json.dump(dashboard, f, indent=2)

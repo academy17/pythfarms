@@ -1,0 +1,33 @@
+{
+  "xshadow_holder": "0x04063BE551982933c2F512A0f116D6ECc445F8eC",
+  "our_voting_power": 6016.010249433047,
+  "token_price_usd": 13.44,
+  "token_value_usd": 80855.18,
+  "total_expected_usd_this_epoch": 561.21,
+  "forecasted_apr_percent": 36.09,
+  "current_votes": {
+    "period": 2900,
+    "votes": [
+      {
+        "pool": "0x6Fb30F3FCB864D49cdff15061ed5c6ADFEE40B40",
+        "weight": 601601024943304635711
+      },
+      {
+        "pool": "0x1f4eFC47e5A5Ab6539d95A76e2dDE6d74462acEa",
+        "weight": 1804803074829913907135
+      },
+      {
+        "pool": "0xB8bda81EcCb1a21198899ac8F1f2F73C82bD7695",
+        "weight": 1804803074829913907135
+      },
+      {
+        "pool": "0x6B19C48449cE9dE4254A883749257Be5da660BFB",
+        "weight": 601601024943304635711
+      },
+      {
+        "pool": "0xFD8fc59E65860e7FAaf09482e6Be4af65741DEba",
+        "weight": 1203202049886609271423
+      }
+    ]
+  }
+}
