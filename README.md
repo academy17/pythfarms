@@ -53,17 +53,17 @@ This script is intended to be called from the manager (`shadow_manager.py`), but
 
 Fetch votes dashboard for the next period:
 ```bash
-python shadow_manager.py fetch
+python scripts/shadow/shadow_manager.py fetch
 ```
 
 Fetch votes dashboard for a specific period:
 ```bash
-python shadow_manager.py fetch --period 2899
+python scripts/shadow/shadow_manager.py fetch --period 2899
 ```
 
 Fetch historical votes for a previous period (using an existing dashboard):
 ```bash
-python shadow_manager.py fetch --period 2898 --historical_dashboard_path data/shadow/historical/2898_votes_dashboard_170725.json
+python scripts/shadow/shadow_manager.py fetch --period 2898 --historical_dashboard_path data/shadow/historical/2898_votes_dashboard_170725.json
 ```
 
 #### Output
@@ -142,23 +142,23 @@ Run via the manager (`shadow_manager.py`):
 
 Optimize for the next period (default):
 ```bash
-python shadow_manager.py optimize
+python scripts/shadow/shadow_manager.py optimize
 ```
 
 Optimize for a specific period:
 ```bash
-python shadow_manager.py optimize --period 2899
+python scripts/shadow/shadow_manager.py optimize --period 2899
 ```
 
 Run historical optimization (removes your actual votes and re-optimizes):
 ```bash
-python shadow_manager.py optimize --period 2898 --historical
+python scripts/shadow/shadow_manager.py optimize --period 2898 --historical
 ```
 You will be prompted for the path to the historical dashboard file.
 
 Display results in the terminal:
 ```bash
-python shadow_manager.py optimize --period 2899 --display
+python scripts/shadow/shadow_manager.py optimize --period 2899 --display
 ```
 
 #### Output
@@ -216,7 +216,7 @@ This module provides three main tools for working with Aerodrome protocol voting
 This script is intended to be called from the manager (`aero_manager.py`):
 
 ```bash
-python aero_manager.py fetch
+python scripts/aero/aero_manager.py fetch
 ```
 
 #### Flags
