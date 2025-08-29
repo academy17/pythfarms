@@ -21,6 +21,42 @@ SHADOW_API_URL = os.getenv(
     "SHADOW_API_URL",
     "https://api.shadow.so/mixed-pairs?tokens=False&poolData=false"
 )
+DEXSCREENER_API_URL = 'https://api.dexscreener.com/latest/dex/pairs/base/'
+
+def fetch_dexscreener_volatility(pool_address):
+    """Fetch volatility data from DexScreener for a pool"""
+    try:
+        url = f"{DEXSCREENER_API_URL}{pool_address}"
+        resp = requests.get(url, timeout=30)
+        resp.raise_for_status()
+        data = resp.json()
+        
+        if not data.get('pairs'):
+            logger.warning(f"No pair data found for {pool_address}")
+            return None
+            
+        pair = data['pairs'][0]  # Get the first (and should be only) pair
+        
+        # Get price change data
+        price_change = pair.get('priceChange', {})
+        volatility = {
+            'h24': price_change.get('h24', 0),  # 24h price change %
+            'h6': price_change.get('h6', 0),    # 6h price change %
+            'h1': price_change.get('h1', 0),    # 1h price change %
+            'd7': price_change.get('d7', 0)     # 7d price change %
+        }
+        
+        # Add current price and volume
+        if 'priceUsd' in pair:
+            volatility['current_price'] = pair['priceUsd']
+        if 'volume' in pair:
+            volatility['volume'] = pair['volume']
+            
+        return volatility
+        
+    except Exception as e:
+        logger.warning(f"Failed to fetch DexScreener data for {pool_address}: {e}")
+        return None
 
 def get_web3_and_contract():
     if not (RPC_URL and VOTER_ADDRESS):
@@ -103,10 +139,30 @@ def fetch_pools_from_api():
             entry = {
                 "pool": p.get("id"),
                 "symbol": p.get("symbol"),
+                "tvl": p.get("tvl", 0),
+                "lp_apr": p.get("lpApr", 0),
+                "stats": {
+                    "last_24h_vol": stats.get("last_24h_vol", 0),
+                    "last_24h_fees": stats.get("last_24h_fees", 0),
+                    "last_7d_vol": stats.get("last_7d_vol", 0),
+                    "last_7d_fees": stats.get("last_7d_fees", 0)
+                },
                 "fee_last_7d_usd": stats.get("last_7d_fees", 0),
                 "vol_last_7d": stats.get("last_7d_vol", 0),
-                "bribes_usd": p.get("voteBribesUsd", 0)
+                "bribes_usd": p.get("voteBribesUsd", 0),
+                "tvl": p.get("tvl", 0),
+                "lp_apr": p.get("lpApr", 0)
             }
+            
+            # Get volatility data from DexScreener
+            try:
+                pool_addr = entry["pool"]
+                volatility_data = fetch_dexscreener_volatility(pool_addr)
+                if volatility_data:
+                    entry["volatility"] = volatility_data
+            except Exception as e:
+                logger.warning(f"Failed to fetch volatility data for pool {entry['pool']}: {e}")
+            
             output.append(entry)
         return output
     except Exception as e:

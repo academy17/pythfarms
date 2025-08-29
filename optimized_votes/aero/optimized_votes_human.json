@@ -1,12 +1,26 @@
 {
-  "total_expected_usd": 187.89,
+  "total_expected_usd": 0.01,
   "allocations": [
     {
       "symbol": "vAMM-WETH/VRTX",
       "pool": "0xe20eeb487186ec2e9272b9d2b5732d31e115d3e3",
-      "votes": 800.8995563771488,
-      "pct": 100,
-      "exp_usd": 187.89
+      "votes": 585.88230712284,
+      "pct": 73,
+      "exp_usd": 0.01
+    },
+    {
+      "symbol": "sAMM-USDC/USD+",
+      "pool": "0x418457ca08fa5ec77f811b105f2c585cd051ac10",
+      "votes": 131.41132467124422,
+      "pct": 16,
+      "exp_usd": 0.0
+    },
+    {
+      "symbol": "WETH/SOLACE",
+      "pool": "0xcafd76397efc53129e7a967a4b746d1899b479fa",
+      "votes": 83.60592458306557,
+      "pct": 10,
+      "exp_usd": 0.0
     }
   ]
 }

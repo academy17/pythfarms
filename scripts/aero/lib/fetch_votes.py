@@ -331,6 +331,23 @@ def fetch_fees_and_bribes(w3, pool_info, contract_prices):
                     "amount_usd": float(amt_usd)
                 })
         
+        # Calculate TVL using reserves with proper decimals
+        reserve0 = Decimal(str(info.get("reserve0", 0)))
+        reserve1 = Decimal(str(info.get("reserve1", 0)))
+        token0_price = contract_prices.get(info["token0"], Decimal(0))
+        token1_price = contract_prices.get(info["token1"], Decimal(0))
+        
+        # Get token decimals
+        dec0 = get_token_decimals(w3, info["token0"])
+        dec1 = get_token_decimals(w3, info["token1"])
+        
+        # Convert reserves to human readable amounts
+        reserve0_human = reserve0 / (Decimal(10) ** dec0)
+        reserve1_human = reserve1 / (Decimal(10) ** dec1)
+        
+        # Calculate TVL
+        tvl = (reserve0_human * token0_price) + (reserve1_human * token1_price)
+
         total_usd = fees_usd + bribes_usd
         
         results.append({
@@ -342,7 +359,12 @@ def fetch_fees_and_bribes(w3, pool_info, contract_prices):
             "fees_usd": float(fees_usd),
             "bribes_usd": float(bribes_usd),
             "bribes": bribe_list,
-            "total_usd": float(total_usd)
+            "total_usd": float(total_usd),
+            "token0_price": float(token0_price),
+            "token1_price": float(token1_price),
+            "reserve0": float(reserve0),
+            "reserve1": float(reserve1),
+            "tvl": float(tvl)
         })
     
     results.sort(key=lambda x: x["total_usd"], reverse=True)
@@ -560,7 +582,9 @@ def run_fetch(is_historical=False):
             "symbol": p.get("symbol", ""),
             "token0": p["token0"].lower(),
             "token1": p["token1"].lower(),
-            "type": p.get("type")
+            "type": p.get("type"),
+            "reserve0": p.get("reserve0", 0),
+            "reserve1": p.get("reserve1", 0)
         }
         for p in enriched_pools
     }
