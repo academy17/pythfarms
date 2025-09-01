@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 # Load environment variables
 load_dotenv()
 
+import time
+
 RPC_URL = os.getenv('SHADOW_RPC_URL')
 VOTER_ADDRESS = os.getenv('SHADOW_VOTER_ADDRESS')
 VOTER_ABI_PATH = os.getenv('VOTER_ABI_PATH', 'abi/shadow/Voter.json')
@@ -21,41 +23,91 @@ SHADOW_API_URL = os.getenv(
     "SHADOW_API_URL",
     "https://api.shadow.so/mixed-pairs?tokens=False&poolData=false"
 )
-DEXSCREENER_API_URL = 'https://api.dexscreener.com/latest/dex/pairs/base/'
+GECKOTERMINAL_API_URL = 'https://api.geckoterminal.com/api/v2'
 
-def fetch_dexscreener_volatility(pool_address):
-    """Fetch volatility data from DexScreener for a pool"""
+def calculate_volatility_metrics(candles):
+    """Calculate volatility metrics from OHLCV candles
+    Each candle is [timestamp, open, high, low, close, volume]
+    """
+    if not candles or len(candles) < 2:  # Need at least 2 candles
+        return None
+        
+    # Extract all highs and lows from the candles
+    period_high = max(float(candle[2]) for candle in candles)  # high is at index 2
+    period_low = min(float(candle[3]) for candle in candles)   # low is at index 3
+    current_close = float(candles[0][4])  # most recent close price
+    
+    # Calculate metrics
+    price_range = period_high - period_low
+    mid_price = (period_high + period_low) / 2
+    half_range = price_range / 2
+    
+    # Calculate percentage volatility (half range as percentage of mid price)
+    volatility_percentage = (half_range / mid_price) * 100 if mid_price > 0 else 0
+    
+    return {
+        'high': period_high,
+        'low': period_low,
+        'range': price_range,
+        'mid_price': mid_price,
+        'volatility_percentage': volatility_percentage,
+        'current_price': current_close
+    }
+
+def fetch_geckoterminal_volatility(pool_address):
+    """Fetch and calculate 7-day volatility metrics from GeckoTerminal OHLCV data"""
     try:
-        url = f"{DEXSCREENER_API_URL}{pool_address}"
-        resp = requests.get(url, timeout=30)
+        # Construct URL for hourly candles (168 hours = 1 week)
+        url = f"{GECKOTERMINAL_API_URL}/networks/sonic/pools/{pool_address}/ohlcv/hour"
+        params = {
+            'aggregate': 1,
+            'limit': 168  # 7 days worth of hourly candles
+        }
+        
+        resp = requests.get(url, params=params, timeout=30)
         resp.raise_for_status()
         data = resp.json()
         
-        if not data.get('pairs'):
-            logger.warning(f"No pair data found for {pool_address}")
+        # Check if we have valid OHLCV data
+        candles = data.get('data', {}).get('attributes', {}).get('ohlcv_list', [])
+        if not candles:
+            logger.warning(f"No OHLCV data found for pool {pool_address}")
             return None
             
-        pair = data['pairs'][0]  # Get the first (and should be only) pair
+        # Sort candles by timestamp (newest first) to ensure proper order
+        candles.sort(key=lambda x: x[0], reverse=True)
+            
+        # Calculate volatility metrics
+        # Each candle is [timestamp, open, high, low, close, volume]
+        metrics = calculate_volatility_metrics(candles)
+        if not metrics:
+            return None
+            
+        # Get volume data from the last 24h and 7d
+        volumes = [float(candle[5]) for candle in candles]  # volume is at index 5
+        vol_24h = sum(volumes[-24:]) if len(volumes) >= 24 else 0
+        vol_7d = sum(volumes)
         
-        # Get price change data
-        price_change = pair.get('priceChange', {})
+        # Construct response
         volatility = {
-            'h24': price_change.get('h24', 0),  # 24h price change %
-            'h6': price_change.get('h6', 0),    # 6h price change %
-            'h1': price_change.get('h1', 0),    # 1h price change %
-            'd7': price_change.get('d7', 0)     # 7d price change %
+            'current_price': metrics['current_price'],
+            'price_range': {
+                'high': metrics['high'],
+                'low': metrics['low'],
+                'range': metrics['range'],
+                'mid_price': metrics['mid_price'],
+                'volatility_percentage': metrics['volatility_percentage']
+            },
+            'volume': {
+                'h24': vol_24h,
+                'd7': vol_7d
+            }
         }
         
-        # Add current price and volume
-        if 'priceUsd' in pair:
-            volatility['current_price'] = pair['priceUsd']
-        if 'volume' in pair:
-            volatility['volume'] = pair['volume']
-            
         return volatility
         
     except Exception as e:
-        logger.warning(f"Failed to fetch DexScreener data for {pool_address}: {e}")
+        logger.warning(f"Failed to fetch GeckoTerminal data for pool {pool_address}: {e}")
         return None
 
 def get_web3_and_contract():
@@ -154,10 +206,13 @@ def fetch_pools_from_api():
                 "lp_apr": p.get("lpApr", 0)
             }
             
-            # Get volatility data from DexScreener
+            # Get volatility data from GeckoTerminal with rate limiting
             try:
                 pool_addr = entry["pool"]
-                volatility_data = fetch_dexscreener_volatility(pool_addr)
+                # Rate limit: sleep 2 seconds between requests (30 requests/minute)
+                time.sleep(2)
+                logger.info(f"Fetching volatility data for pool {entry['symbol']} ({pool_addr})")
+                volatility_data = fetch_geckoterminal_volatility(pool_addr)
                 if volatility_data:
                     entry["volatility"] = volatility_data
             except Exception as e:
