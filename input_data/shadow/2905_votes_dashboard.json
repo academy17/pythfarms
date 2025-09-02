@@ -1,391 +1,381 @@
 {
   "period": 2905,
   "start_date": "2025-09-04T00:00:00+00:00",
-  "total_votes_period": 1236061.9646113326,
+  "total_votes_period": 1245122.2104941497,
   "pools": [
     {
       "pool": "0x324963c267c354c7660ce8ca3f5f167e05649970",
-      "symbol": "CL-wS-USDC-0.116%",
-      "tvl": 4337043.784167144,
-      "lp_apr": 374.77837181490764,
+      "symbol": "CL-wS-USDC-0.1595%",
+      "tvl": 4410419.17950463,
+      "lp_apr": 247.77612993282582,
       "stats": {
-        "last_24h_vol": 8433506.850865513,
-        "last_24h_fees": 10905.136016727614,
-        "last_7d_vol": 56022553.580961116,
-        "last_7d_fees": 73656.10907901055
+        "last_24h_vol": 7308196.052359183,
+        "last_24h_fees": 9445.318161279916,
+        "last_7d_vol": 54897242.78245479,
+        "last_7d_fees": 72196.29122356285
       },
-      "fee_last_7d_usd": 73656.10907901055,
-      "vol_last_7d": 56022553.580961116,
-      "bribes_usd": 51228.755219930295,
+      "fee_last_7d_usd": 72196.29122356285,
+      "vol_last_7d": 54897242.78245479,
+      "bribes_usd": 57495.44194309284,
       "volatility": {
-        "current_price": 0.998989317647582,
+        "current_price": 0.997948848555254,
         "price_range": {
           "high": 1.00480645682826,
-          "low": 0.995056847789852,
-          "range": 0.009749609038407936,
-          "mid_price": 0.9997082281453755,
-          "volatility_percentage": 0.1783,
-          "std_dev": 0.001781,
-          "annualized_volatility": 16.69,
+          "low": 0.995615070473593,
+          "range": 0.009191386354666986,
+          "mid_price": 0.9996572629327103,
+          "volatility_percentage": 0.176,
+          "std_dev": 0.001756,
           "metrics": {
             "num_samples": 168,
-            "variance": 3e-06,
-            "hourly_factor": 93.59
+            "variance": 3e-06
           }
-        },
-        "volume": {
-          "h24": 8399336.566452261,
-          "d7": 55716571.80219365
         }
       },
-      "pool_votes_period": 473434.3970052165
+      "pool_votes_period": 478552.0895544442,
+      "vote_percentage": 38.434146103981384,
+      "expected_emissions_shadow": 6787.853445569764,
+      "expected_emissions_usd": 83772.47112755099,
+      "expected_lp_apr": 98.7699427500206,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x6fb30f3fcb864d49cdff15061ed5c6adfee40b40",
-      "symbol": "CL-USDC-WETH-0.1198%",
-      "tvl": 3726963.534501085,
-      "lp_apr": 219.543650948971,
+      "symbol": "CL-USDC-WETH-0.1351%",
+      "tvl": 3698428.9586436744,
+      "lp_apr": 224.55135649260498,
       "stats": {
-        "last_24h_vol": 7447952.655032872,
-        "last_24h_fees": 9193.624586012718,
-        "last_7d_vol": 42748810.470524244,
-        "last_7d_fees": 53030.59114044631
+        "last_24h_vol": 7065411.18946601,
+        "last_24h_fees": 9376.383264777362,
+        "last_7d_vol": 42366269.00495738,
+        "last_7d_fees": 53213.349819210955
       },
-      "fee_last_7d_usd": 53030.59114044631,
-      "vol_last_7d": 42748810.470524244,
-      "bribes_usd": 33413.22183211742,
+      "fee_last_7d_usd": 53213.349819210955,
+      "vol_last_7d": 42366269.00495738,
+      "bribes_usd": 39672.66633605671,
       "volatility": {
-        "current_price": 0.997635910810288,
+        "current_price": 0.999956809697439,
         "price_range": {
           "high": 1.00550380720711,
-          "low": 0.995060422098361,
-          "range": 0.010443385108749093,
-          "mid_price": 0.9998421353837456,
-          "volatility_percentage": 0.1788,
-          "std_dev": 0.001783,
-          "annualized_volatility": 16.73,
+          "low": 0.995318219742026,
+          "range": 0.010185587465084134,
+          "mid_price": 0.9998592410326649,
+          "volatility_percentage": 0.1762,
+          "std_dev": 0.001762,
           "metrics": {
             "num_samples": 168,
-            "variance": 3e-06,
-            "hourly_factor": 93.59
+            "variance": 3e-06
           }
-        },
-        "volume": {
-          "h24": 7315495.793046142,
-          "d7": 42512681.45815631
         }
       },
-      "pool_votes_period": 362273.87832128827
+      "pool_votes_period": 363768.7823281261,
+      "vote_percentage": 29.215508265952284,
+      "expected_emissions_shadow": 5159.750080321757,
+      "expected_emissions_usd": 63679.19079208276,
+      "expected_lp_apr": 89.53309522004889,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xb6d9b069f6b96a507243d501d1a23b3fccfc85d3",
-      "symbol": "CL-wS-WETH-0.0709%",
-      "tvl": 785267.8637179377,
-      "lp_apr": 116.87113975381531,
+      "symbol": "CL-wS-WETH-0.1306%",
+      "tvl": 848104.1928270905,
+      "lp_apr": 182.8436190306013,
       "stats": {
-        "last_24h_vol": 2647669.0839393605,
-        "last_24h_fees": 1979.9338059120794,
-        "last_7d_vol": 17613881.862362057,
-        "last_7d_fees": 13938.319979371763
+        "last_24h_vol": 2723633.1267909515,
+        "last_24h_fees": 1988.1634621553617,
+        "last_7d_vol": 17689845.905213647,
+        "last_7d_fees": 13946.549635615045
       },
-      "fee_last_7d_usd": 13938.319979371763,
-      "vol_last_7d": 17613881.862362057,
-      "bribes_usd": 9914.498156158701,
+      "fee_last_7d_usd": 13946.549635615045,
+      "vol_last_7d": 17689845.905213647,
+      "bribes_usd": 11061.622402456833,
       "volatility": {
-        "current_price": 4312.06380351478,
+        "current_price": 4292.24680365755,
         "price_range": {
           "high": 4646.14735438736,
           "low": 4255.35332509633,
           "range": 390.7940292910298,
-          "mid_price": 4453.607840580201,
-          "volatility_percentage": 2.2225,
-          "std_dev": 95.836554,
-          "annualized_volatility": 208.02,
+          "mid_price": 4445.417042127616,
+          "volatility_percentage": 2.3073,
+          "std_dev": 99.034371,
           "metrics": {
             "num_samples": 168,
-            "variance": 9184.645049,
-            "hourly_factor": 93.59
+            "variance": 9807.806591
           }
-        },
-        "volume": {
-          "h24": 2580937.1959243543,
-          "d7": 17378324.134547547
         }
       },
-      "pool_votes_period": 99992.55406795317
+      "pool_votes_period": 100447.63748655826,
+      "vote_percentage": 8.067291438540298,
+      "expected_emissions_shadow": 1424.7641105219893,
+      "expected_emissions_usd": 17583.76359615932,
+      "expected_lp_apr": 107.81171874087188,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x6b19c48449ce9de4254a883749257be5da660bfb",
-      "symbol": "CL-WBTC-WETH-0.1059%",
-      "tvl": 975351.1166225849,
-      "lp_apr": 80.16407975145275,
+      "symbol": "CL-WBTC-WETH-0.1295%",
+      "tvl": 1112728.8908782527,
+      "lp_apr": 123.43187829029887,
       "stats": {
-        "last_24h_vol": 1270096.1371288672,
-        "last_24h_fees": 1568.1675809565354,
-        "last_7d_vol": 8321113.481310107,
-        "last_7d_fees": 10416.646281802065
+        "last_24h_vol": 1258773.0407719365,
+        "last_24h_fees": 1582.6106846392536,
+        "last_7d_vol": 8309790.384953177,
+        "last_7d_fees": 10431.089385484784
       },
-      "fee_last_7d_usd": 10416.646281802065,
-      "vol_last_7d": 8321113.481310107,
-      "bribes_usd": 6886.034567768851,
+      "fee_last_7d_usd": 10431.089385484784,
+      "vol_last_7d": 8309790.384953177,
+      "bribes_usd": 7806.099315881891,
       "volatility": {
-        "current_price": 108932.868975007,
+        "current_price": 110792.704507456,
         "price_range": {
           "high": 113344.408289993,
           "low": 107278.311388312,
           "range": 6066.096901681012,
-          "mid_price": 110054.21686640076,
-          "volatility_percentage": 1.4701,
-          "std_dev": 1601.389073,
-          "annualized_volatility": 137.59,
+          "mid_price": 110079.703245641,
+          "volatility_percentage": 1.4524,
+          "std_dev": 1609.147742,
           "metrics": {
             "num_samples": 168,
-            "variance": 2564446.964298,
-            "hourly_factor": 93.59
+            "variance": 2589356.456803
           }
-        },
-        "volume": {
-          "h24": 1068615.2442667377,
-          "d7": 8065752.987801931
         }
       },
-      "pool_votes_period": 84297.5920279275
+      "pool_votes_period": 84621.03925598702,
+      "vote_percentage": 6.796203500570727,
+      "expected_emissions_shadow": 1200.2773061052483,
+      "expected_emissions_usd": 14813.253818316129,
+      "expected_lp_apr": 69.22523580244835,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xcf0a945ed064ac32ec8d178f865f650a9f9a2fdb",
       "symbol": "CL-wS-x33-1.0%",
-      "tvl": 453205.1895411733,
-      "lp_apr": 248.28492435356162,
+      "tvl": 490479.6214687739,
+      "lp_apr": 360.1690759867618,
       "stats": {
-        "last_24h_vol": 35762.36360363546,
-        "last_24h_fees": 357.6236360363546,
-        "last_7d_vol": 575885.5951121151,
-        "last_7d_fees": 5758.8559511211515
+        "last_24h_vol": 56836.542376266574,
+        "last_24h_fees": 568.3654237626656,
+        "last_7d_vol": 596959.7738847462,
+        "last_7d_fees": 5969.597738847462
       },
-      "fee_last_7d_usd": 5758.8559511211515,
-      "vol_last_7d": 575885.5951121151,
-      "bribes_usd": 4046.3785962468082,
+      "fee_last_7d_usd": 5969.597738847462,
+      "vol_last_7d": 596959.7738847462,
+      "bribes_usd": 4430.652879544321,
       "volatility": {
-        "current_price": 23.0642648560734,
+        "current_price": 23.3501040704279,
         "price_range": {
           "high": 29.9651518568261,
           "low": 22.3422475818603,
           "range": 7.622904274965801,
-          "mid_price": 25.4878886688396,
-          "volatility_percentage": 8.8417,
-          "std_dev": 2.039269,
-          "annualized_volatility": 827.54,
+          "mid_price": 25.290026580359,
+          "volatility_percentage": 8.9066,
+          "std_dev": 2.079689,
           "metrics": {
             "num_samples": 168,
-            "variance": 4.158617,
-            "hourly_factor": 93.59
+            "variance": 4.325106
           }
-        },
-        "volume": {
-          "h24": 328128.7896484055,
-          "d7": 1154293.4926998334
         }
       },
-      "pool_votes_period": 33612.91703490373
+      "pool_votes_period": 34164.76846667607,
+      "vote_percentage": 2.743888766799618,
+      "expected_emissions_shadow": 484.5981167265112,
+      "expected_emissions_usd": 5980.68035314361,
+      "expected_lp_apr": 63.40638117281434,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xbd0313c1986f7ef59c8ea58cc85714ae2aa5b89d",
       "symbol": "wS/GOGLZ",
-      "tvl": 370579.35039018723,
-      "lp_apr": 70.42116863848956,
+      "tvl": 377809.9468885097,
+      "lp_apr": 69.5751516200069,
       "stats": {
-        "last_24h_vol": 138933.45076939798,
-        "last_24h_fees": 694.6672538469899,
-        "last_7d_vol": 1149250.4728565018,
-        "last_7d_fees": 5746.252364282509
+        "last_24h_vol": 133335.8070475276,
+        "last_24h_fees": 666.6790352376379,
+        "last_7d_vol": 1143652.8291346314,
+        "last_7d_fees": 5718.264145673156
       },
-      "fee_last_7d_usd": 5746.252364282509,
-      "vol_last_7d": 1149250.4728565018,
-      "bribes_usd": 3891.2619575607587,
+      "fee_last_7d_usd": 5718.264145673156,
+      "vol_last_7d": 1143652.8291346314,
+      "bribes_usd": 4366.9048625152955,
       "volatility": {
-        "current_price": 0.300463,
+        "current_price": 0.30497,
         "price_range": {
           "high": 0.330231,
           "low": 0.294088,
           "range": 0.03614299999999998,
-          "mid_price": 0.3155871666666667,
-          "volatility_percentage": 2.1644,
-          "std_dev": 0.006503,
-          "annualized_volatility": 202.58,
+          "mid_price": 0.31510235714285717,
+          "volatility_percentage": 2.2951,
+          "std_dev": 0.006999,
           "metrics": {
             "num_samples": 168,
-            "variance": 4.2e-05,
-            "hourly_factor": 93.59
+            "variance": 4.9e-05
           }
-        },
-        "volume": {
-          "h24": 174208.2468894768,
-          "d7": 1174982.8244599611
         }
       },
-      "pool_votes_period": 29881.286523433428
+      "pool_votes_period": 30302.99939754878,
+      "vote_percentage": 2.43373695707528,
+      "expected_emissions_shadow": 429.82221447044515,
+      "expected_emissions_usd": 5304.662120424286,
+      "expected_lp_apr": 73.01089675742787,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xf19748a0e269c6965a84f8c98ca8c47a064d4dd0",
       "symbol": "wS/SHADOW",
-      "tvl": 2065889.310201108,
-      "lp_apr": 20.935822580490665,
+      "tvl": 2072751.20438857,
+      "lp_apr": 21.09365147691646,
       "stats": {
-        "last_24h_vol": 21340.899085875422,
-        "last_24h_fees": 213.4089908587542,
-        "last_7d_vol": 386341.61271049996,
-        "last_7d_fees": 3863.416127105
+        "last_24h_vol": 19857.467497922946,
+        "last_24h_fees": 198.57467497922946,
+        "last_7d_vol": 384858.1811225475,
+        "last_7d_fees": 3848.581811225475
       },
-      "fee_last_7d_usd": 3863.416127105,
-      "vol_last_7d": 386341.61271049996,
-      "bribes_usd": 3084.2302236142755,
+      "fee_last_7d_usd": 3848.581811225475,
+      "vol_last_7d": 384858.1811225475,
+      "bribes_usd": 3287.0961839798024,
       "volatility": {
-        "current_price": 0.300123,
+        "current_price": 0.304751,
         "price_range": {
           "high": 0.330727,
           "low": 0.29407,
           "range": 0.036656999999999995,
-          "mid_price": 0.3154724226190476,
-          "volatility_percentage": 2.1466,
-          "std_dev": 0.006443,
-          "annualized_volatility": 200.91,
+          "mid_price": 0.31510147023809526,
+          "volatility_percentage": 2.169,
+          "std_dev": 0.00661,
           "metrics": {
             "num_samples": 168,
-            "variance": 4.2e-05,
-            "hourly_factor": 93.59
+            "variance": 4.4e-05
           }
-        },
-        "volume": {
-          "h24": 76935.22352894583,
-          "d7": 449750.25866130384
         }
       },
-      "pool_votes_period": 29508.18884319924
+      "pool_votes_period": 29298.346205017337,
+      "vote_percentage": 2.3530498418616874,
+      "expected_emissions_shadow": 415.5720653573643,
+      "expected_emissions_usd": 5128.793531817972,
+      "expected_lp_apr": 12.86682468642956,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x2bcb79fd1e0c4251b6f94daee25d4c6ff330cdf8",
-      "symbol": "CL-USDC-stS-0.1157%",
-      "tvl": 228679.36443751934,
-      "lp_apr": 215.13098989321549,
+      "symbol": "CL-USDC-stS-0.2191%",
+      "tvl": 232997.86410884716,
+      "lp_apr": 216.19807654586333,
       "stats": {
-        "last_24h_vol": 355520.6481015356,
-        "last_24h_fees": 490.72188689855005,
-        "last_7d_vol": 2563937.741099749,
-        "last_7d_fees": 3464.881905045295
+        "last_24h_vol": 377294.1008913344,
+        "last_24h_fees": 515.9959030880771,
+        "last_7d_vol": 2585711.193889548,
+        "last_7d_fees": 3490.155921234822
       },
-      "fee_last_7d_usd": 3464.881905045295,
-      "vol_last_7d": 2563937.741099749,
-      "bribes_usd": 2397.3223844156637,
+      "fee_last_7d_usd": 3490.155921234822,
+      "vol_last_7d": 2585711.193889548,
+      "bribes_usd": 2708.960460928211,
       "volatility": {
-        "current_price": 1.00071375178049,
+        "current_price": 1.00055416470423,
         "price_range": {
           "high": 1.00388548820862,
-          "low": 0.995060422098361,
-          "range": 0.008825066110258906,
-          "mid_price": 0.9999944087395993,
-          "volatility_percentage": 0.1767,
-          "std_dev": 0.001768,
-          "annualized_volatility": 16.54,
+          "low": 0.995402132990712,
+          "range": 0.008483355217907884,
+          "mid_price": 0.9999145670461536,
+          "volatility_percentage": 0.1796,
+          "std_dev": 0.001797,
           "metrics": {
             "num_samples": 168,
-            "variance": 3e-06,
-            "hourly_factor": 93.59
+            "variance": 3e-06
           }
-        },
-        "volume": {
-          "h24": 336826.94258437207,
-          "d7": 2533695.988595591
         }
       },
-      "pool_votes_period": 25050.517812470756
+      "pool_votes_period": 24892.459668971627,
+      "vote_percentage": 1.9991981075570562,
+      "expected_emissions_shadow": 353.0783206694417,
+      "expected_emissions_usd": 4357.525344532868,
+      "expected_lp_apr": 97.25038415367399,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x8bc2f9e725cbb07c338df4e77c82190119ddd823",
-      "symbol": "CL-WBTC-USDC-0.1306%",
-      "tvl": 336422.3064171291,
-      "lp_apr": 60.66059246387453,
+      "symbol": "CL-WBTC-USDC-0.1259%",
+      "tvl": 316443.1135584463,
+      "lp_apr": 81.20651440877671,
       "stats": {
-        "last_24h_vol": 403838.1998017712,
-        "last_24h_fees": 492.58942525755225,
-        "last_7d_vol": 2435239.474586824,
-        "last_7d_fees": 2940.7584646144455
+        "last_24h_vol": 490486.27704102296,
+        "last_24h_fees": 633.5414735138035,
+        "last_7d_vol": 2521887.551826076,
+        "last_7d_fees": 3081.7105128706967
       },
-      "fee_last_7d_usd": 2940.7584646144455,
-      "vol_last_7d": 2435239.474586824,
-      "bribes_usd": 1782.7861324428582,
+      "fee_last_7d_usd": 3081.7105128706967,
+      "vol_last_7d": 2521887.551826076,
+      "bribes_usd": 2268.240191975402,
       "volatility": {
-        "current_price": 109339.990940648,
+        "current_price": 110714.500817142,
         "price_range": {
           "high": 113422.523856815,
           "low": 106332.44802196,
           "range": 7090.075834855001,
-          "mid_price": 110069.80154286574,
-          "volatility_percentage": 1.4899,
-          "std_dev": 1629.057001,
-          "annualized_volatility": 139.45,
+          "mid_price": 110089.50817563906,
+          "volatility_percentage": 1.4766,
+          "std_dev": 1634.795296,
           "metrics": {
             "num_samples": 168,
-            "variance": 2653826.713044,
-            "hourly_factor": 93.59
+            "variance": 2672555.659507
           }
-        },
-        "volume": {
-          "h24": 310291.1179955045,
-          "d7": 2344449.182968215
         }
       },
-      "pool_votes_period": 22510.97682509406
+      "pool_votes_period": 22307.01665211412,
+      "vote_percentage": 1.7915523845053867,
+      "expected_emissions_shadow": 316.40601545259466,
+      "expected_emissions_usd": 3904.933128953412,
+      "expected_lp_apr": 64.16841258518124,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xa1538e790ccdd639755602857f582a39ed7f650c",
-      "symbol": "CL-wS-WBTC-0.0906%",
-      "tvl": 135703.21865854997,
-      "lp_apr": 209.539746549824,
+      "symbol": "CL-wS-WBTC-0.169%",
+      "tvl": 154873.94061293057,
+      "lp_apr": 121.14761851178883,
       "stats": {
-        "last_24h_vol": 151829.35527445632,
-        "last_24h_fees": 178.76777391070488,
-        "last_7d_vol": 1237246.4359686445,
-        "last_7d_fees": 1454.8935014726082
+        "last_24h_vol": 117922.14150460242,
+        "last_24h_fees": 135.0285014413953,
+        "last_7d_vol": 1203339.2221987906,
+        "last_7d_fees": 1411.1542290032987
       },
-      "fee_last_7d_usd": 1454.8935014726082,
-      "vol_last_7d": 1237246.4359686445,
-      "bribes_usd": 1023.487683211386,
+      "fee_last_7d_usd": 1411.1542290032987,
+      "vol_last_7d": 1203339.2221987906,
+      "bribes_usd": 1114.1658652123415,
       "volatility": {
-        "current_price": 109189.355589521,
+        "current_price": 111058.516134045,
         "price_range": {
           "high": 113422.266719828,
           "low": 107318.089430681,
           "range": 6104.177289147003,
-          "mid_price": 110060.52863298995,
-          "volatility_percentage": 1.4718,
-          "std_dev": 1607.010151,
-          "annualized_volatility": 137.75,
+          "mid_price": 110077.06984292806,
+          "volatility_percentage": 1.4525,
+          "std_dev": 1613.079024,
           "metrics": {
             "num_samples": 168,
-            "variance": 2582481.62574,
-            "hourly_factor": 93.59
+            "variance": 2602023.938094
           }
-        },
-        "volume": {
-          "h24": 183690.27758435326,
-          "d7": 1253117.0449190275
         }
       },
-      "pool_votes_period": 8102.0205208518955
+      "pool_votes_period": 8118.581329275101,
+      "vote_percentage": 0.6520308818564158,
+      "expected_emissions_shadow": 115.15515541968774,
+      "expected_emissions_usd": 1421.1903674615498,
+      "expected_lp_apr": 47.71745253948194,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xfd8fc59e65860e7faaf09482e6be4af65741deba",
       "symbol": "CL-USDC-mooBIFI-1.0%",
       "tvl": 176880.90602444392,
-      "lp_apr": 80.62261655919964,
+      "lp_apr": 81.12355970092243,
       "stats": {
-        "last_24h_vol": 15923.541834,
-        "last_24h_fees": 159.23541834000002,
-        "last_7d_vol": 55798.641783857136,
-        "last_7d_fees": 557.9864178385714
+        "last_24h_vol": 10223.81698,
+        "last_24h_fees": 102.23816980000001,
+        "last_7d_vol": 50098.916929857136,
+        "last_7d_fees": 500.98916929857137
       },
-      "fee_last_7d_usd": 557.9864178385714,
-      "vol_last_7d": 55798.641783857136,
+      "fee_last_7d_usd": 500.98916929857137,
+      "vol_last_7d": 50098.916929857136,
       "bribes_usd": 553.651723201728,
       "volatility": {
         "current_price": 222.924167935665,
@@ -393,703 +383,684 @@
           "high": 248.994582588975,
           "low": 222.383778749336,
           "range": 26.610803839639004,
-          "mid_price": 232.72358694590542,
-          "volatility_percentage": 2.6709,
-          "std_dev": 5.95416,
-          "annualized_volatility": 249.99,
+          "mid_price": 232.51879662562203,
+          "volatility_percentage": 2.6428,
+          "std_dev": 5.891338,
           "metrics": {
-            "num_samples": 109,
-            "variance": 35.452024,
-            "hourly_factor": 93.59
+            "num_samples": 106,
+            "variance": 34.707865
           }
-        },
-        "volume": {
-          "h24": 100154.860896263,
-          "d7": 447559.3701503303
         }
       },
-      "pool_votes_period": 6916.877020081281
+      "pool_votes_period": 6931.409722341681,
+      "vote_percentage": 0.5566850919469843,
+      "expected_emissions_shadow": 98.31613818729339,
+      "expected_emissions_usd": 1213.3711951372302,
+      "expected_lp_apr": 35.671064540124284,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xb5c54e0471b93ec68202b629662df3a6189f1236",
       "symbol": "CL-wS-PENDLE-1.0%",
-      "tvl": 69897.43739006203,
-      "lp_apr": 303.9860493985455,
+      "tvl": 70365.59164928414,
+      "lp_apr": 180.78440021317712,
       "stats": {
-        "last_24h_vol": 4119.7279092934405,
-        "last_24h_fees": 41.197279092934416,
-        "last_7d_vol": 58721.262521179124,
-        "last_7d_fees": 587.2126252117912
+        "last_24h_vol": 13265.591942899675,
+        "last_24h_fees": 132.6559194289967,
+        "last_7d_vol": 67867.12655478535,
+        "last_7d_fees": 678.6712655478534
       },
-      "fee_last_7d_usd": 587.2126252117912,
-      "vol_last_7d": 58721.262521179124,
-      "bribes_usd": 391.043496521717,
+      "fee_last_7d_usd": 678.6712655478534,
+      "vol_last_7d": 67867.12655478535,
+      "bribes_usd": 497.04007349161884,
       "volatility": {
-        "current_price": 4.50660177514564,
+        "current_price": 4.51531377886661,
         "price_range": {
           "high": 6.16366109996882,
-          "low": 4.41191539530692,
-          "range": 1.7517457046619,
-          "mid_price": 5.220795199201357,
-          "volatility_percentage": 11.2233,
-          "std_dev": 0.505787,
-          "annualized_volatility": 1050.44,
+          "low": 4.35839194563692,
+          "range": 1.8052691543319002,
+          "mid_price": 5.169932225825887,
+          "volatility_percentage": 11.2894,
+          "std_dev": 0.509752,
           "metrics": {
             "num_samples": 168,
-            "variance": 0.255821,
-            "hourly_factor": 93.59
+            "variance": 0.259847
           }
-        },
-        "volume": {
-          "h24": 56023.53418681208,
-          "d7": 167119.24373460957
         }
       },
-      "pool_votes_period": 6075.039064029743
+      "pool_votes_period": 6087.556011565599,
+      "vote_percentage": 0.48891233007157103,
+      "expected_emissions_shadow": 86.34679264837564,
+      "expected_emissions_usd": 1065.651203594233,
+      "expected_lp_apr": 78.75136311379806,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x9abf712d326da30f77ee14840f0180b571630a32",
       "symbol": "CL-wS-DERP-1.0%",
-      "tvl": 123124.65624403549,
-      "lp_apr": 158.46642666052583,
+      "tvl": 125583.37788617446,
+      "lp_apr": 148.79663024285594,
       "stats": {
-        "last_24h_vol": 3099.537143289508,
-        "last_24h_fees": 30.995371432895087,
-        "last_7d_vol": 55119.25826628426,
-        "last_7d_fees": 551.1925826628426
+        "last_24h_vol": 1429.79077157223,
+        "last_24h_fees": 14.297907715722296,
+        "last_7d_vol": 53449.51189456698,
+        "last_7d_fees": 534.4951189456698
       },
-      "fee_last_7d_usd": 551.1925826628426,
-      "vol_last_7d": 55119.25826628426,
-      "bribes_usd": 433.761340868581,
+      "fee_last_7d_usd": 534.4951189456698,
+      "vol_last_7d": 53449.51189456698,
+      "bribes_usd": 447.28328835310555,
       "volatility": {
-        "current_price": 0.00198073636354338,
+        "current_price": 0.00204476792529181,
         "price_range": {
           "high": 0.003427996026081,
           "low": 0.00191207299161612,
           "range": 0.0015159230344648801,
-          "mid_price": 0.002672130060494048,
-          "volatility_percentage": 24.306,
+          "mid_price": 0.0026211831912522398,
+          "volatility_percentage": 23.542,
           "std_dev": 0.000481,
-          "annualized_volatility": 2274.91,
           "metrics": {
             "num_samples": 168,
-            "variance": 0.0,
-            "hourly_factor": 93.59
+            "variance": 0.0
           }
-        },
-        "volume": {
-          "h24": 4058.250218177174,
-          "d7": 72541.5945598665
         }
       },
-      "pool_votes_period": 5538.860606823089
+      "pool_votes_period": 5550.416612462074,
+      "vote_percentage": 0.4457728378533452,
+      "expected_emissions_shadow": 78.72792815997529,
+      "expected_emissions_usd": 971.6227879106549,
+      "expected_lp_apr": 40.231745491945645,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x9b480e05a9e907d8c7a1ecc676f66355dc1e4888",
-      "symbol": "CL-USDC-Anon-0.201%",
-      "tvl": 95880.24995941031,
-      "lp_apr": 47.81837125742211,
+      "symbol": "CL-USDC-Anon-0.241%",
+      "tvl": 98026.95805629756,
+      "lp_apr": 46.763443463191315,
       "stats": {
-        "last_24h_vol": 68248.25453203858,
-        "last_24h_fees": 137.61425471837745,
-        "last_7d_vol": 832456.7623951883,
-        "last_7d_fees": 1963.4383834541766
+        "last_24h_vol": 83700.71010232143,
+        "last_24h_fees": 167.91281136614657,
+        "last_7d_vol": 847909.2179654712,
+        "last_7d_fees": 1993.7369401019457
       },
-      "fee_last_7d_usd": 1963.4383834541766,
-      "vol_last_7d": 832456.7623951883,
-      "bribes_usd": 1680.1288060666175,
+      "fee_last_7d_usd": 1993.7369401019457,
+      "vol_last_7d": 847909.2179654712,
+      "bribes_usd": 1811.9174673422183,
       "volatility": {
-        "current_price": 1.00071375178049,
+        "current_price": 0.999797338696593,
         "price_range": {
           "high": 1.02089695040859,
           "low": 0.984667782953254,
           "range": 0.03622916745533611,
-          "mid_price": 0.9996171436764062,
-          "volatility_percentage": 0.5272,
-          "std_dev": 0.005275,
-          "annualized_volatility": 49.34,
+          "mid_price": 0.999513790409871,
+          "volatility_percentage": 0.5273,
+          "std_dev": 0.005272,
           "metrics": {
             "num_samples": 168,
-            "variance": 2.8e-05,
-            "hourly_factor": 93.59
+            "variance": 2.8e-05
           }
-        },
-        "volume": {
-          "h24": 21520.81282817509,
-          "d7": 790053.5427335532
         }
       },
-      "pool_votes_period": 4649.527995923822
+      "pool_votes_period": 5192.1556647803845,
+      "vote_percentage": 0.41699968252271247,
+      "expected_emissions_shadow": 73.6463020189247,
+      "expected_emissions_usd": 908.9077657617883,
+      "expected_lp_apr": 48.21449604961668,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xb8bda81eccb1a21198899ac8f1f2f73c82bd7695",
       "symbol": "CL-wS-BRUSH-0.5%",
-      "tvl": 326152.4937369321,
-      "lp_apr": 84.43330220906333,
+      "tvl": 329731.36118421867,
+      "lp_apr": 136.83912643101576,
       "stats": {
-        "last_24h_vol": 29541.148440094385,
-        "last_24h_fees": 147.70574220047195,
-        "last_7d_vol": 173067.46550890227,
-        "last_7d_fees": 865.3373275445115
+        "last_24h_vol": 19814.558304099297,
+        "last_24h_fees": 99.07279152049651,
+        "last_7d_vol": 163340.8753729072,
+        "last_7d_fees": 816.704376864536
       },
-      "fee_last_7d_usd": 865.3373275445115,
-      "vol_last_7d": 173067.46550890227,
-      "bribes_usd": 580.1461858204981,
+      "fee_last_7d_usd": 816.704376864536,
+      "vol_last_7d": 163340.8753729072,
+      "bribes_usd": 656.4995983658446,
       "volatility": {
-        "current_price": 0.0112083611873939,
+        "current_price": 0.0114800910013761,
         "price_range": {
           "high": 0.0133890061965751,
           "low": 0.0109623612684491,
           "range": 0.002426644928126,
-          "mid_price": 0.01242456881645824,
-          "volatility_percentage": 3.9991,
-          "std_dev": 0.000448,
-          "annualized_volatility": 374.29,
+          "mid_price": 0.012340030605956702,
+          "volatility_percentage": 4.5484,
+          "std_dev": 0.000522,
           "metrics": {
             "num_samples": 168,
-            "variance": 0.0,
-            "hourly_factor": 93.59
+            "variance": 0.0
           }
-        },
-        "volume": {
-          "h24": 15987.163935854456,
-          "d7": 161578.53498601748
         }
       },
-      "pool_votes_period": 4314.813286409245
+      "pool_votes_period": 4323.145566661553,
+      "vote_percentage": 0.3472065256105128,
+      "expected_emissions_shadow": 61.32013457027178,
+      "expected_emissions_usd": 756.7840472717287,
+      "expected_lp_apr": 11.934797562717659,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x1f4efc47e5a5ab6539d95a76e2dde6d74462acea",
       "symbol": "CL-wS-GOGLZ-0.5%",
-      "tvl": 40539.044946128946,
-      "lp_apr": 108.39839888144373,
+      "tvl": 41542.73282134233,
+      "lp_apr": 106.43670668438804,
       "stats": {
-        "last_24h_vol": 33966.21248806814,
-        "last_24h_fees": 169.83106244034073,
-        "last_7d_vol": 227897.2145101081,
-        "last_7d_fees": 1139.4860725505405
+        "last_24h_vol": 10827.31078995084,
+        "last_24h_fees": 54.136553949754195,
+        "last_7d_vol": 204758.3128119908,
+        "last_7d_fees": 1023.791564059954
       },
-      "fee_last_7d_usd": 1139.4860725505405,
-      "vol_last_7d": 227897.2145101081,
-      "bribes_usd": 764.7034016254506,
+      "fee_last_7d_usd": 1023.791564059954,
+      "vol_last_7d": 204758.3128119908,
+      "bribes_usd": 806.2931836502098,
       "volatility": {
-        "current_price": 0.299836,
+        "current_price": 0.303878,
         "price_range": {
           "high": 0.330127,
           "low": 0.294954,
           "range": 0.03517300000000001,
-          "mid_price": 0.3148385833333333,
-          "volatility_percentage": 2.1621,
-          "std_dev": 0.006483,
-          "annualized_volatility": 202.36,
+          "mid_price": 0.3141293214285714,
+          "volatility_percentage": 2.2461,
+          "std_dev": 0.006825,
           "metrics": {
             "num_samples": 168,
-            "variance": 4.2e-05,
-            "hourly_factor": 93.59
+            "variance": 4.7e-05
           }
-        },
-        "volume": {
-          "h24": 28316.141080193054,
-          "d7": 236816.80832402958
         }
       },
-      "pool_votes_period": 4284.873408459809
+      "pool_votes_period": 4293.860314940062,
+      "vote_percentage": 0.3448545274311639,
+      "expected_emissions_shadow": 60.90474823900077,
+      "expected_emissions_usd": 751.6575459820033,
+      "expected_lp_apr": 94.08671441803624,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xd9e3be6c93a575d9b2cbd5372d54d1921ca2fbbc",
       "symbol": "wS/TAROT",
-      "tvl": 138232.8067186863,
-      "lp_apr": 28.439796391760712,
+      "tvl": 139925.04142462497,
+      "lp_apr": 28.270930797411758,
       "stats": {
-        "last_24h_vol": 1472.2762085963586,
-        "last_24h_fees": 7.361381042981793,
-        "last_7d_vol": 8524.67938339826,
-        "last_7d_fees": 42.6233969169913
+        "last_24h_vol": 802.2466700380128,
+        "last_24h_fees": 4.011233350190064,
+        "last_7d_vol": 7854.649844839913,
+        "last_7d_fees": 39.273249224199574
       },
-      "fee_last_7d_usd": 42.6233969169913,
-      "vol_last_7d": 8524.67938339826,
-      "bribes_usd": 32.93549266627341,
+      "fee_last_7d_usd": 39.273249224199574,
+      "vol_last_7d": 7854.649844839913,
+      "bribes_usd": 950.0177946844832,
       "volatility": {
-        "current_price": 0.097265578934145,
+        "current_price": 0.0989415005962216,
         "price_range": {
           "high": 0.121645336623303,
           "low": 0.096808969822708,
           "range": 0.024836366800595006,
-          "mid_price": 0.11039576910593725,
-          "volatility_percentage": 6.4316,
-          "std_dev": 0.006256,
-          "annualized_volatility": 601.97,
+          "mid_price": 0.11005878690466453,
+          "volatility_percentage": 6.4496,
+          "std_dev": 0.006381,
           "metrics": {
             "num_samples": 168,
-            "variance": 3.9e-05,
-            "hourly_factor": 93.59
+            "variance": 4.1e-05
           }
-        },
-        "volume": {
-          "h24": 9303.042111723673,
-          "d7": 59156.95807321859
         }
       },
-      "pool_votes_period": 3919.230241732577
+      "pool_votes_period": 3927.458769903474,
+      "vote_percentage": 0.3154275730367696,
+      "expected_emissions_shadow": 55.70765466397472,
+      "expected_emissions_usd": 687.5174794716979,
+      "expected_lp_apr": 25.550043486523922,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xde861c8fc9ab78fe00490c5a38813d26e2d09c95",
       "symbol": "CL-wS-stS-0.0094%",
-      "tvl": 1992733.3788135187,
-      "lp_apr": 6.105857784521625,
+      "tvl": 2035432.7555343676,
+      "lp_apr": 6.040667470693282,
       "stats": {
-        "last_24h_vol": 1276291.3775744308,
-        "last_24h_fees": 119.97138949199649,
-        "last_7d_vol": 8320447.030047632,
-        "last_7d_fees": 782.1220208244774
+        "last_24h_vol": 1669296.839833453,
+        "last_24h_fees": 156.9139029443446,
+        "last_7d_vol": 8713452.492306653,
+        "last_7d_fees": 819.0645342768256
       },
-      "fee_last_7d_usd": 782.1220208244774,
-      "vol_last_7d": 8320447.030047632,
-      "bribes_usd": 468.9847713536902,
+      "fee_last_7d_usd": 819.0645342768256,
+      "vol_last_7d": 8713452.492306653,
+      "bribes_usd": 602.6337589790719,
       "volatility": {
-        "current_price": 0.309921630808057,
+        "current_price": 0.315096756582517,
         "price_range": {
           "high": 0.340363950604717,
           "low": 0.303754125676059,
           "range": 0.03660982492865805,
-          "mid_price": 0.3256613654675479,
-          "volatility_percentage": 2.1516,
-          "std_dev": 0.006668,
-          "annualized_volatility": 201.38,
+          "mid_price": 0.3252227994499003,
+          "volatility_percentage": 2.259,
+          "std_dev": 0.007118,
           "metrics": {
             "num_samples": 168,
-            "variance": 4.4e-05,
-            "hourly_factor": 93.59
+            "variance": 5.1e-05
           }
-        },
-        "volume": {
-          "h24": 2110104.1672697635,
-          "d7": 9075105.732680285
         }
       },
-      "pool_votes_period": 3809.6171634365387
+      "pool_votes_period": 3817.5294947878997,
+      "vote_percentage": 0.3065987790285134,
+      "expected_emissions_shadow": 54.1484016063672,
+      "expected_emissions_usd": 668.2739170117238,
+      "expected_lp_apr": 1.7072656215305213,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xd7202d441778714ffe7c59879aad163abd91ad82",
       "symbol": "WETH/SILO",
-      "tvl": 789801.7561085534,
-      "lp_apr": 4.525494073769054,
+      "tvl": 793385.7003215731,
+      "lp_apr": 4.533446325002282,
       "stats": {
-        "last_24h_vol": 141854.34974729735,
-        "last_24h_fees": 70.92717487364868,
-        "last_7d_vol": 1489372.9832506634,
-        "last_7d_fees": 744.6864916253318
+        "last_24h_vol": 186096.1332717561,
+        "last_24h_fees": 93.04806663587807,
+        "last_7d_vol": 1533614.7667751221,
+        "last_7d_fees": 766.8073833875611
       },
-      "fee_last_7d_usd": 744.6864916253318,
-      "vol_last_7d": 1489372.9832506634,
-      "bribes_usd": 529.1283611891805,
+      "fee_last_7d_usd": 766.8073833875611,
+      "vol_last_7d": 1533614.7667751221,
+      "bribes_usd": 602.0694996193458,
       "volatility": {
-        "current_price": 0.0215013047812931,
+        "current_price": 0.0217342259744186,
         "price_range": {
           "high": 0.0231299404267723,
-          "low": 0.0205150442529459,
-          "range": 0.0026148961738263997,
-          "mid_price": 0.02149302449925789,
-          "volatility_percentage": 2.1044,
-          "std_dev": 0.000452,
-          "annualized_volatility": 196.96,
+          "low": 0.020857369834778,
+          "range": 0.002272570591994299,
+          "mid_price": 0.02159832582032383,
+          "volatility_percentage": 1.8199,
+          "std_dev": 0.000396,
           "metrics": {
             "num_samples": 168,
-            "variance": 0.0,
-            "hourly_factor": 93.59
+            "variance": 0.0
           }
-        },
-        "volume": {
-          "h24": 276685.27893396694,
-          "d7": 1611149.8436358804
         }
       },
-      "pool_votes_period": 3641.2660430378596
+      "pool_votes_period": 3648.9165238980427,
+      "vote_percentage": 0.2930568978004097,
+      "expected_emissions_shadow": 51.756770349489656,
+      "expected_emissions_usd": 638.7575371987084,
+      "expected_lp_apr": 4.186537760999482,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x28f1bb2952ae8742b9e16fd515e3d01f4be6bc30",
       "symbol": "CL-wS-NAVI-2.0%",
-      "tvl": 58727.27823614678,
-      "lp_apr": 1236.6088092810917,
+      "tvl": 62375.82352845355,
+      "lp_apr": 631.8819926865394,
       "stats": {
-        "last_24h_vol": 4621.4537918050755,
-        "last_24h_fees": 92.4290758361015,
-        "last_7d_vol": 31505.673088985182,
-        "last_7d_fees": 630.1134617797036
+        "last_24h_vol": 8648.209889892747,
+        "last_24h_fees": 172.96419779785495,
+        "last_7d_vol": 42877.50868497029,
+        "last_7d_fees": 857.5501736994058
       },
-      "fee_last_7d_usd": 630.1134617797036,
-      "vol_last_7d": 31505.673088985182,
-      "bribes_usd": 566.1792137898977,
+      "fee_last_7d_usd": 857.5501736994058,
+      "vol_last_7d": 42877.50868497029,
+      "bribes_usd": 734.4056544273001,
       "volatility": {
-        "current_price": 0.195465543577579,
+        "current_price": 0.210499687322392,
         "price_range": {
           "high": 0.272330139294628,
           "low": 0.195465543577579,
           "range": 0.07686459571704901,
-          "mid_price": 0.23327554478645374,
-          "volatility_percentage": 7.5518,
-          "std_dev": 0.014761,
-          "annualized_volatility": 706.81,
+          "mid_price": 0.23184384337941064,
+          "volatility_percentage": 7.2711,
+          "std_dev": 0.015306,
           "metrics": {
             "num_samples": 168,
-            "variance": 0.000218,
-            "hourly_factor": 93.59
+            "variance": 0.000234
           }
-        },
-        "volume": {
-          "h24": 10465.91882746131,
-          "d7": 67398.25058445017
         }
       },
-      "pool_votes_period": 3543.9390074573976
+      "pool_votes_period": 3550.0504991099942,
+      "vote_percentage": 0.2851166310575322,
+      "expected_emissions_shadow": 50.35444006684026,
+      "expected_emissions_usd": 621.4506412769631,
+      "expected_lp_apr": 51.80762596530846,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xa30db08e1ace7c23ae959e1d2e3584b8e3b1858a",
       "symbol": "wS/SILO",
-      "tvl": 169248.31420812238,
-      "lp_apr": 18.218657879609363,
+      "tvl": 171400.04874347546,
+      "lp_apr": 18.10680991954652,
       "stats": {
-        "last_24h_vol": 145991.17872747616,
-        "last_24h_fees": 72.99558936373808,
-        "last_7d_vol": 1222992.8059824896,
-        "last_7d_fees": 611.4964029912447
+        "last_24h_vol": 137886.74298147636,
+        "last_24h_fees": 68.94337149073822,
+        "last_7d_vol": 1214888.37023649,
+        "last_7d_fees": 607.4441851182448
       },
-      "fee_last_7d_usd": 611.4964029912447,
-      "vol_last_7d": 1222992.8059824896,
-      "bribes_usd": 421.7304834262967,
+      "fee_last_7d_usd": 607.4441851182448,
+      "vol_last_7d": 1214888.37023649,
+      "bribes_usd": 475.13050000179913,
       "volatility": {
-        "current_price": 0.0214791027754602,
+        "current_price": 0.0217907901099736,
         "price_range": {
           "high": 0.0231757239986335,
-          "low": 0.0205334948994687,
-          "range": 0.0026422290991648008,
-          "mid_price": 0.021496406398488342,
-          "volatility_percentage": 2.1084,
-          "std_dev": 0.000453,
-          "annualized_volatility": 197.33,
+          "low": 0.0208137519000962,
+          "range": 0.0023619720985373002,
+          "mid_price": 0.02160106614713624,
+          "volatility_percentage": 1.829,
+          "std_dev": 0.000399,
           "metrics": {
             "num_samples": 168,
-            "variance": 0.0,
-            "hourly_factor": 93.59
+            "variance": 0.0
           }
-        },
-        "volume": {
-          "h24": 218544.86194743853,
-          "d7": 1283561.8126531749
         }
       },
-      "pool_votes_period": 2926.4162677175436
+      "pool_votes_period": 2932.56481368493,
+      "vote_percentage": 0.23552425528744586,
+      "expected_emissions_shadow": 41.5959319986696,
+      "expected_emissions_usd": 513.3572844971214,
+      "expected_lp_apr": 15.574428939517135,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x08c5e3b7533ee819a4d1f66e839d0e8f04ae3d0c",
       "symbol": "RZR/scUSD",
-      "tvl": 202175.040646,
-      "lp_apr": 205.90587158560228,
+      "tvl": 206817.16105629294,
+      "lp_apr": 203.96109558660672,
       "stats": {
-        "last_24h_vol": 1518.4094190306673,
-        "last_24h_fees": 15.18409419030667,
-        "last_7d_vol": 37275.42856623577,
-        "last_7d_fees": 372.7542856623577
+        "last_24h_vol": 4199.211736778166,
+        "last_24h_fees": 41.992117367781645,
+        "last_7d_vol": 41692.21735601394,
+        "last_7d_fees": 416.92217356013936
       },
-      "fee_last_7d_usd": 372.7542856623577,
-      "vol_last_7d": 37275.42856623577,
-      "bribes_usd": 329.0967867507869,
+      "fee_last_7d_usd": 416.92217356013936,
+      "vol_last_7d": 41692.21735601394,
+      "bribes_usd": 368.12007063175946,
       "volatility": {
-        "current_price": 11.9777504317905,
+        "current_price": 12.8320188183895,
         "price_range": {
           "high": 16.065357463898,
           "low": 11.9777504317905,
           "range": 4.087607032107499,
-          "mid_price": 13.516763299659672,
-          "volatility_percentage": 6.1355,
-          "std_dev": 0.734892,
-          "annualized_volatility": 574.25,
+          "mid_price": 13.460239240997417,
+          "volatility_percentage": 5.7793,
+          "std_dev": 0.741605,
           "metrics": {
             "num_samples": 168,
-            "variance": 0.540066,
-            "hourly_factor": 93.59
+            "variance": 0.549978
           }
-        },
-        "volume": {
-          "h24": 10281.11958215013,
-          "d7": 80925.88320788911
         }
       },
-      "pool_votes_period": 2658.1406631313594
+      "pool_votes_period": 2662.0239553212878,
+      "vote_percentage": 0.21379619870926683,
+      "expected_emissions_shadow": 37.75854054704973,
+      "expected_emissions_usd": 465.9980173644834,
+      "expected_lp_apr": 11.71657940723668,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x6807a4ff4c87abdbaf083232136eff37e9205f12",
       "symbol": "CL-wS-SHADOW-1.0%",
-      "tvl": 20195.101266925205,
-      "lp_apr": 158.50280876639397,
+      "tvl": 20563.91733905974,
+      "lp_apr": 88.34522436874906,
       "stats": {
-        "last_24h_vol": 3440.695689681417,
-        "last_24h_fees": 34.40695689681417,
-        "last_7d_vol": 54377.55228865647,
-        "last_7d_fees": 543.7755228865648
+        "last_24h_vol": 4836.6029487947735,
+        "last_24h_fees": 48.366029487947735,
+        "last_7d_vol": 55773.45954776983,
+        "last_7d_fees": 557.7345954776982
       },
-      "fee_last_7d_usd": 543.7755228865648,
-      "vol_last_7d": 54377.55228865647,
-      "bribes_usd": 453.3966476765254,
+      "fee_last_7d_usd": 557.7345954776982,
+      "vol_last_7d": 55773.45954776983,
+      "bribes_usd": 502.26892307862295,
       "volatility": {
-        "current_price": 12.347428498295,
+        "current_price": 12.664956269597,
         "price_range": {
           "high": 16.278503432614,
           "low": 12.1365501925057,
           "range": 4.141953240108299,
-          "mid_price": 13.276744954950267,
-          "volatility_percentage": 7.0304,
-          "std_dev": 0.86807,
-          "annualized_volatility": 658.01,
+          "mid_price": 13.09411334266843,
+          "volatility_percentage": 5.7304,
+          "std_dev": 0.725757,
           "metrics": {
             "num_samples": 168,
-            "variance": 0.753546,
-            "hourly_factor": 93.59
+            "variance": 0.526723
           }
-        },
-        "volume": {
-          "h24": 13928.158899849635,
-          "d7": 73165.61763807003
         }
       },
-      "pool_votes_period": 2582.49531055756
+      "pool_votes_period": 2586.703107011728,
+      "vote_percentage": 0.20774692517814353,
+      "expected_emissions_shadow": 36.69017852151287,
+      "expected_emissions_usd": 452.81279943723536,
+      "expected_lp_apr": 114.50282153202266,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x5fb279484b65cf58e6a3d0216a659261dee9eeb6",
       "symbol": "CL-USDC-HLP0-0.45%",
-      "tvl": 165326.45967468628,
-      "lp_apr": 17.667609129004266,
+      "tvl": 163433.00569781143,
+      "lp_apr": 17.963737480320397,
       "stats": {
-        "last_24h_vol": 10780.832948758596,
-        "last_24h_fees": 48.51374826941369,
-        "last_7d_vol": 68006.1000439204,
-        "last_7d_fees": 306.0274501976418
+        "last_24h_vol": 12239.987627222326,
+        "last_24h_fees": 55.079944322500474,
+        "last_7d_vol": 69465.25472238414,
+        "last_7d_fees": 312.5936462507286
       },
-      "fee_last_7d_usd": 306.0274501976418,
-      "vol_last_7d": 68006.1000439204,
-      "bribes_usd": 170.0762643285137,
+      "fee_last_7d_usd": 312.5936462507286,
+      "vol_last_7d": 69465.25472238414,
+      "bribes_usd": 178.84776538552464,
       "volatility": {
-        "current_price": 1.03097653876355,
+        "current_price": 1.02339559355648,
         "price_range": {
           "high": 1.03239412503227,
           "low": 1.00717015263815,
           "range": 0.025223972394119887,
-          "mid_price": 1.0209557335092971,
-          "volatility_percentage": 0.5141,
-          "std_dev": 0.0053,
-          "annualized_volatility": 48.12,
+          "mid_price": 1.0211145669754405,
+          "volatility_percentage": 0.5132,
+          "std_dev": 0.005252,
           "metrics": {
             "num_samples": 168,
-            "variance": 2.8e-05,
-            "hourly_factor": 93.59
+            "variance": 2.8e-05
           }
-        },
-        "volume": {
-          "h24": 340492.74658309075,
-          "d7": 1749505.9986458067
         }
       },
-      "pool_votes_period": 1498.1386903600735
+      "pool_votes_period": 1500.7917792989938,
+      "vote_percentage": 0.12053369272911588,
+      "expected_emissions_shadow": 21.28745202989752,
+      "expected_emissions_usd": 262.7196469183681,
+      "expected_lp_apr": 8.359034689122213,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x0157699e0a26dbdf42a0a1dcf7426d0df408c60e",
       "symbol": "CL-USDC-beS-0.3%",
-      "tvl": 30078.248538638134,
-      "lp_apr": 196.26472083787814,
+      "tvl": 29526.142295543046,
+      "lp_apr": 320.72019986432724,
       "stats": {
-        "last_24h_vol": 10872.994542941131,
-        "last_24h_fees": 32.61898362882339,
-        "last_7d_vol": 76009.80589476743,
-        "last_7d_fees": 228.0294176843023
+        "last_24h_vol": 15977.265053315412,
+        "last_24h_fees": 47.931795159946226,
+        "last_7d_vol": 81114.0764051417,
+        "last_7d_fees": 243.34222921542514
       },
-      "fee_last_7d_usd": 228.0294176843023,
-      "vol_last_7d": 76009.80589476743,
-      "bribes_usd": 162.8847985134515,
+      "fee_last_7d_usd": 243.34222921542514,
+      "vol_last_7d": 81114.0764051417,
+      "bribes_usd": 201.06201650055414,
       "volatility": {
-        "current_price": 0.997806465963982,
+        "current_price": 0.995817326155639,
         "price_range": {
-          "high": 1.00731154620821,
+          "high": 1.0064425881177,
           "low": 0.992741611801782,
-          "range": 0.014569934406428064,
-          "mid_price": 0.9996803208490325,
-          "volatility_percentage": 0.2671,
-          "std_dev": 0.002665,
-          "annualized_volatility": 25.0,
+          "range": 0.013700976315917934,
+          "mid_price": 0.99950956815768,
+          "volatility_percentage": 0.2543,
+          "std_dev": 0.002533,
           "metrics": {
             "num_samples": 168,
-            "variance": 7e-06,
-            "hourly_factor": 93.59
+            "variance": 6e-06
           }
-        },
-        "volume": {
-          "h24": 17665.681119529167,
-          "d7": 92507.82276610562
         }
       },
-      "pool_votes_period": 1461.960984338491
+      "pool_votes_period": 1464.9697946993897,
+      "vote_percentage": 0.11765670729767076,
+      "expected_emissions_shadow": 20.779347715029814,
+      "expected_emissions_usd": 256.44886420504656,
+      "expected_lp_apr": 45.164521681098115,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x2c13383855377faf5a562f1aef47e4be7a0f12ac",
       "symbol": "CL-USDC-scUSD-0.0095%",
-      "tvl": 457948.002043,
-      "lp_apr": 60.646824160776234,
+      "tvl": 478222.015654,
+      "lp_apr": 22.2709987722222,
       "stats": {
-        "last_24h_vol": 138825.13080800005,
-        "last_24h_fees": 13.18838742676,
-        "last_7d_vol": 2093735.0348609998,
-        "last_7d_fees": 198.904828311795
+        "last_24h_vol": 193434.38526000004,
+        "last_24h_fees": 18.3762665997,
+        "last_7d_vol": 2148344.2893129997,
+        "last_7d_fees": 204.092707484735
       },
-      "fee_last_7d_usd": 198.904828311795,
-      "vol_last_7d": 2093735.0348609998,
-      "bribes_usd": 139.47103700000002,
+      "fee_last_7d_usd": 204.092707484735,
+      "vol_last_7d": 2148344.2893129997,
+      "bribes_usd": 154.69411000000002,
       "volatility": {
-        "current_price": 1.00049884712388,
+        "current_price": 0.999714091798014,
         "price_range": {
           "high": 1.00656479231393,
           "low": 0.990901073474157,
           "range": 0.015663718839773022,
-          "mid_price": 0.9993574423509951,
-          "volatility_percentage": 0.2322,
-          "std_dev": 0.002324,
-          "annualized_volatility": 21.74,
+          "mid_price": 0.9994389164616921,
+          "volatility_percentage": 0.2326,
+          "std_dev": 0.002325,
           "metrics": {
             "num_samples": 168,
-            "variance": 5e-06,
-            "hourly_factor": 93.59
+            "variance": 5e-06
           }
-        },
-        "volume": {
-          "h24": 476496.51168659324,
-          "d7": 2370626.973171878
         }
       },
-      "pool_votes_period": 1321.4108386877745
+      "pool_votes_period": 1324.0021704353792,
+      "vote_percentage": 0.10633511789255806,
+      "expected_emissions_shadow": 18.779842133589057,
+      "expected_emissions_usd": 231.77191368839277,
+      "expected_lp_apr": 2.5201975478511445,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x66a8289bdd968d1157eb1a608f60a87759632cd6",
-      "symbol": "CL-USDC-EGGS-0.2992%",
-      "tvl": 20955.871311526284,
-      "lp_apr": 786.6253759156109,
+      "symbol": "CL-USDC-EGGS-0.3259%",
+      "tvl": 20929.961794282994,
+      "lp_apr": 793.2363133023402,
       "stats": {
-        "last_24h_vol": 3590.659867200555,
-        "last_24h_fees": 11.607080188841065,
-        "last_7d_vol": 72899.2654556072,
-        "last_7d_fees": 498.51364638468453
+        "last_24h_vol": 1471.7412578525825,
+        "last_24h_fees": 4.644557373253551,
+        "last_7d_vol": 70780.34684625923,
+        "last_7d_fees": 491.55112356909706
       },
-      "fee_last_7d_usd": 498.51364638468453,
-      "vol_last_7d": 72899.2654556072,
-      "bribes_usd": 437.24430591310835,
+      "fee_last_7d_usd": 491.55112356909706,
+      "vol_last_7d": 70780.34684625923,
+      "bribes_usd": 444.0317223272202,
       "volatility": {
-        "current_price": 0.000345839493593309,
+        "current_price": 0.000349193386046911,
         "price_range": {
           "high": 0.000490867755166087,
           "low": 0.000338247609225736,
           "range": 0.00015262014594035096,
-          "mid_price": 0.0003634876708861184,
-          "volatility_percentage": 3.7879,
+          "mid_price": 0.0003618064702834563,
+          "volatility_percentage": 3.6885,
           "std_dev": 1.3e-05,
-          "annualized_volatility": 354.53,
           "metrics": {
             "num_samples": 168,
-            "variance": 0.0,
-            "hourly_factor": 93.59
+            "variance": 0.0
           }
-        },
-        "volume": {
-          "h24": 8850.312755686668,
-          "d7": 84143.63918643603
         }
       },
-      "pool_votes_period": 1129.7829083763438
+      "pool_votes_period": 1184.681967037459,
+      "vote_percentage": 0.09514583846089261,
+      "expected_emissions_shadow": 16.80370381277944,
+      "expected_emissions_usd": 207.38335083099668,
+      "expected_lp_apr": 51.52390792303048,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xe8b696fb500c2a3b1faa5e0fce4d53d6ad26765f",
       "symbol": "USDC/x33",
-      "tvl": 64805.81621493534,
-      "lp_apr": 13.414344399182692,
+      "tvl": 66092.89127511522,
+      "lp_apr": 13.23670875317758,
       "stats": {
-        "last_24h_vol": 2445.7048249716345,
-        "last_24h_fees": 24.457048249716347,
-        "last_7d_vol": 17091.76624404081,
-        "last_7d_fees": 170.91766244040812
+        "last_24h_vol": 2442.520815782801,
+        "last_24h_fees": 24.425208157828013,
+        "last_7d_vol": 17088.582234851976,
+        "last_7d_fees": 170.8858223485198
       },
-      "fee_last_7d_usd": 170.91766244040812,
-      "vol_last_7d": 17091.76624404081,
-      "bribes_usd": 128.66432615725455,
+      "fee_last_7d_usd": 170.8858223485198,
+      "vol_last_7d": 17088.582234851976,
+      "bribes_usd": 144.6081459341182,
       "volatility": {
-        "current_price": 1.00049884712388,
+        "current_price": 1.00894353635606,
         "price_range": {
-          "high": 1.02361863446497,
+          "high": 1.02385833590192,
           "low": 0.983492266804358,
-          "range": 0.04012636766061206,
-          "mid_price": 1.0015354914084478,
-          "volatility_percentage": 0.7638,
-          "std_dev": 0.007642,
-          "annualized_volatility": 71.49,
+          "range": 0.04036606909756202,
+          "mid_price": 1.0018684343082513,
+          "volatility_percentage": 0.7952,
+          "std_dev": 0.008023,
           "metrics": {
             "num_samples": 168,
-            "variance": 5.8e-05,
-            "hourly_factor": 93.59
+            "variance": 6.4e-05
           }
-        },
-        "volume": {
-          "h24": 1729.5009438538232,
-          "d7": 25533.671969768453
         }
       },
-      "pool_votes_period": 903.6361536541942
+      "pool_votes_period": 905.5111019825374,
+      "vote_percentage": 0.07272467669042451,
+      "expected_emissions_shadow": 12.84390307294764,
+      "expected_emissions_usd": 158.5133662609969,
+      "expected_lp_apr": 12.471379124966973,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xb901d7316447c84f4417b8a8268e2822095051e6",
       "symbol": "wS/GSNAKE",
-      "tvl": 108283.77682096818,
-      "lp_apr": 5.349079463034447,
+      "tvl": 118385.08042696083,
+      "lp_apr": 4.925336369121477,
       "stats": {
-        "last_24h_vol": 4061.400951833916,
-        "last_24h_fees": 40.61400951833918,
-        "last_7d_vol": 33483.97301791537,
-        "last_7d_fees": 334.8397301791538
+        "last_24h_vol": 9343.064031233771,
+        "last_24h_fees": 93.43064031233774,
+        "last_7d_vol": 38765.636097315226,
+        "last_7d_fees": 387.65636097315235
       },
-      "fee_last_7d_usd": 334.8397301791538,
-      "vol_last_7d": 33483.97301791537,
-      "bribes_usd": 265.36776254467736,
+      "fee_last_7d_usd": 387.65636097315235,
+      "vol_last_7d": 38765.636097315226,
+      "bribes_usd": 356.64962417835284,
       "volatility": {
-        "current_price": 19.8326524224303,
+        "current_price": 23.1191780517999,
         "price_range": {
-          "high": 23.123993578546,
+          "high": 23.927419595619,
           "low": 18.9958156785683,
-          "range": 4.1281778999777,
-          "mid_price": 20.422013268150902,
-          "volatility_percentage": 4.4822,
-          "std_dev": 0.888936,
-          "annualized_volatility": 419.51,
+          "range": 4.931603917050701,
+          "mid_price": 20.58503106314149,
+          "volatility_percentage": 4.873,
+          "std_dev": 1.12659,
           "metrics": {
             "num_samples": 168,
-            "variance": 0.790207,
-            "hourly_factor": 93.59
+            "variance": 1.269206
           }
-        },
-        "volume": {
-          "h24": 1191.7296276665027,
-          "d7": 30471.56931539042
         }
       },
-      "pool_votes_period": 835.6892844651087
+      "pool_votes_period": 884.8038293029772,
+      "vote_percentage": 0.0710616051858738,
+      "expected_emissions_shadow": 12.55018806203384,
+      "expected_emissions_usd": 154.88847475902085,
+      "expected_lp_apr": 6.803391659169606,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x07e356f542da8a86728d8625f52aadb436147456",
       "symbol": "wS/MOLTEN",
-      "tvl": 48296.93609906003,
-      "lp_apr": 18.814513227071004,
+      "tvl": 48611.09454053217,
+      "lp_apr": 18.809068049635375,
       "stats": {
-        "last_24h_vol": 1941.8620479734427,
-        "last_24h_fees": 19.41862047973443,
-        "last_7d_vol": 6983.785886338661,
-        "last_7d_fees": 69.8378588633866
+        "last_24h_vol": 1861.9249458920192,
+        "last_24h_fees": 18.619249458920194,
+        "last_7d_vol": 6903.848784257238,
+        "last_7d_fees": 69.03848784257237
       },
-      "fee_last_7d_usd": 69.8378588633866,
-      "vol_last_7d": 6983.785886338661,
-      "bribes_usd": 45.81184032978672,
+      "fee_last_7d_usd": 69.03848784257237,
+      "vol_last_7d": 6903.848784257238,
+      "bribes_usd": 46.1098338987671,
       "volatility": {
         "current_price": 0.121541919170365,
         "price_range": {
@@ -1099,1070 +1070,1041 @@
           "mid_price": 0.17765213026950571,
           "volatility_percentage": 26.3272,
           "std_dev": 0.031999,
-          "annualized_volatility": 2464.09,
           "metrics": {
             "num_samples": 56,
-            "variance": 0.001024,
-            "hourly_factor": 93.59
+            "variance": 0.001024
           }
-        },
-        "volume": {
-          "h24": 12696.724521163078,
-          "d7": 33458.17527454603
         }
       },
-      "pool_votes_period": 830.0722720002354
-    },
-    {
-      "pool": "0xc00021495419f35ad564e289b5077f48d1399b2d",
-      "symbol": "USDC/STBL",
-      "tvl": 305124.866088949,
-      "lp_apr": 2.5316307826433335,
-      "stats": {
-        "last_24h_vol": 2147.4120042152176,
-        "last_24h_fees": 21.47412004215218,
-        "last_7d_vol": 9640.363968106356,
-        "last_7d_fees": 96.40363968106357
-      },
-      "fee_last_7d_usd": 96.40363968106357,
-      "vol_last_7d": 9640.363968106356,
-      "bribes_usd": 61.27170355873043,
-      "volatility": {
-        "current_price": 1.00133605274935,
-        "price_range": {
-          "high": 1.01040542387097,
-          "low": 0.993108114698118,
-          "range": 0.017297309172852104,
-          "mid_price": 0.9996883823327932,
-          "volatility_percentage": 0.2088,
-          "std_dev": 0.002091,
-          "annualized_volatility": 19.54,
-          "metrics": {
-            "num_samples": 168,
-            "variance": 4e-06,
-            "hourly_factor": 93.59
-          }
-        },
-        "volume": {
-          "h24": 2467.3629372151995,
-          "d7": 9872.637781297677
-        }
-      },
-      "pool_votes_period": 525.5556736318771
-    },
-    {
-      "pool": "0x6494bcef30adababf79c27b89baaa9bf7cefd3ad",
-      "symbol": "CL-USDC-msUSD-0.025%",
-      "tvl": 11550.994868832971,
-      "lp_apr": 32.31829249717196,
-      "stats": {
-        "last_24h_vol": 9992.327032658912,
-        "last_24h_fees": 2.498081758164727,
-        "last_7d_vol": 171204.89574031474,
-        "last_7d_fees": 42.80122393507868
-      },
-      "fee_last_7d_usd": 42.80122393507868,
-      "vol_last_7d": 171204.89574031474,
-      "bribes_usd": 40.49586246856902,
-      "volatility": {
-        "current_price": 0.997984313893321,
-        "price_range": {
-          "high": 1.00867041635767,
-          "low": 0.990247883045363,
-          "range": 0.018422533312307032,
-          "mid_price": 0.9999018922876663,
-          "volatility_percentage": 0.2408,
-          "std_dev": 0.002404,
-          "annualized_volatility": 22.54,
-          "metrics": {
-            "num_samples": 168,
-            "variance": 6e-06,
-            "hourly_factor": 93.59
-          }
-        },
-        "volume": {
-          "h24": 138429.0719697067,
-          "d7": 498519.6600947425
-        }
-      },
-      "pool_votes_period": 382.04611622050396
-    },
-    {
-      "pool": "0x06479961abd981b3f292b19db9655cea150f9427",
-      "symbol": "CL-wS-WHALE-1.0%",
-      "tvl": 19867.548080542412,
-      "lp_apr": 296.7645541996751,
-      "stats": {
-        "last_24h_vol": 276.49258042530073,
-        "last_24h_fees": 2.7649258042530076,
-        "last_7d_vol": 2297.959665819094,
-        "last_7d_fees": 22.97959665819094
-      },
-      "fee_last_7d_usd": 22.97959665819094,
-      "vol_last_7d": 2297.959665819094,
-      "bribes_usd": 15.892940211114972,
-      "volatility": {
-        "current_price": 0.0187688593575942,
-        "price_range": {
-          "high": 0.0222668006046579,
-          "low": 0.0126497200435513,
-          "range": 0.0096170805611066,
-          "mid_price": 0.017948157576684113,
-          "volatility_percentage": 15.3774,
-          "std_dev": 0.002886,
-          "annualized_volatility": 1439.25,
-          "metrics": {
-            "num_samples": 159,
-            "variance": 8e-06,
-            "hourly_factor": 93.59
-          }
-        },
-        "volume": {
-          "h24": 3778.769521619042,
-          "d7": 23778.496235195496
-        }
-      },
-      "pool_votes_period": 380.9396829009579
-    },
-    {
-      "pool": "0xca1f88a000136ee0bb1b35f27eb591e499decf9a",
-      "symbol": "CL-USDC-EURC.e-0.0646%",
-      "tvl": 24427.910812353795,
-      "lp_apr": 45.37623628663802,
-      "stats": {
-        "last_24h_vol": 7531.256520214274,
-        "last_24h_fees": 4.763141354907158,
-        "last_7d_vol": 25930.108046850146,
-        "last_7d_fees": 18.67522374382063
-      },
-      "fee_last_7d_usd": 18.67522374382063,
-      "vol_last_7d": 25930.108046850146,
-      "bribes_usd": 10.160621808736957,
-      "volatility": {
-        "current_price": 0.999445271321495,
-        "price_range": {
-          "high": 1.01095437217527,
-          "low": 0.99125715967582,
-          "range": 0.019697212499450112,
-          "mid_price": 1.0000974030124503,
-          "volatility_percentage": 0.3013,
-          "std_dev": 0.003011,
-          "annualized_volatility": 28.2,
-          "metrics": {
-            "num_samples": 168,
-            "variance": 9e-06,
-            "hourly_factor": 93.59
-          }
-        },
-        "volume": {
-          "h24": 16726.094749498665,
-          "d7": 46780.78731201454
-        }
-      },
-      "pool_votes_period": 343.5695574165183
-    },
-    {
-      "pool": "0x8e30ad00b6176ff1d47cba832f4feb88f4b8379b",
-      "symbol": "CL-wS-Anon-0.3%",
-      "tvl": 442.6369919209525,
-      "lp_apr": 649.2713607511454,
-      "stats": {
-        "last_24h_vol": 464.9030221705778,
-        "last_24h_fees": 1.3947090665117337,
-        "last_7d_vol": 2501.2184749701305,
-        "last_7d_fees": 7.503655424910393
-      },
-      "fee_last_7d_usd": 7.503655424910393,
-      "vol_last_7d": 2501.2184749701305,
-      "bribes_usd": 25.83341496423317,
-      "volatility": {
-        "current_price": 0.300914,
-        "price_range": {
-          "high": 0.355877,
-          "low": 0.294732,
-          "range": 0.061145000000000005,
-          "mid_price": 0.32245472275052806,
-          "volatility_percentage": 4.5506,
-          "std_dev": 0.013693,
-          "annualized_volatility": 425.91,
-          "metrics": {
-            "num_samples": 168,
-            "variance": 0.000188,
-            "hourly_factor": 93.59
-          }
-        },
-        "volume": {
-          "h24": 1090.0097891551427,
-          "d7": 4169.630413548494
-        }
-      },
-      "pool_votes_period": 320.97695503691824
-    },
-    {
-      "pool": "0xfc4060db484f759b822b3aea7e85826c61f9dfd8",
-      "symbol": "CL-wS-beS-0.0504%",
-      "tvl": 26436.510359123313,
-      "lp_apr": 12.263113276595668,
-      "stats": {
-        "last_24h_vol": 41.15095364855348,
-        "last_24h_fees": 0.020647651673470675,
-        "last_7d_vol": 56342.692031990984,
-        "last_7d_fees": 28.163011641603035
-      },
-      "fee_last_7d_usd": 28.163011641603035,
-      "vol_last_7d": 56342.692031990984,
-      "bribes_usd": 21.57996747753666,
-      "volatility": {
-        "current_price": 0.304501622837634,
-        "price_range": {
-          "high": 0.358605286994684,
-          "low": 0.304501622837634,
-          "range": 0.054103664157050035,
-          "mid_price": 0.32417389488767434,
-          "volatility_percentage": 3.3112,
-          "std_dev": 0.010083,
-          "annualized_volatility": 309.91,
-          "metrics": {
-            "num_samples": 168,
-            "variance": 0.000102,
-            "hourly_factor": 93.59
-          }
-        },
-        "volume": {
-          "h24": 28729.55550182431,
-          "d7": 103662.57580282136
-        }
-      },
-      "pool_votes_period": 304.15448702891433
-    },
-    {
-      "pool": "0x287c6882de298665977787e268f3dba052a6e251",
-      "symbol": "wS/SNAKE",
-      "tvl": 867753.5102549668,
-      "lp_apr": 0.3245776942135802,
-      "stats": {
-        "last_24h_vol": 1768.037572041192,
-        "last_24h_fees": 8.84018786020596,
-        "last_7d_vol": 30100.720341290427,
-        "last_7d_fees": 150.50360170645212
-      },
-      "fee_last_7d_usd": 150.50360170645212,
-      "vol_last_7d": 30100.720341290427,
-      "bribes_usd": 132.69704924336503,
-      "volatility": {
-        "current_price": 0.301224825164834,
-        "price_range": {
-          "high": 0.357703680711175,
-          "low": 0.300021171635199,
-          "range": 0.057682509075975996,
-          "mid_price": 0.3264321892329069,
-          "volatility_percentage": 4.4248,
-          "std_dev": 0.013328,
-          "annualized_volatility": 414.13,
-          "metrics": {
-            "num_samples": 168,
-            "variance": 0.000178,
-            "hourly_factor": 93.59
-          }
-        },
-        "volume": {
-          "h24": 719.756393737823,
-          "d7": 42150.79002641108
-        }
-      },
-      "pool_votes_period": 286.2484833916908
-    },
-    {
-      "pool": "0xe076acf0c028ac2ba1ec4807d592bfb2c524fdb0",
-      "symbol": "wS/x33",
-      "tvl": 46361.48059866928,
-      "lp_apr": 5.04061631675347,
-      "stats": {
-        "last_24h_vol": 479.13147930080254,
-        "last_24h_fees": 4.791314793008025,
-        "last_7d_vol": 5511.515841828608,
-        "last_7d_fees": 55.11515841828609
-      },
-      "fee_last_7d_usd": 55.11515841828609,
-      "vol_last_7d": 5511.515841828608,
-      "bribes_usd": 44.675308224363725,
-      "volatility": {
-        "current_price": 0.294767,
-        "price_range": {
-          "high": 0.354142,
-          "low": 0.294229,
-          "range": 0.059912999999999994,
-          "mid_price": 0.32094158333333334,
-          "volatility_percentage": 4.1118,
-          "std_dev": 0.01212,
-          "annualized_volatility": 384.85,
-          "metrics": {
-            "num_samples": 168,
-            "variance": 0.000147,
-            "hourly_factor": 93.59
-          }
-        },
-        "volume": {
-          "h24": 6073.029018787278,
-          "d7": 21769.1450511457
-        }
-      },
-      "pool_votes_period": 259.8384874108386
+      "pool_votes_period": 831.8162950829894,
+      "vote_percentage": 0.06680599607590872,
+      "expected_emissions_shadow": 11.798605058682499,
+      "expected_emissions_usd": 145.61279343309272,
+      "expected_lp_apr": 15.576413841509703,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xde87419f0774eef80b0ebd134ff54ece0d4927c9",
       "symbol": "wS/MCLB",
-      "tvl": 77300.15995125266,
-      "lp_apr": 3.8804953057939957,
+      "tvl": 77301.12138865731,
+      "lp_apr": 3.9045919745190196,
       "stats": {
-        "last_24h_vol": 19146.16838052329,
-        "last_24h_fees": 191.46168380523287,
-        "last_7d_vol": 45808.76628900999,
-        "last_7d_fees": 458.08766289009986
+        "last_24h_vol": 1850.5741579814558,
+        "last_24h_fees": 18.505741579814558,
+        "last_7d_vol": 28513.172066468152,
+        "last_7d_fees": 285.1317206646816
       },
-      "fee_last_7d_usd": 458.08766289009986,
-      "vol_last_7d": 45808.76628900999,
-      "bribes_usd": 242.9437234485416,
+      "fee_last_7d_usd": 285.1317206646816,
+      "vol_last_7d": 28513.172066468152,
+      "bribes_usd": 243.6185136816707,
       "volatility": {
-        "current_price": 0.59227632108894,
+        "current_price": 0.589490266224329,
         "price_range": {
           "high": 0.805314380957446,
           "low": 0.568554705257971,
           "range": 0.23675967569947498,
-          "mid_price": 0.7326649496421747,
-          "volatility_percentage": 8.7698,
-          "std_dev": 0.051942,
-          "annualized_volatility": 820.81,
+          "mid_price": 0.7312957058200678,
+          "volatility_percentage": 8.9787,
+          "std_dev": 0.052929,
           "metrics": {
             "num_samples": 168,
-            "variance": 0.002698,
-            "hourly_factor": 93.59
+            "variance": 0.002801
           }
-        },
-        "volume": {
-          "h24": 3436.158000653565,
-          "d7": 37764.62226240944
         }
       },
-      "pool_votes_period": 240.1409969613752
+      "pool_votes_period": 572.0889500285862,
+      "vote_percentage": 0.04594640953369084,
+      "expected_emissions_shadow": 8.114594075306268,
+      "expected_emissions_usd": 100.14647536756458,
+      "expected_lp_apr": 6.736793238652152,
+      "shadow_price_usd": 12.341526198127756
+    },
+    {
+      "pool": "0xc00021495419f35ad564e289b5077f48d1399b2d",
+      "symbol": "USDC/STBL",
+      "tvl": 308333.9439217254,
+      "lp_apr": 2.5209167714205094,
+      "stats": {
+        "last_24h_vol": 1997.5197753128255,
+        "last_24h_fees": 19.975197753128246,
+        "last_7d_vol": 9490.471739203964,
+        "last_7d_fees": 94.90471739203963
+      },
+      "fee_last_7d_usd": 94.90471739203963,
+      "vol_last_7d": 9490.471739203964,
+      "bribes_usd": 72.62412637072912,
+      "volatility": {
+        "current_price": 0.995748563333528,
+        "price_range": {
+          "high": 1.00534751602228,
+          "low": 0.993108114698118,
+          "range": 0.012239401324162014,
+          "mid_price": 0.9996200658169498,
+          "volatility_percentage": 0.1947,
+          "std_dev": 0.001938,
+          "metrics": {
+            "num_samples": 168,
+            "variance": 4e-06
+          }
+        }
+      },
+      "pool_votes_period": 526.6598922126009,
+      "vote_percentage": 0.04229784737384021,
+      "expected_emissions_shadow": 7.470221616474612,
+      "expected_emissions_usd": 92.1939357855417,
+      "expected_lp_apr": 1.5548351893637793,
+      "shadow_price_usd": 12.341526198127756
+    },
+    {
+      "pool": "0x6494bcef30adababf79c27b89baaa9bf7cefd3ad",
+      "symbol": "CL-USDC-msUSD-0.025%",
+      "tvl": 12045.340054740926,
+      "lp_apr": 31.04355223940991,
+      "stats": {
+        "last_24h_vol": 25702.872142035158,
+        "last_24h_fees": 6.4257180355087895,
+        "last_7d_vol": 205231.2835980819,
+        "last_7d_fees": 51.307820899520465
+      },
+      "fee_last_7d_usd": 51.307820899520465,
+      "vol_last_7d": 205231.2835980819,
+      "bribes_usd": 44.4867320608205,
+      "volatility": {
+        "current_price": 0.999013062405988,
+        "price_range": {
+          "high": 1.00867041635767,
+          "low": 0.990247883045363,
+          "range": 0.018422533312307032,
+          "mid_price": 0.9998249907847269,
+          "volatility_percentage": 0.2385,
+          "std_dev": 0.002383,
+          "metrics": {
+            "num_samples": 168,
+            "variance": 6e-06
+          }
+        }
+      },
+      "pool_votes_period": 382.8390785569969,
+      "vote_percentage": 0.030747108623583236,
+      "expected_emissions_shadow": 5.430245975733473,
+      "expected_emissions_usd": 67.01752297179247,
+      "expected_lp_apr": 28.931613210550932,
+      "shadow_price_usd": 12.341526198127756
+    },
+    {
+      "pool": "0x06479961abd981b3f292b19db9655cea150f9427",
+      "symbol": "CL-wS-WHALE-1.0%",
+      "tvl": 21041.19962119431,
+      "lp_apr": 283.9516631417468,
+      "stats": {
+        "last_24h_vol": 566.4754627176014,
+        "last_24h_fees": 5.6647546271760145,
+        "last_7d_vol": 2864.4351285366956,
+        "last_7d_fees": 28.64435128536696
+      },
+      "fee_last_7d_usd": 28.64435128536696,
+      "vol_last_7d": 2864.4351285366956,
+      "bribes_usd": 21.0642047331962,
+      "volatility": {
+        "current_price": 0.0200670383482289,
+        "price_range": {
+          "high": 0.0222668006046579,
+          "low": 0.0126497200435513,
+          "range": 0.0096170805611066,
+          "mid_price": 0.018030036245245743,
+          "volatility_percentage": 14.1924,
+          "std_dev": 0.002848,
+          "metrics": {
+            "num_samples": 160,
+            "variance": 8e-06
+          }
+        }
+      },
+      "pool_votes_period": 381.7400561004087,
+      "vote_percentage": 0.030658842391776797,
+      "expected_emissions_shadow": 5.414657279055423,
+      "expected_emissions_usd": 66.82513466334566,
+      "expected_lp_apr": 16.51477608241396,
+      "shadow_price_usd": 12.341526198127756
+    },
+    {
+      "pool": "0x287c6882de298665977787e268f3dba052a6e251",
+      "symbol": "wS/SNAKE",
+      "tvl": 882845.1124863165,
+      "lp_apr": 0.3210120614336315,
+      "stats": {
+        "last_24h_vol": 153.34745078385097,
+        "last_24h_fees": 0.766737253919255,
+        "last_7d_vol": 30257.03895595469,
+        "last_7d_fees": 151.28519477977346
+      },
+      "fee_last_7d_usd": 151.28519477977346,
+      "vol_last_7d": 30257.03895595469,
+      "bribes_usd": 135.35085111766205,
+      "volatility": {
+        "current_price": 0.307315293985314,
+        "price_range": {
+          "high": 0.357703680711175,
+          "low": 0.300021171635199,
+          "range": 0.057682509075975996,
+          "mid_price": 0.3248801674232939,
+          "volatility_percentage": 4.2044,
+          "std_dev": 0.012921,
+          "metrics": {
+            "num_samples": 168,
+            "variance": 0.000167
+          }
+        }
+      },
+      "pool_votes_period": 366.24623117087003,
+      "vote_percentage": 0.0294144806095394,
+      "expected_emissions_shadow": 5.194890580239122,
+      "expected_emissions_usd": 64.11287819242821,
+      "expected_lp_apr": 0.37762792350033425,
+      "shadow_price_usd": 12.341526198127756
+    },
+    {
+      "pool": "0xca1f88a000136ee0bb1b35f27eb591e499decf9a",
+      "symbol": "CL-USDC-EURC.e-0.0576%",
+      "tvl": 24138.12358035014,
+      "lp_apr": 49.28725448667067,
+      "stats": {
+        "last_24h_vol": 14121.809306828136,
+        "last_24h_fees": 12.611743400876604,
+        "last_7d_vol": 32520.660833464004,
+        "last_7d_fees": 26.523825789790074
+      },
+      "fee_last_7d_usd": 26.523825789790074,
+      "vol_last_7d": 32520.660833464004,
+      "bribes_usd": 22.59376326723507,
+      "volatility": {
+        "current_price": 0.995032608127808,
+        "price_range": {
+          "high": 1.01095437217527,
+          "low": 0.99125715967582,
+          "range": 0.019697212499450112,
+          "mid_price": 1.0000803318179656,
+          "volatility_percentage": 0.294,
+          "std_dev": 0.002925,
+          "metrics": {
+            "num_samples": 168,
+            "variance": 9e-06
+          }
+        }
+      },
+      "pool_votes_period": 344.21924306915895,
+      "vote_percentage": 0.027645418270432202,
+      "expected_emissions_shadow": 4.882456531061882,
+      "expected_emissions_usd": 60.256965189320184,
+      "expected_lp_apr": 12.980968381466864,
+      "shadow_price_usd": 12.341526198127756
+    },
+    {
+      "pool": "0x8e30ad00b6176ff1d47cba832f4feb88f4b8379b",
+      "symbol": "CL-wS-Anon-0.3%",
+      "tvl": 451.9393584027765,
+      "lp_apr": 639.8584331115035,
+      "stats": {
+        "last_24h_vol": 526.4147653286791,
+        "last_24h_fees": 1.579244295986037,
+        "last_7d_vol": 2562.7302181282316,
+        "last_7d_fees": 7.688190654384696
+      },
+      "fee_last_7d_usd": 7.688190654384696,
+      "vol_last_7d": 2562.7302181282316,
+      "bribes_usd": 27.577316980224793,
+      "volatility": {
+        "current_price": 0.30404,
+        "price_range": {
+          "high": 0.355877,
+          "low": 0.294732,
+          "range": 0.061145000000000005,
+          "mid_price": 0.32056226785714287,
+          "volatility_percentage": 4.4158,
+          "std_dev": 0.013426,
+          "metrics": {
+            "num_samples": 168,
+            "variance": 0.00018
+          }
+        }
+      },
+      "pool_votes_period": 321.65134356608513,
+      "vote_percentage": 0.025832913496774895,
+      "expected_emissions_shadow": 4.562350114759663,
+      "expected_emissions_usd": 56.30636346633755,
+      "expected_lp_apr": 647.8592416905915,
+      "shadow_price_usd": 12.341526198127756
+    },
+    {
+      "pool": "0xfc4060db484f759b822b3aea7e85826c61f9dfd8",
+      "symbol": "CL-wS-beS-0.0503%",
+      "tvl": 26777.47446570119,
+      "lp_apr": 12.18218986476378,
+      "stats": {
+        "last_24h_vol": 30.5597165320118,
+        "last_24h_fees": 0.015337792264652062,
+        "last_7d_vol": 56376.14994033748,
+        "last_7d_fees": 28.179789835199482
+      },
+      "fee_last_7d_usd": 28.179789835199482,
+      "vol_last_7d": 56376.14994033748,
+      "bribes_usd": 21.892775367260153,
+      "volatility": {
+        "current_price": 0.311306457927888,
+        "price_range": {
+          "high": 0.358605286994684,
+          "low": 0.304501622837634,
+          "range": 0.054103664157050035,
+          "mid_price": 0.32377544831893623,
+          "volatility_percentage": 3.1596,
+          "std_dev": 0.009836,
+          "metrics": {
+            "num_samples": 168,
+            "variance": 9.7e-05
+          }
+        }
+      },
+      "pool_votes_period": 304.74735606554464,
+      "vote_percentage": 0.024475296761801404,
+      "expected_emissions_shadow": 4.322581461975716,
+      "expected_emissions_usd": 53.34725235651467,
+      "expected_lp_apr": 10.359666764287294,
+      "shadow_price_usd": 12.341526198127756
+    },
+    {
+      "pool": "0xe076acf0c028ac2ba1ec4807d592bfb2c524fdb0",
+      "symbol": "wS/x33",
+      "tvl": 47255.00826588292,
+      "lp_apr": 4.976305016312421,
+      "stats": {
+        "last_24h_vol": 517.8158606929437,
+        "last_24h_fees": 5.178158606929436,
+        "last_7d_vol": 5550.20022322075,
+        "last_7d_fees": 55.5020022322075
+      },
+      "fee_last_7d_usd": 55.5020022322075,
+      "vol_last_7d": 5550.20022322075,
+      "bribes_usd": 48.122006609370295,
+      "volatility": {
+        "current_price": 0.304688,
+        "price_range": {
+          "high": 0.354142,
+          "low": 0.294767,
+          "range": 0.05937500000000001,
+          "mid_price": 0.3212490119047619,
+          "volatility_percentage": 3.8173,
+          "std_dev": 0.011631,
+          "metrics": {
+            "num_samples": 168,
+            "variance": 0.000135
+          }
+        }
+      },
+      "pool_votes_period": 260.38442098206895,
+      "vote_percentage": 0.02091235854500825,
+      "expected_emissions_shadow": 3.693331045281632,
+      "expected_emissions_usd": 45.58134185370183,
+      "expected_lp_apr": 5.015827662236913,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x78f28d7dbcc40bb48c930c740c66869bdd117819",
       "symbol": "CL-USDC-x33-0.3%",
-      "tvl": 1566.034535753179,
-      "lp_apr": 262.9874341045272,
+      "tvl": 1590.2132407168597,
+      "lp_apr": 261.22577433548275,
       "stats": {
-        "last_24h_vol": 1869.8284872370511,
-        "last_24h_fees": 5.609485461711152,
-        "last_7d_vol": 19841.117805996153,
-        "last_7d_fees": 59.52335341798845
+        "last_24h_vol": 1886.879828920693,
+        "last_24h_fees": 5.660639486762078,
+        "last_7d_vol": 19858.169147679797,
+        "last_7d_fees": 59.57450744303938
       },
-      "fee_last_7d_usd": 59.52335341798845,
-      "vol_last_7d": 19841.117805996153,
-      "bribes_usd": 46.41395681823206,
+      "fee_last_7d_usd": 59.57450744303938,
+      "vol_last_7d": 19858.169147679797,
+      "bribes_usd": 50.57467382021936,
       "volatility": {
-        "current_price": 1.00218570908971,
+        "current_price": 0.998780639062976,
         "price_range": {
           "high": 1.01830064397704,
           "low": 0.98432796569476,
           "range": 0.0339726782822799,
-          "mid_price": 1.001125198819155,
-          "volatility_percentage": 0.6329,
-          "std_dev": 0.006343,
-          "annualized_volatility": 59.23,
+          "mid_price": 1.0016389461774928,
+          "volatility_percentage": 0.6559,
+          "std_dev": 0.006551,
           "metrics": {
             "num_samples": 168,
-            "variance": 4e-05,
-            "hourly_factor": 93.59
+            "variance": 4.3e-05
           }
-        },
-        "volume": {
-          "h24": 1128.1090068783267,
-          "d7": 19106.747656097596
         }
       },
-      "pool_votes_period": 200.04098595523683
-    },
-    {
-      "pool": "0xc15de0d97bb77873fd9755f98624c7a79c7ba3f9",
-      "symbol": "CL-USDC-SHADOW-1.0%",
-      "tvl": 803.8156259949105,
-      "lp_apr": 850.681874940815,
-      "stats": {
-        "last_24h_vol": 265.66715372168045,
-        "last_24h_fees": 2.656671537216804,
-        "last_7d_vol": 2385.3792140002943,
-        "last_7d_fees": 23.853792140002945
-      },
-      "fee_last_7d_usd": 23.853792140002945,
-      "vol_last_7d": 2385.3792140002943,
-      "bribes_usd": 35.32266972084511,
-      "volatility": {
-        "current_price": 0.998452000727896,
-        "price_range": {
-          "high": 1.06539638531279,
-          "low": 0.985372261668814,
-          "range": 0.08002412364397593,
-          "mid_price": 1.0031025389506893,
-          "volatility_percentage": 0.9629,
-          "std_dev": 0.009615,
-          "annualized_volatility": 90.13,
-          "metrics": {
-            "num_samples": 168,
-            "variance": 9.2e-05,
-            "hourly_factor": 93.59
-          }
-        },
-        "volume": {
-          "h24": 744.426749984318,
-          "d7": 3915.3998707947994
-        }
-      },
-      "pool_votes_period": 195.24757237239814
-    },
-    {
-      "pool": "0x7770c6ec2c9fd5f13f4b4d64e9f30ccaddba217f",
-      "symbol": "wS/FISH",
-      "tvl": 15493.661002951321,
-      "lp_apr": 9.356292401560305,
-      "stats": {
-        "last_24h_vol": 52.051578261293,
-        "last_24h_fees": 1.04103156522586,
-        "last_7d_vol": 1579.2550673205947,
-        "last_7d_fees": 31.58510134641189
-      },
-      "fee_last_7d_usd": 31.58510134641189,
-      "vol_last_7d": 1579.2550673205947,
-      "bribes_usd": 27.681115806881223,
-      "volatility": {
-        "current_price": 0.071093990635861,
-        "price_range": {
-          "high": 0.14756074849371,
-          "low": 0.071093990635861,
-          "range": 0.07646675785784901,
-          "mid_price": 0.10785892510194431,
-          "volatility_percentage": 23.9918,
-          "std_dev": 0.017057,
-          "annualized_volatility": 2245.51,
-          "metrics": {
-            "num_samples": 160,
-            "variance": 0.000291,
-            "hourly_factor": 93.59
-          }
-        },
-        "volume": {
-          "h24": 1310.2243242235809,
-          "d7": 8303.130332485249
-        }
-      },
-      "pool_votes_period": 166.95504620967907
+      "pool_votes_period": 200.35965306242562,
+      "vote_percentage": 0.016091565259518516,
+      "expected_emissions_shadow": 2.8419308808351187,
+      "expected_emissions_usd": 35.07376441909491,
+      "expected_lp_apr": 114.6912692646654,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x5fc0e8736dc1012940ff373ade4bf6e09444cc3b",
       "symbol": "USDC/SPIN",
-      "tvl": 189768.13562772228,
-      "lp_apr": 0.7459146328954973,
+      "tvl": 197640.23406930614,
+      "lp_apr": 0.721222005171821,
       "stats": {
-        "last_24h_vol": 0.0,
-        "last_24h_fees": 0.0,
-        "last_7d_vol": 175.00580639402796,
-        "last_7d_fees": 3.500116127880559
+        "last_24h_vol": 7470.5324279999995,
+        "last_24h_fees": 149.41064856000003,
+        "last_7d_vol": 7645.538234394027,
+        "last_7d_fees": 152.91076468788057
       },
-      "fee_last_7d_usd": 3.500116127880559,
-      "vol_last_7d": 175.00580639402796,
-      "bribes_usd": 3.08970838273933,
+      "fee_last_7d_usd": 152.91076468788057,
+      "vol_last_7d": 7645.538234394027,
+      "bribes_usd": 158.7017988581255,
       "volatility": {
-        "current_price": 0.997587405277077,
+        "current_price": 0.997573169659635,
         "price_range": {
           "high": 1.01299178100372,
           "low": 0.993513164297924,
           "range": 0.01947861670579587,
-          "mid_price": 1.0007577560666123,
-          "volatility_percentage": 0.3468,
-          "std_dev": 0.003459,
-          "annualized_volatility": 32.46,
+          "mid_price": 1.0006565062381994,
+          "volatility_percentage": 0.3493,
+          "std_dev": 0.003485,
           "metrics": {
             "num_samples": 53,
-            "variance": 1.2e-05,
-            "hourly_factor": 93.59
+            "variance": 1.2e-05
           }
-        },
-        "volume": {
-          "h24": 12647.698834749659,
-          "d7": 16478.20023066833
         }
       },
-      "pool_votes_period": 161.25711150218154
+      "pool_votes_period": 196.97262359468348,
+      "vote_percentage": 0.01581954140200513,
+      "expected_emissions_shadow": 2.793888755129921,
+      "expected_emissions_usd": 34.48085126609046,
+      "expected_lp_apr": 0.9072061031904842,
+      "shadow_price_usd": 12.341526198127756
+    },
+    {
+      "pool": "0xc15de0d97bb77873fd9755f98624c7a79c7ba3f9",
+      "symbol": "CL-USDC-SHADOW-1.0%",
+      "tvl": 808.6585612307208,
+      "lp_apr": 853.3396539088329,
+      "stats": {
+        "last_24h_vol": 209.04079916397168,
+        "last_24h_fees": 2.090407991639717,
+        "last_7d_vol": 2328.7528594425858,
+        "last_7d_fees": 23.287528594425858
+      },
+      "fee_last_7d_usd": 23.287528594425858,
+      "vol_last_7d": 2328.7528594425858,
+      "bribes_usd": 38.06819823935892,
+      "volatility": {
+        "current_price": 1.01161876565884,
+        "price_range": {
+          "high": 1.06539638531279,
+          "low": 0.985372261668814,
+          "range": 0.08002412364397593,
+          "mid_price": 1.0033090451350315,
+          "volatility_percentage": 0.952,
+          "std_dev": 0.00963,
+          "metrics": {
+            "num_samples": 168,
+            "variance": 9.3e-05
+          }
+        }
+      },
+      "pool_votes_period": 195.6428183968183,
+      "vote_percentage": 0.015712740223240724,
+      "expected_emissions_shadow": 2.775026601999068,
+      "expected_emissions_usd": 34.24806350907294,
+      "expected_lp_apr": 220.22883177807338,
+      "shadow_price_usd": 12.341526198127756
+    },
+    {
+      "pool": "0x7770c6ec2c9fd5f13f4b4d64e9f30ccaddba217f",
+      "symbol": "wS/FISH",
+      "tvl": 15397.31237454335,
+      "lp_apr": 9.475970952364559,
+      "stats": {
+        "last_24h_vol": 215.4578662722389,
+        "last_24h_fees": 4.309157325444777,
+        "last_7d_vol": 1804.8330869761608,
+        "last_7d_fees": 36.096661739523206
+      },
+      "fee_last_7d_usd": 36.096661739523206,
+      "vol_last_7d": 1804.8330869761608,
+      "bribes_usd": 31.779837613043508,
+      "volatility": {
+        "current_price": 0.0692914272426508,
+        "price_range": {
+          "high": 0.14756074849371,
+          "low": 0.0692914272426508,
+          "range": 0.0782693212510592,
+          "mid_price": 0.10615656549278933,
+          "volatility_percentage": 26.0661,
+          "std_dev": 0.018062,
+          "metrics": {
+            "num_samples": 159,
+            "variance": 0.000326
+          }
+        }
+      },
+      "pool_votes_period": 167.30582705635197,
+      "vote_percentage": 0.013436900060593535,
+      "expected_emissions_shadow": 2.3730905358823153,
+      "expected_emissions_usd": 29.28755901912063,
+      "expected_lp_apr": 9.891031836908097,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xc291ca0a0a0e793dc6a0442a34e1607ce1905389",
       "symbol": "CL-scETH-WETH-0.0092%",
-      "tvl": 2499144.9399433904,
-      "lp_apr": 9.958656946717872,
+      "tvl": 2498589.9438446853,
+      "lp_apr": 9.756389176861006,
       "stats": {
-        "last_24h_vol": 19358.53082765968,
-        "last_24h_fees": 1.78098483614469,
-        "last_7d_vol": 366155.9681679031,
-        "last_7d_fees": 33.68634907144708
+        "last_24h_vol": 14764.029153169058,
+        "last_24h_fees": 1.3582906820915532,
+        "last_7d_vol": 361561.46649341244,
+        "last_7d_fees": 33.26365491739395
       },
-      "fee_last_7d_usd": 33.68634907144708,
-      "vol_last_7d": 366155.9681679031,
-      "bribes_usd": 11.410273197148047,
+      "fee_last_7d_usd": 33.26365491739395,
+      "vol_last_7d": 361561.46649341244,
+      "bribes_usd": 12.122812709932262,
       "volatility": {
-        "current_price": 4313.46043491856,
+        "current_price": 4287.029984193,
         "price_range": {
           "high": 4909.65733487859,
           "low": 4246.2241274595,
           "range": 663.4332074190897,
-          "mid_price": 4510.443569616853,
-          "volatility_percentage": 3.4553,
-          "std_dev": 149.044516,
-          "annualized_volatility": 323.4,
+          "mid_price": 4487.52497888696,
+          "volatility_percentage": 3.2267,
+          "std_dev": 138.330512,
           "metrics": {
             "num_samples": 168,
-            "variance": 22214.267866,
-            "hourly_factor": 93.59
+            "variance": 19135.330492
           }
-        },
-        "volume": {
-          "h24": 14631.822658913923,
-          "d7": 388507.9485262187
         }
       },
-      "pool_votes_period": 147.86155215867925
+      "pool_votes_period": 148.15057581403647,
+      "vote_percentage": 0.011898476676858907,
+      "expected_emissions_shadow": 2.1013896260253264,
+      "expected_emissions_usd": 25.934355122065455,
+      "expected_lp_apr": 0.053973901146511336,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x382e360d672ec27d9225c3d2c439993316f95623",
       "symbol": "wS/GEMS",
-      "tvl": 11591.9626992952,
-      "lp_apr": 8.229877906737634,
+      "tvl": 11389.239902306503,
+      "lp_apr": 8.428490446165558,
       "stats": {
-        "last_24h_vol": 0.33353583401169296,
-        "last_24h_fees": 0.006670716680233859,
-        "last_7d_vol": 355.43809236748586,
-        "last_7d_fees": 7.108761847349717
+        "last_24h_vol": 5.272372519808291,
+        "last_24h_fees": 0.10544745039616583,
+        "last_7d_vol": 360.71046488729417,
+        "last_7d_fees": 7.2142092977458825
       },
-      "fee_last_7d_usd": 7.108761847349717,
-      "vol_last_7d": 355.43809236748586,
-      "bribes_usd": 6.307633766983654,
+      "fee_last_7d_usd": 7.2142092977458825,
+      "vol_last_7d": 360.71046488729417,
+      "bribes_usd": 6.303793674117426,
       "volatility": {
-        "current_price": 24.7876304338533,
+        "current_price": 25.5334296221571,
         "price_range": {
           "high": 29.8848911407747,
           "low": 24.4694879043792,
           "range": 5.415403236395502,
-          "mid_price": 26.64220383476383,
-          "volatility_percentage": 4.3934,
-          "std_dev": 1.089025,
-          "annualized_volatility": 411.2,
+          "mid_price": 26.67319820069846,
+          "volatility_percentage": 4.3675,
+          "std_dev": 1.11516,
           "metrics": {
-            "num_samples": 81,
-            "variance": 1.185975,
-            "hourly_factor": 93.59
+            "num_samples": 75,
+            "variance": 1.243583
           }
-        },
-        "volume": {
-          "h24": 1635.1319709530435,
-          "d7": 3767.6771944466227
         }
       },
-      "pool_votes_period": 109.91911680708117
+      "pool_votes_period": 110.13650212051226,
+      "vote_percentage": 0.008845437113904068,
+      "expected_emissions_shadow": 1.5621923960205977,
+      "expected_emissions_usd": 19.279838382004176,
+      "expected_lp_apr": 8.802620758398323,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xc58490f4f0a9228f564d5129bc3e32c98e7e15a9",
       "symbol": "CL-WBTC-scBTC-0.01%",
-      "tvl": 59588.51846607789,
-      "lp_apr": 1.1857039334547923,
+      "tvl": 6944.038073511107,
+      "lp_apr": 10.2380410244837,
       "stats": {
-        "last_24h_vol": 8494.03885502227,
-        "last_24h_fees": 0.849403885502227,
-        "last_7d_vol": 122592.58485046163,
-        "last_7d_fees": 12.259258485046164
+        "last_24h_vol": 35698.62381553909,
+        "last_24h_fees": 3.5698623815539094,
+        "last_7d_vol": 149797.16981097846,
+        "last_7d_fees": 14.979716981097846
       },
-      "fee_last_7d_usd": 12.259258485046164,
-      "vol_last_7d": 122592.58485046163,
-      "bribes_usd": 10.78918334399964,
+      "fee_last_7d_usd": 14.979716981097846,
+      "vol_last_7d": 149797.16981097846,
+      "bribes_usd": 14.299538537916835,
       "volatility": {
-        "current_price": 109358.627622158,
+        "current_price": 111047.638558989,
         "price_range": {
-          "high": 113653.44415662,
+          "high": 113288.803653653,
           "low": 107496.938372685,
-          "range": 6156.50578393499,
-          "mid_price": 110415.9679212238,
-          "volatility_percentage": 1.5188,
-          "std_dev": 1660.909175,
-          "annualized_volatility": 142.15,
+          "range": 5791.865280967992,
+          "mid_price": 110258.15696789522,
+          "volatility_percentage": 1.4121,
+          "std_dev": 1568.062957,
           "metrics": {
             "num_samples": 168,
-            "variance": 2758619.287881,
-            "hourly_factor": 93.59
+            "variance": 2458821.438617
           }
-        },
-        "volume": {
-          "h24": 24259.176171617684,
-          "d7": 149624.5096841499
         }
       },
-      "pool_votes_period": 92.12929581449374
-    },
-    {
-      "pool": "0x4fd7424cd30266976d80a51de155c1d8c97bff24",
-      "symbol": "SHADOW/SADO",
-      "tvl": 10818.688206561708,
-      "lp_apr": 502.16375053875436,
-      "stats": {
-        "last_24h_vol": 671.7215716708857,
-        "last_24h_fees": 6.717215716708858,
-        "last_7d_vol": 6081.194104825015,
-        "last_7d_fees": 60.811941048250134
-      },
-      "fee_last_7d_usd": 60.811941048250134,
-      "vol_last_7d": 6081.194104825015,
-      "bribes_usd": 44.60837663192215,
-      "volatility": {
-        "current_price": 8.45184544954058e-05,
-        "price_range": {
-          "high": 0.000128629012531562,
-          "low": 4.36461886198552e-05,
-          "range": 8.498282391170681e-05,
-          "mid_price": 9.101995752265245e-05,
-          "volatility_percentage": 19.3437,
-          "std_dev": 1.6e-05,
-          "annualized_volatility": 1810.47,
-          "metrics": {
-            "num_samples": 168,
-            "variance": 0.0,
-            "hourly_factor": 93.59
-          }
-        },
-        "volume": {
-          "h24": 6204.7147079198085,
-          "d7": 16202.855967609154
-        }
-      },
-      "pool_votes_period": 53.483541973570546
+      "pool_votes_period": 92.27010221069344,
+      "vote_percentage": 0.007410525764701792,
+      "expected_emissions_shadow": 1.3087727436255918,
+      "expected_emissions_usd": 16.152253102850782,
+      "expected_lp_apr": 12.095514921673727,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xae8e9b2222031c464342dbfab7433b64eb5c15cf",
       "symbol": "wS/THC",
-      "tvl": 75965.18726331033,
-      "lp_apr": 7.959857001215862,
+      "tvl": 78123.93352512288,
+      "lp_apr": 7.788202157429545,
       "stats": {
-        "last_24h_vol": 3557.9476584159083,
-        "last_24h_fees": 17.789738292079544,
-        "last_7d_vol": 13127.786580503376,
-        "last_7d_fees": 65.63893290251688
+        "last_24h_vol": 3751.7928527242184,
+        "last_24h_fees": 18.758964263621095,
+        "last_7d_vol": 16879.5794332276,
+        "last_7d_fees": 84.39789716613798
       },
-      "fee_last_7d_usd": 65.63893290251688,
-      "vol_last_7d": 13127.786580503376,
-      "bribes_usd": 53.6978847080542,
+      "fee_last_7d_usd": 84.39789716613798,
+      "vol_last_7d": 16879.5794332276,
+      "bribes_usd": 61.7167576072859,
       "volatility": {
-        "current_price": 0.297252,
+        "current_price": 0.304824,
         "price_range": {
           "high": 0.351943,
           "low": 0.296794,
           "range": 0.055149000000000004,
-          "mid_price": 0.321787505952381,
-          "volatility_percentage": 4.3048,
-          "std_dev": 0.012796,
-          "annualized_volatility": 402.9,
+          "mid_price": 0.3214192380952381,
+          "volatility_percentage": 4.2652,
+          "std_dev": 0.013001,
           "metrics": {
             "num_samples": 168,
-            "variance": 0.000164,
-            "hourly_factor": 93.59
+            "variance": 0.000169
           }
-        },
-        "volume": {
-          "h24": 2545.1449097503746,
-          "d7": 30134.946289876083
         }
       },
-      "pool_votes_period": 53.452010507772094
+      "pool_votes_period": 88.95013728684295,
+      "vote_percentage": 0.007143888088827958,
+      "expected_emissions_shadow": 1.2616818713059013,
+      "expected_emissions_usd": 15.571079868424633,
+      "expected_lp_apr": 1.0364252241570775,
+      "shadow_price_usd": 12.341526198127756
+    },
+    {
+      "pool": "0x4fd7424cd30266976d80a51de155c1d8c97bff24",
+      "symbol": "SHADOW/SADO",
+      "tvl": 10985.27893139185,
+      "lp_apr": 492.4483709954756,
+      "stats": {
+        "last_24h_vol": 194.1966709432677,
+        "last_24h_fees": 1.941966709432677,
+        "last_7d_vol": 5603.669204097396,
+        "last_7d_fees": 56.03669204097395
+      },
+      "fee_last_7d_usd": 56.03669204097395,
+      "vol_last_7d": 5603.669204097396,
+      "bribes_usd": 45.79945530823388,
+      "volatility": {
+        "current_price": 8.52140581584663e-05,
+        "price_range": {
+          "high": 0.000128629012531562,
+          "low": 4.74331759189226e-05,
+          "range": 8.11958366126394e-05,
+          "mid_price": 9.18925089599868e-05,
+          "volatility_percentage": 17.3734,
+          "std_dev": 1.5e-05,
+          "metrics": {
+            "num_samples": 168,
+            "variance": 0.0
+          }
+        }
+      },
+      "pool_votes_period": 53.483537662126366,
+      "vote_percentage": 0.004295444833555771,
+      "expected_emissions_shadow": 0.7586183893568023,
+      "expected_emissions_usd": 9.362508726628457,
+      "expected_lp_apr": 4.431844260171145,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x268d86627e193dc731bb06109d69175d56d54c98",
       "symbol": "wS/FA",
-      "tvl": 337140.80540307856,
-      "lp_apr": 0.12070079887867531,
+      "tvl": 339316.9465224902,
+      "lp_apr": 0.12067186534578563,
       "stats": {
-        "last_24h_vol": 1080.2645063539637,
-        "last_24h_fees": 10.802645063539641,
-        "last_7d_vol": 4912.654354356663,
-        "last_7d_fees": 49.12654354356664
+        "last_24h_vol": 54.865378013417924,
+        "last_24h_fees": 0.5486537801341793,
+        "last_7d_vol": 4974.390359384252,
+        "last_7d_fees": 49.743903593842525
       },
-      "fee_last_7d_usd": 49.12654354356664,
-      "vol_last_7d": 4912.654354356663,
-      "bribes_usd": 45.773032253287596,
+      "fee_last_7d_usd": 49.743903593842525,
+      "vol_last_7d": 4974.390359384252,
+      "bribes_usd": 46.06951696829557,
       "volatility": {
         "current_price": 0.0829465872644603,
         "price_range": {
           "high": 0.0955865485015903,
           "low": 0.080261654088498,
           "range": 0.015324894413092302,
-          "mid_price": 0.08651017453175894,
-          "volatility_percentage": 3.3738,
-          "std_dev": 0.002798,
-          "annualized_volatility": 315.77,
+          "mid_price": 0.0865595601273735,
+          "volatility_percentage": 3.4384,
+          "std_dev": 0.002852,
           "metrics": {
-            "num_samples": 156,
-            "variance": 8e-06,
-            "hourly_factor": 93.59
+            "num_samples": 148,
+            "variance": 8e-06
           }
-        },
-        "volume": {
-          "h24": 1431.7484897454465,
-          "d7": 10485.287331008969
         }
       },
-      "pool_votes_period": 46.397571935532135
+      "pool_votes_period": 46.49391315398455,
+      "vote_percentage": 0.0037340843141439573,
+      "expected_emissions_shadow": 0.6594765240584969,
+      "expected_emissions_usd": 8.13894679871817,
+      "expected_lp_apr": 0.12472858720166903,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x47fffa06eeeef596d46cf7d58c3856a751ea68ed",
       "symbol": "USDC/aSonUSDC",
-      "tvl": 46976.286025237525,
-      "lp_apr": 0.8744107109860503,
+      "tvl": 46976.75012890596,
+      "lp_apr": 0.8798396697397675,
       "stats": {
-        "last_24h_vol": 4482.455562092046,
-        "last_24h_fees": 0.44824555620920475,
-        "last_7d_vol": 12196.901911402603,
-        "last_7d_fees": 1.2196901911402604
+        "last_24h_vol": 4463.265886917226,
+        "last_24h_fees": 0.44632658869172254,
+        "last_7d_vol": 12177.712236227784,
+        "last_7d_fees": 1.2177712236227782
       },
-      "fee_last_7d_usd": 1.2196901911402604,
-      "vol_last_7d": 12196.901911402603,
-      "bribes_usd": 5.342784531582395,
+      "fee_last_7d_usd": 1.2177712236227782,
+      "vol_last_7d": 12177.712236227784,
+      "bribes_usd": 5.5862609007814275,
       "volatility": {
-        "current_price": 1.0011346144468,
+        "current_price": 0.999009085578585,
         "price_range": {
           "high": 1.00971988543702,
           "low": 0.995145767178109,
           "range": 0.014574118258910973,
-          "mid_price": 0.9998420016156632,
-          "volatility_percentage": 0.233,
-          "std_dev": 0.002333,
-          "annualized_volatility": 21.81,
+          "mid_price": 0.9999035646647068,
+          "volatility_percentage": 0.2278,
+          "std_dev": 0.002276,
           "metrics": {
             "num_samples": 168,
-            "variance": 5e-06,
-            "hourly_factor": 93.59
+            "variance": 5e-06
           }
-        },
-        "volume": {
-          "h24": 24396.945377089356,
-          "d7": 61736.184589388635
         }
       },
-      "pool_votes_period": 45.853850719559745
+      "pool_votes_period": 45.95019193801216,
+      "vote_percentage": 0.0036904162138249852,
+      "expected_emissions_shadow": 0.6517643021085233,
+      "expected_emissions_usd": 8.043766209476793,
+      "expected_lp_apr": 0.890389057874435,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xdee813f080f9128e52e38e9ffef8b997f9544332",
       "symbol": "HLP0/xUSD",
-      "tvl": 181126.63335260897,
-      "lp_apr": 0.22274550718386416,
+      "tvl": 176913.9019132395,
+      "lp_apr": 0.2294685990389613,
       "stats": {
-        "last_24h_vol": 10739.143751016984,
-        "last_24h_fees": 5.36957187550849,
-        "last_7d_vol": 24674.589602355387,
-        "last_7d_fees": 12.337294801177693
+        "last_24h_vol": 11401.418102246556,
+        "last_24h_fees": 5.700709051123277,
+        "last_7d_vol": 36076.00770460194,
+        "last_7d_fees": 18.03800385230097
       },
-      "fee_last_7d_usd": 12.337294801177693,
-      "vol_last_7d": 24674.589602355387,
-      "bribes_usd": 12.016828247611175,
+      "fee_last_7d_usd": 18.03800385230097,
+      "vol_last_7d": 36076.00770460194,
+      "bribes_usd": 12.534630318013216,
       "volatility": {
-        "current_price": 1.02775072395463,
+        "current_price": 1.02339550382938,
         "price_range": {
           "high": 1.04554068050608,
           "low": 0.983283112380996,
           "range": 0.062257568125084095,
-          "mid_price": 1.0193944360652816,
-          "volatility_percentage": 0.7669,
-          "std_dev": 0.007881,
-          "annualized_volatility": 71.77,
+          "mid_price": 1.0196519427784847,
+          "volatility_percentage": 0.765,
+          "std_dev": 0.007829,
           "metrics": {
             "num_samples": 168,
-            "variance": 6.2e-05,
-            "hourly_factor": 93.59
+            "variance": 6.1e-05
           }
-        },
-        "volume": {
-          "h24": 275375.93307337567,
-          "d7": 516185.77276059665
         }
       },
-      "pool_votes_period": 42.326631433439765
+      "pool_votes_period": 42.415561788934305,
+      "vote_percentage": 0.003406538043530756,
+      "expected_emissions_shadow": 0.6016285865617138,
+      "expected_emissions_usd": 7.425014962593964,
+      "expected_lp_apr": 0.2182421923203266,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x80797a61d219eaa4337edcb1d44a54750bdadc9e",
       "symbol": "wS/MILK",
-      "tvl": 7126.160813363258,
-      "lp_apr": 4.677601541397387,
+      "tvl": 7021.508900619569,
+      "lp_apr": 4.778477601208375,
       "stats": {
-        "last_24h_vol": 80.22342076568066,
-        "last_24h_fees": 1.604468415313613,
-        "last_7d_vol": 465.1508936295231,
-        "last_7d_fees": 9.303017872590463
+        "last_24h_vol": 139.7089236370454,
+        "last_24h_fees": 2.794178472740907,
+        "last_7d_vol": 524.6363965008878,
+        "last_7d_fees": 10.492727930017757
       },
-      "fee_last_7d_usd": 9.303017872590463,
-      "vol_last_7d": 465.1508936295231,
-      "bribes_usd": 6.057905292078251,
+      "fee_last_7d_usd": 10.492727930017757,
+      "vol_last_7d": 524.6363965008878,
+      "bribes_usd": 8.40859701745849,
       "volatility": {
-        "current_price": 0.000432254718605155,
+        "current_price": 0.000416038539522225,
         "price_range": {
-          "high": 0.000579267358714122,
+          "high": 0.000578494553381707,
           "low": 0.000387706006893418,
-          "range": 0.00019156135182070395,
-          "mid_price": 0.0004756064324582045,
-          "volatility_percentage": 10.7605,
-          "std_dev": 4.7e-05,
-          "annualized_volatility": 1007.13,
+          "range": 0.00019078854648828903,
+          "mid_price": 0.00047115573951698856,
+          "volatility_percentage": 10.6094,
+          "std_dev": 4.4e-05,
           "metrics": {
-            "num_samples": 142,
-            "variance": 0.0,
-            "hourly_factor": 93.59
+            "num_samples": 144,
+            "variance": 0.0
           }
-        },
-        "volume": {
-          "h24": 263.44733783186894,
-          "d7": 1335.165522329614
         }
       },
-      "pool_votes_period": 37.62367238527979
+      "pool_votes_period": 37.702721590163826,
+      "vote_percentage": 0.003028033816471783,
+      "expected_emissions_shadow": 0.5347809658326345,
+      "expected_emissions_usd": 6.600013300083523,
+      "expected_lp_apr": 4.887848131532805,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xe62dcc8343fefd2169d65d9f953b2da74346c4e4",
-      "symbol": "CL-USDC-BEETS-0.4002%",
+      "symbol": "CL-USDC-BEETS-0.4009%",
       "tvl": 0,
-      "lp_apr": 32336.441963725418,
+      "lp_apr": 32537.362245412758,
       "stats": {
-        "last_24h_vol": 327.36646049999996,
-        "last_24h_fees": 1.3555901851795003,
-        "last_7d_vol": 2100.6840085,
-        "last_7d_fees": 9.253543857098501
+        "last_24h_vol": 363.9511775,
+        "last_24h_fees": 1.503471702063,
+        "last_7d_vol": 2137.2687254999996,
+        "last_7d_fees": 9.401425373982
       },
-      "fee_last_7d_usd": 9.253543857098501,
-      "vol_last_7d": 2100.6840085,
-      "bribes_usd": 7.588357,
+      "fee_last_7d_usd": 9.401425373982,
+      "vol_last_7d": 2137.2687254999996,
+      "bribes_usd": 8.715336,
       "volatility": {
-        "current_price": 1.00071375178049,
+        "current_price": 1.00102229180804,
         "price_range": {
           "high": 1.01358250297542,
           "low": 0.992205730399358,
           "range": 0.021376772576061964,
-          "mid_price": 0.9999008106941587,
-          "volatility_percentage": 0.311,
-          "std_dev": 0.003113,
-          "annualized_volatility": 29.11,
+          "mid_price": 0.999824548003827,
+          "volatility_percentage": 0.306,
+          "std_dev": 0.003063,
           "metrics": {
             "num_samples": 168,
-            "variance": 1e-05,
-            "hourly_factor": 93.59
+            "variance": 9e-06
           }
-        },
-        "volume": {
-          "h24": 1031.669299169317,
-          "d7": 5592.188045432182
         }
       },
-      "pool_votes_period": 32.920713337119814
+      "pool_votes_period": 32.98988139139335,
+      "vote_percentage": 0.0026495295894128097,
+      "expected_emissions_shadow": 0.46793334510355516,
+      "expected_emissions_usd": 5.7750116375730824,
+      "expected_lp_apr": 0,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xd501fb4eeb19cdd8a1b41e33226bdd1ef04495ba",
       "symbol": "CL-scUSD-msUSD-0.01%",
-      "tvl": 1846.18781769414,
-      "lp_apr": 15.571564344529623,
+      "tvl": 1570.8562543818325,
+      "lp_apr": 818.4373909730023,
       "stats": {
-        "last_24h_vol": 996.964911314168,
-        "last_24h_fees": 0.09969649113141678,
-        "last_7d_vol": 63111.74428105934,
-        "last_7d_fees": 6.311174428105935
+        "last_24h_vol": 1447.684330294408,
+        "last_24h_fees": 0.1447684330294408,
+        "last_7d_vol": 64559.56642608573,
+        "last_7d_fees": 6.455956642608573
       },
-      "fee_last_7d_usd": 6.311174428105935,
-      "vol_last_7d": 63111.74428105934,
-      "bribes_usd": 6.639154124753793,
+      "fee_last_7d_usd": 6.455956642608573,
+      "vol_last_7d": 64559.56642608573,
+      "bribes_usd": 6.712770981470148,
       "volatility": {
-        "current_price": 0.987749359853331,
+        "current_price": 1.00165637049123,
         "price_range": {
-          "high": 1.00808054131778,
+          "high": 1.00702280236767,
           "low": 0.948101833255518,
-          "range": 0.05997870806226202,
-          "mid_price": 0.9974488134269183,
-          "volatility_percentage": 1.0193,
-          "std_dev": 0.010068,
-          "annualized_volatility": 95.4,
+          "range": 0.058920969112151944,
+          "mid_price": 0.9979545811449758,
+          "volatility_percentage": 0.9537,
+          "std_dev": 0.009552,
           "metrics": {
-            "num_samples": 167,
-            "variance": 0.000101,
-            "hourly_factor": 93.59
+            "num_samples": 161,
+            "variance": 9.1e-05
           }
-        },
-        "volume": {
-          "h24": 28070.07685724396,
-          "d7": 218884.7017959115
         }
       },
-      "pool_votes_period": 19.49815978821235
+      "pool_votes_period": 19.512981514128107,
+      "vote_percentage": 0.0015671539186811246,
+      "expected_emissions_shadow": 0.2767750088132147,
+      "expected_emissions_usd": 3.4158260222553296,
+      "expected_lp_apr": 11.307397011140004,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xfead02fb16ec3b2f6318dca230198db73e99428c",
       "symbol": "aSonUSDC/xUSD",
-      "tvl": 17395.498119239906,
-      "lp_apr": 1.1183629785957674,
+      "tvl": 17229.46023966886,
+      "lp_apr": 1.1361928281472287,
       "stats": {
-        "last_24h_vol": 1620.1543165511493,
-        "last_24h_fees": 2.430231474826724,
-        "last_7d_vol": 4886.400604508742,
-        "last_7d_fees": 7.329600906763114
+        "last_24h_vol": 1684.542117404244,
+        "last_24h_fees": 2.5268131761063657,
+        "last_7d_vol": 4950.788405361836,
+        "last_7d_fees": 7.426182608042755
       },
-      "fee_last_7d_usd": 7.329600906763114,
-      "vol_last_7d": 4886.400604508742,
-      "bribes_usd": 4.955575661250035,
+      "fee_last_7d_usd": 7.426182608042755,
+      "vol_last_7d": 4950.788405361836,
+      "bribes_usd": 5.461696140368335,
       "volatility": {
-        "current_price": 0.932970284294639,
+        "current_price": 0.940307915155769,
         "price_range": {
           "high": 1.09549322593123,
           "low": 0.898747014533879,
           "range": 0.19674621139735105,
-          "mid_price": 0.9518728753764624,
-          "volatility_percentage": 4.3131,
-          "std_dev": 0.040239,
-          "annualized_volatility": 403.68,
+          "mid_price": 0.94690831653836,
+          "volatility_percentage": 3.4609,
+          "std_dev": 0.032543,
           "metrics": {
             "num_samples": 168,
-            "variance": 0.001619,
-            "hourly_factor": 93.59
+            "variance": 0.001059
           }
-        },
-        "volume": {
-          "h24": 497.55901189547507,
-          "d7": 5243.862940412071
         }
       },
-      "pool_votes_period": 18.811836192639895
+      "pool_votes_period": 18.851360795081913,
+      "vote_percentage": 0.0015140169082358914,
+      "expected_emissions_shadow": 0.26739048291631723,
+      "expected_emissions_usd": 3.3000066500417615,
+      "expected_lp_apr": 0.9959705261519536,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x063e22cd27a5a923cba7f8184ac9ca8405564283",
       "symbol": "CL-USDC-satUSD-0.3%",
-      "tvl": 21399.08393657164,
-      "lp_apr": 1.8412709233387288,
+      "tvl": 21389.492363718648,
+      "lp_apr": 1.8530786708218818,
       "stats": {
-        "last_24h_vol": 205.992269,
-        "last_24h_fees": 0.617976807,
-        "last_7d_vol": 933.5834788183777,
-        "last_7d_fees": 2.800750436455133
+        "last_24h_vol": 645.014434,
+        "last_24h_fees": 1.9350433020000002,
+        "last_7d_vol": 1578.5979128183776,
+        "last_7d_fees": 4.735793738455134
       },
-      "fee_last_7d_usd": 2.800750436455133,
-      "vol_last_7d": 933.5834788183777,
-      "bribes_usd": 2.703433244441375,
+      "fee_last_7d_usd": 4.735793738455134,
+      "vol_last_7d": 1578.5979128183776,
+      "bribes_usd": 4.6370531821136405,
       "volatility": {
-        "current_price": 0.99058317205307,
+        "current_price": 0.989212637901582,
         "price_range": {
           "high": 1.01030216569032,
           "low": 0.982449651125958,
           "range": 0.027852514564361996,
-          "mid_price": 0.9952463212713427,
-          "volatility_percentage": 0.4781,
-          "std_dev": 0.004736,
-          "annualized_volatility": 44.75,
+          "mid_price": 0.9951566840579935,
+          "volatility_percentage": 0.4794,
+          "std_dev": 0.004742,
           "metrics": {
             "num_samples": 168,
-            "variance": 2.2e-05,
-            "hourly_factor": 93.59
+            "variance": 2.2e-05
           }
-        },
-        "volume": {
-          "h24": 5716.707951665969,
-          "d7": 20666.384559244227
         }
       },
-      "pool_votes_period": 15.284616906519915
+      "pool_votes_period": 15.316730646004054,
+      "vote_percentage": 0.0012301387379416615,
+      "expected_emissions_shadow": 0.21725476736950775,
+      "expected_emissions_usd": 2.681255403158931,
+      "expected_lp_apr": 0.6518400651749959,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x494c6a6f0bc1f1463d69da10eb7a9ee56f4b5f29",
       "symbol": "CL-GOGLZ-EGGS-0.3%",
-      "tvl": 1077.0525776718284,
-      "lp_apr": 1080.7409889571288,
+      "tvl": 1093.50271488963,
+      "lp_apr": 1070.9914253612587,
       "stats": {
-        "last_24h_vol": 1.8013421076204486,
-        "last_24h_fees": 0.0054040263228613454,
-        "last_7d_vol": 699.8243665969133,
-        "last_7d_fees": 2.09947309979074
+        "last_24h_vol": 3.095471950180145,
+        "last_24h_fees": 0.009286415850540436,
+        "last_7d_vol": 708.206484710937,
+        "last_7d_fees": 2.1246194541328114
       },
-      "fee_last_7d_usd": 2.09947309979074,
-      "vol_last_7d": 699.8243665969133,
-      "bribes_usd": 1.6393127013111706,
+      "fee_last_7d_usd": 2.1246194541328114,
+      "vol_last_7d": 708.206484710937,
+      "bribes_usd": 1.6709854641106252,
       "volatility": {
-        "current_price": 0.000344322318365813,
+        "current_price": 0.000352997432590907,
         "price_range": {
           "high": 0.000499613360303759,
           "low": 0.000343478179790297,
           "range": 0.00015613518051346204,
-          "mid_price": 0.00037291002786148553,
-          "volatility_percentage": 5.0078,
+          "mid_price": 0.000372600088438297,
+          "volatility_percentage": 4.9353,
           "std_dev": 1.7e-05,
-          "annualized_volatility": 468.7,
           "metrics": {
             "num_samples": 168,
-            "variance": 0.0,
-            "hourly_factor": 93.59
+            "variance": 0.0
           }
-        },
-        "volume": {
-          "h24": 1074.182384278766,
-          "d7": 3493.2430607990877
         }
       },
-      "pool_votes_period": 15.284616906519915
+      "pool_votes_period": 15.316730646004054,
+      "vote_percentage": 0.0012301387379416615,
+      "expected_emissions_shadow": 0.21725476736950775,
+      "expected_emissions_usd": 2.681255403158931,
+      "expected_lp_apr": 12.75033697363403,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x05487100e07be9ec1d9da73a371696880a592cd6",
       "symbol": "wS/RUGGIE",
-      "tvl": 2698.362746884113,
-      "lp_apr": 4.3086124150873,
+      "tvl": 2585.7679691511844,
+      "lp_apr": 4.524900328222548,
       "stats": {
-        "last_24h_vol": 36.141071895022606,
-        "last_24h_fees": 0.10842321568506781,
-        "last_7d_vol": 1500.933315129199,
-        "last_7d_fees": 4.502799945387598
+        "last_24h_vol": 161.67439038873312,
+        "last_24h_fees": 0.4850231711661994,
+        "last_7d_vol": 1769.8944226233057,
+        "last_7d_fees": 5.309683267869917
       },
-      "fee_last_7d_usd": 4.502799945387598,
-      "vol_last_7d": 1500.933315129199,
-      "bribes_usd": 4.852730540903918,
+      "fee_last_7d_usd": 5.309683267869917,
+      "vol_last_7d": 1769.8944226233057,
+      "bribes_usd": 5.070377259001451,
       "volatility": {
-        "current_price": 1.88982794402732e-05,
+        "current_price": 1.70003759073997e-05,
         "price_range": {
           "high": 2.19795666536086e-05,
           "low": 1.07913090366173e-05,
           "range": 1.11882576169913e-05,
-          "mid_price": 1.619496430017468e-05,
-          "volatility_percentage": 13.4704,
+          "mid_price": 1.6292771512150708e-05,
+          "volatility_percentage": 14.7144,
           "std_dev": 3e-06,
-          "annualized_volatility": 1260.76,
           "metrics": {
-            "num_samples": 96,
-            "variance": 0.0,
-            "hourly_factor": 93.59
+            "num_samples": 101,
+            "variance": 0.0
           }
-        },
-        "volume": {
-          "h24": 851.035889349444,
-          "d7": 3912.077838103501
         }
       },
-      "pool_votes_period": 12.301118836372325
+      "pool_votes_period": 12.325821712898586,
+      "vote_percentage": 0.0009899286679664044,
+      "expected_emissions_shadow": 0.174831273772672,
+      "expected_emissions_usd": 2.1576847455174772,
+      "expected_lp_apr": 4.339121224544364,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xa7571f0d72f3bcf12709b9e967adbf0df13042f2",
       "symbol": "wS/SPEED",
-      "tvl": 15806.266597557467,
-      "lp_apr": 0.6491533857277355,
+      "tvl": 15906.019379484123,
+      "lp_apr": 0.6490904694297497,
       "stats": {
-        "last_24h_vol": 0.5926931697337157,
-        "last_24h_fees": 0.011853863394674313,
-        "last_7d_vol": 212.33710023898362,
-        "last_7d_fees": 4.246742004779673
+        "last_24h_vol": 0,
+        "last_24h_fees": 0,
+        "last_7d_vol": 211.74440706924992,
+        "last_7d_fees": 4.234888141384999
       },
-      "fee_last_7d_usd": 4.246742004779673,
-      "vol_last_7d": 212.33710023898362,
-      "bribes_usd": 4.138801417688347,
+      "fee_last_7d_usd": 4.234888141384999,
+      "vol_last_7d": 211.74440706924992,
+      "bribes_usd": 4.164921245081376,
       "volatility": {
         "current_price": 3.81162410043672e-08,
         "price_range": {
@@ -2172,145 +2114,141 @@
           "mid_price": 4.186706913176942e-08,
           "volatility_percentage": 7.1108,
           "std_dev": 0.0,
-          "annualized_volatility": 665.54,
           "metrics": {
             "num_samples": 17,
-            "variance": 0.0,
-            "hourly_factor": 93.59
+            "variance": 0.0
           }
-        },
-        "volume": {
-          "h24": 0,
-          "d7": 508.8905522532594
         }
       },
-      "pool_votes_period": 12.301118836372325
+      "pool_votes_period": 12.325821712898586,
+      "vote_percentage": 0.0009899286679664044,
+      "expected_emissions_shadow": 0.174831273772672,
+      "expected_emissions_usd": 2.1576847455174772,
+      "expected_lp_apr": 0.7053908592090987,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x5d47882852688084d94adcf12e30b11d0afb50fa",
       "symbol": "CL-USDC-xUSD-0.025%",
-      "tvl": 472.77234024767705,
-      "lp_apr": 12056304.793613467,
+      "tvl": 471.2636460628942,
+      "lp_apr": 667.3201907167071,
       "stats": {
-        "last_24h_vol": 36.9869627723811,
-        "last_24h_fees": 0.009246740693095275,
-        "last_7d_vol": 2208.5165517041332,
-        "last_7d_fees": 0.5521291379260332
+        "last_24h_vol": 517.7634950749575,
+        "last_24h_fees": 0.12944087376873936,
+        "last_7d_vol": 2726.2800467790908,
+        "last_7d_fees": 0.6815700116947726
       },
-      "fee_last_7d_usd": 0.5521291379260332,
-      "vol_last_7d": 2208.5165517041332,
-      "bribes_usd": 0.2974106668424427,
+      "fee_last_7d_usd": 0.6815700116947726,
+      "vol_last_7d": 2726.2800467790908,
+      "bribes_usd": 0.4177182707477577,
       "volatility": {
-        "current_price": 0.998231879173066,
+        "current_price": 0.996477982830874,
         "price_range": {
           "high": 1.00893590105597,
           "low": 0.989021160514373,
           "range": 0.01991474054159692,
-          "mid_price": 0.9998403224334572,
-          "volatility_percentage": 0.318,
-          "std_dev": 0.003175,
-          "annualized_volatility": 29.77,
+          "mid_price": 0.9998565712752975,
+          "volatility_percentage": 0.3126,
+          "std_dev": 0.003115,
           "metrics": {
             "num_samples": 168,
-            "variance": 1e-05,
-            "hourly_factor": 93.59
+            "variance": 1e-05
           }
-        },
-        "volume": {
-          "h24": 7586.4368245889655,
-          "d7": 21644.612870862667
         }
       },
-      "pool_votes_period": 7.143279455214213
+      "pool_votes_period": 7.158101181129969,
+      "vote_percentage": 0.0005748914540918152,
+      "expected_emissions_shadow": 0.10153156328563528,
+      "expected_emissions_usd": 1.253054448226534,
+      "expected_lp_apr": 13.826407331042834,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xb2afd40980e4940e509e6032b307da4e0f4a7113",
       "symbol": "CL-WETH-EGGS-0.3%",
-      "tvl": 2426.9856076658493,
-      "lp_apr": 52.855585656456434,
+      "tvl": 2464.781435109299,
+      "lp_apr": 81.11402211837401,
       "stats": {
-        "last_24h_vol": 104.55139649067861,
-        "last_24h_fees": 0.3136541894720358,
-        "last_7d_vol": 771.7249829616851,
-        "last_7d_fees": 2.3151749488850557
+        "last_24h_vol": 58.19330550317364,
+        "last_24h_fees": 0.1745799165095209,
+        "last_7d_vol": 725.3668919741801,
+        "last_7d_fees": 2.1761006759225405
       },
-      "fee_last_7d_usd": 2.3151749488850557,
-      "vol_last_7d": 771.7249829616851,
-      "bribes_usd": 1.7740007560894084,
+      "fee_last_7d_usd": 2.1761006759225405,
+      "vol_last_7d": 725.3668919741801,
+      "bribes_usd": 1.8363425495560386,
       "volatility": {
-        "current_price": 4301.31221680918,
+        "current_price": 4285.25443417793,
         "price_range": {
           "high": 4944.5523669487,
           "low": 4098.72242334801,
           "range": 845.8299436006901,
-          "mid_price": 4463.604226578822,
-          "volatility_percentage": 4.6696,
-          "std_dev": 200.852607,
-          "annualized_volatility": 437.05,
+          "mid_price": 4466.282091014645,
+          "volatility_percentage": 4.621,
+          "std_dev": 198.02359,
           "metrics": {
             "num_samples": 168,
-            "variance": 40341.76959,
-            "hourly_factor": 93.59
+            "variance": 39213.34217
           }
-        },
-        "volume": {
-          "h24": 293.7590047128631,
-          "d7": 1784.4281559004864
         }
       },
-      "pool_votes_period": 7.0544385722399605
+      "pool_votes_period": 7.069260298155717,
+      "vote_percentage": 0.0005677563405884592,
+      "expected_emissions_shadow": 0.10027143109361897,
+      "expected_emissions_usd": 1.2375024937656605,
+      "expected_lp_apr": 2.610784419226234,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x0c9a698ed5422eae47ce0b4096496b1fa7771d7d",
       "symbol": "CL-wS-OS-0.01%",
-      "tvl": 5358.106410474131,
-      "lp_apr": 1.239043931124379,
+      "tvl": 5443.328706806331,
+      "lp_apr": 1.2272232902019804,
       "stats": {
-        "last_24h_vol": 1730.3314024750127,
-        "last_24h_fees": 0.1730331402475013,
-        "last_7d_vol": 8781.822397237394,
-        "last_7d_fees": 0.8781822397237394
+        "last_24h_vol": 1611.5992970038847,
+        "last_24h_fees": 0.1611599297003885,
+        "last_7d_vol": 8663.090291766266,
+        "last_7d_fees": 0.8663090291766267
       },
-      "fee_last_7d_usd": 0.8781822397237394,
-      "vol_last_7d": 8781.822397237394,
-      "bribes_usd": 0.61088386683267,
+      "fee_last_7d_usd": 0.8663090291766267,
+      "vol_last_7d": 8663.090291766266,
+      "bribes_usd": 0.6782263896218044,
       "volatility": {
-        "current_price": 0.300772243644475,
+        "current_price": 0.30388592499051,
         "price_range": {
-          "high": 0.346443185233169,
+          "high": 0.330885850195896,
           "low": 0.293799888861147,
-          "range": 0.05264329637202203,
-          "mid_price": 0.3164103796262026,
-          "volatility_percentage": 2.9213,
-          "std_dev": 0.008786,
-          "annualized_volatility": 273.42,
+          "range": 0.03708596133474901,
+          "mid_price": 0.3141330194210711,
+          "volatility_percentage": 2.2992,
+          "std_dev": 0.006987,
           "metrics": {
             "num_samples": 168,
-            "variance": 7.7e-05,
-            "hourly_factor": 93.59
+            "variance": 4.9e-05
           }
-        },
-        "volume": {
-          "h24": 8348.301077877542,
-          "d7": 18689.366760269422
         }
       },
-      "pool_votes_period": 7.0544385722399605
+      "pool_votes_period": 7.069260298155717,
+      "vote_percentage": 0.0005677563405884592,
+      "expected_emissions_shadow": 0.10027143109361897,
+      "expected_emissions_usd": 1.2375024937656605,
+      "expected_lp_apr": 1.1821834238184261,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xe4759b87e04776480a91822171234db39afa9375",
       "symbol": "CL-wS-MYRD-2.0%",
-      "tvl": 2188.320990681028,
-      "lp_apr": 1602.8408733017957,
+      "tvl": 2188.3640480852796,
+      "lp_apr": 1602.7540223503386,
       "stats": {
-        "last_24h_vol": 2.03364483556263,
-        "last_24h_fees": 0.0406728967112526,
-        "last_7d_vol": 16.827773573257243,
-        "last_7d_fees": 0.33655547146514486
+        "last_24h_vol": 1.1773246974851521,
+        "last_24h_fees": 0.023546493949703044,
+        "last_7d_vol": 15.971453435179766,
+        "last_7d_fees": 0.31942906870359533
       },
-      "fee_last_7d_usd": 0.33655547146514486,
-      "vol_last_7d": 16.827773573257243,
-      "bribes_usd": 0.24540450242020945,
+      "fee_last_7d_usd": 0.31942906870359533,
+      "vol_last_7d": 15.971453435179766,
+      "bribes_usd": 0.246780015301737,
       "volatility": {
         "current_price": 0.0582163324539496,
         "price_range": {
@@ -2320,309 +2258,306 @@
           "mid_price": 0.06927164791840475,
           "volatility_percentage": 28.7309,
           "std_dev": 0.016726,
-          "annualized_volatility": 2689.06,
           "metrics": {
             "num_samples": 60,
-            "variance": 0.00028,
-            "hourly_factor": 93.59
+            "variance": 0.00028
           }
-        },
-        "volume": {
-          "h24": 2133.260600470373,
-          "d7": 2252.464840180292
         }
       },
-      "pool_votes_period": 7.0544385722399605
-    },
-    {
-      "pool": "0xf28c748091fdab86d5120ab359fcb471daa6467d",
-      "symbol": "CL-frxUSD-scUSD-0.01%",
-      "tvl": 8324.743414028053,
-      "lp_apr": 25.588593961012872,
-      "stats": {
-        "last_24h_vol": 13435.879147570644,
-        "last_24h_fees": 1.3435879147570644,
-        "last_7d_vol": 99850.02338790116,
-        "last_7d_fees": 9.985002338790116
-      },
-      "fee_last_7d_usd": 9.985002338790116,
-      "vol_last_7d": 99850.02338790116,
-      "bribes_usd": 10.594410670535463,
-      "volatility": {
-        "current_price": 0.999382024214045,
-        "price_range": {
-          "high": 1.00775859402494,
-          "low": 0.984471069630797,
-          "range": 0.023287524394143055,
-          "mid_price": 0.9991273728833499,
-          "volatility_percentage": 0.3514,
-          "std_dev": 0.003512,
-          "annualized_volatility": 32.89,
-          "metrics": {
-            "num_samples": 168,
-            "variance": 1.2e-05,
-            "hourly_factor": 93.59
-          }
-        },
-        "volume": {
-          "h24": 1284.7842457913896,
-          "d7": 110002.62026249833
-        }
-      },
-      "pool_votes_period": 1.791064851007671
+      "pool_votes_period": 7.069260298155717,
+      "vote_percentage": 0.0005677563405884592,
+      "expected_emissions_shadow": 0.10027143109361897,
+      "expected_emissions_usd": 1.2375024937656605,
+      "expected_lp_apr": 2.9405587124371664,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x9053fe060f412ad5677f934f89e07524343ee8e7",
       "symbol": "CL-USDC-USDT-0.0095%",
-      "tvl": 857357.8484385684,
-      "lp_apr": 1.93521454941344,
+      "tvl": 857351.2657372189,
+      "lp_apr": 1.947249308792089,
       "stats": {
-        "last_24h_vol": 18385.415827896268,
-        "last_24h_fees": 1.7466145036501461,
-        "last_7d_vol": 174361.4614002605,
-        "last_7d_fees": 16.56433883302475
+        "last_24h_vol": 32738.71740256621,
+        "last_24h_fees": 3.11017815324379,
+        "last_7d_vol": 188714.76297493046,
+        "last_7d_fees": 17.927902482618393
       },
-      "fee_last_7d_usd": 16.56433883302475,
-      "vol_last_7d": 174361.4614002605,
-      "bribes_usd": 10.261852051020014,
+      "fee_last_7d_usd": 17.927902482618393,
+      "vol_last_7d": 188714.76297493046,
+      "bribes_usd": 12.410919738209314,
       "volatility": {
-        "current_price": 1.00049884712388,
+        "current_price": 0.997690268049676,
         "price_range": {
-          "high": 1.00937405034651,
+          "high": 1.00647251894736,
           "low": 0.993152018044977,
-          "range": 0.016222032301533074,
-          "mid_price": 0.9997910930012911,
-          "volatility_percentage": 0.2311,
-          "std_dev": 0.002312,
-          "annualized_volatility": 21.63,
+          "range": 0.013320500902383015,
+          "mid_price": 0.9996943048495017,
+          "volatility_percentage": 0.2053,
+          "std_dev": 0.002048,
           "metrics": {
             "num_samples": 168,
-            "variance": 5e-06,
-            "hourly_factor": 93.59
+            "variance": 4e-06
           }
-        },
-        "volume": {
-          "h24": 95720.87798027085,
-          "d7": 263498.62171527167
         }
       },
-      "pool_votes_period": 1.3932282484289493
+      "pool_votes_period": 2.9757225977558384,
+      "vote_percentage": 0.00023899040372710629,
+      "expected_emissions_shadow": 0.04220808837558903,
+      "expected_emissions_usd": 0.5209122284602236,
+      "expected_lp_apr": 0.00315943265758635,
+      "shadow_price_usd": 12.341526198127756
+    },
+    {
+      "pool": "0xf28c748091fdab86d5120ab359fcb471daa6467d",
+      "symbol": "CL-frxUSD-scUSD-0.01%",
+      "tvl": 8324.75213140733,
+      "lp_apr": 25.74728227062085,
+      "stats": {
+        "last_24h_vol": 65.12112537161481,
+        "last_24h_fees": 0.006512112537161481,
+        "last_7d_vol": 100211.65346827278,
+        "last_7d_fees": 10.021165346827276
+      },
+      "fee_last_7d_usd": 10.021165346827276,
+      "vol_last_7d": 100211.65346827278,
+      "bribes_usd": 10.600741310478178,
+      "volatility": {
+        "current_price": 1.00323262294176,
+        "price_range": {
+          "high": 1.00775859402494,
+          "low": 0.984471069630797,
+          "range": 0.023287524394143055,
+          "mid_price": 0.9991607200530969,
+          "volatility_percentage": 0.3455,
+          "std_dev": 0.003466,
+          "metrics": {
+            "num_samples": 168,
+            "variance": 1.2e-05
+          }
+        }
+      },
+      "pool_votes_period": 1.791064851007671,
+      "vote_percentage": 0.00014384651048003183,
+      "expected_emissions_shadow": 0.025404728106966454,
+      "expected_emissions_usd": 0.31353311748843904,
+      "expected_lp_apr": 0.19584633694844472,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x5b4dc4eefdd7973b4f309238e8cada7cea0b00c1",
       "symbol": "CL-wS-8-0.3%",
-      "tvl": 21665.712165987105,
-      "lp_apr": 31.267835831336907,
+      "tvl": 22248.814106789727,
+      "lp_apr": 30.62748402041129,
       "stats": {
-        "last_24h_vol": 17.311273734249077,
-        "last_24h_fees": 0.051933821202747234,
-        "last_7d_vol": 56.416978857266244,
-        "last_7d_fees": 0.16925093657179874
+        "last_24h_vol": 10.326013309140604,
+        "last_24h_fees": 0.030978039927421815,
+        "last_7d_vol": 69.37255972449134,
+        "last_7d_fees": 0.208117679173474
       },
-      "fee_last_7d_usd": 0.16925093657179874,
-      "vol_last_7d": 56.416978857266244,
-      "bribes_usd": 0.1611069508679773,
+      "fee_last_7d_usd": 0.208117679173474,
+      "vol_last_7d": 69.37255972449134,
+      "bribes_usd": 0.17750400550795906,
       "volatility": {
-        "current_price": 0.000502045299529077,
+        "current_price": 0.000519208043611994,
         "price_range": {
           "high": 0.000595923055154273,
           "low": 0.000502005290119185,
           "range": 9.391776503508802e-05,
-          "mid_price": 0.0005453213505930407,
-          "volatility_percentage": 4.2267,
-          "std_dev": 2.1e-05,
-          "annualized_volatility": 395.6,
+          "mid_price": 0.000544607471081471,
+          "volatility_percentage": 4.1434,
+          "std_dev": 2.2e-05,
           "metrics": {
-            "num_samples": 135,
-            "variance": 0.0,
-            "hourly_factor": 93.59
+            "num_samples": 133,
+            "variance": 0.0
           }
-        },
-        "volume": {
-          "h24": 230.26605128775373,
-          "d7": 1501.2377042603043
         }
       },
-      "pool_votes_period": 1.1757397620399934
+      "pool_votes_period": 1.1782100496926196,
+      "vote_percentage": 9.462605676474321e-05,
+      "expected_emissions_shadow": 0.016711905182269827,
+      "expected_emissions_usd": 0.2062504156276101,
+      "expected_lp_apr": 0.048204913579473624,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xfd0e1f26884d3f116806b5f473766d7d2dbfe5a9",
       "symbol": "CL-wS-wOS-0.01%",
-      "tvl": 3350.4230419532814,
-      "lp_apr": 20.312727286075976,
+      "tvl": 2754.177083713923,
+      "lp_apr": 24.86372161770076,
       "stats": {
-        "last_24h_vol": 1138.504709479319,
-        "last_24h_fees": 0.1138504709479319,
-        "last_7d_vol": 9076.070418279713,
-        "last_7d_fees": 0.9076070418279713
+        "last_24h_vol": 1965.7664164683647,
+        "last_24h_fees": 0.1965766416468365,
+        "last_7d_vol": 9903.332125268758,
+        "last_7d_fees": 0.9903332125268759
       },
-      "fee_last_7d_usd": 0.9076070418279713,
-      "vol_last_7d": 9076.070418279713,
-      "bribes_usd": 0.8000535012511677,
+      "fee_last_7d_usd": 0.9903332125268759,
+      "vol_last_7d": 9903.332125268758,
+      "bribes_usd": 0.9372066900757187,
       "volatility": {
-        "current_price": 0.31109822677744,
+        "current_price": 0.315411788798997,
         "price_range": {
           "high": 0.362376030994933,
           "low": 0.306199041422163,
           "range": 0.05617698957277001,
-          "mid_price": 0.331347979652575,
-          "volatility_percentage": 3.6926,
-          "std_dev": 0.011488,
-          "annualized_volatility": 345.61,
+          "mid_price": 0.3311447161287573,
+          "volatility_percentage": 3.6889,
+          "std_dev": 0.011635,
           "metrics": {
             "num_samples": 168,
-            "variance": 0.000132,
-            "hourly_factor": 93.59
+            "variance": 0.000135
           }
-        },
-        "volume": {
-          "h24": 470.3995601497901,
-          "d7": 13391.223749543602
         }
       },
-      "pool_votes_period": 0.10874424319447798
+      "pool_votes_period": 0.10874424319447798,
+      "vote_percentage": 8.733620063794446e-06,
+      "expected_emissions_shadow": 0.0015424443899947416,
+      "expected_emissions_usd": 0.01903611784827529,
+      "expected_lp_apr": 0.03594097612545287,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x05cf0c7ed39fc2ed0bd4397716ebb02f74ff25b5",
       "symbol": "CL-scETH-wstkscETH-0.01%",
-      "tvl": 2063.9452695270197,
-      "lp_apr": 0.2646429566693888,
+      "tvl": 2068.1909937996616,
+      "lp_apr": 0.2655737879774961,
       "stats": {
-        "last_24h_vol": 2137.442823465415,
-        "last_24h_fees": 0.21374428234654153,
-        "last_7d_vol": 5762.4357738372555,
-        "last_7d_fees": 0.5762435773837256
+        "last_24h_vol": 2735.669729608246,
+        "last_24h_fees": 0.27356697296082466,
+        "last_7d_vol": 6360.662679980087,
+        "last_7d_fees": 0.6360662679980087
       },
-      "fee_last_7d_usd": 0.5762435773837256,
-      "vol_last_7d": 5762.4357738372555,
-      "bribes_usd": 0.412013534607379,
-      "pool_votes_period": 0.10874424319447798
-    },
-    {
-      "pool": "0x08020666da56e42b13876b45bf92289c8701e7d4",
-      "symbol": "USDC/8",
-      "tvl": 1078.6984055918942,
-      "lp_apr": 1.6835592903835646,
-      "stats": {
-        "last_24h_vol": 16.99260584748452,
-        "last_24h_fees": 0.16992605847484518,
-        "last_7d_vol": 37.49611478573088,
-        "last_7d_fees": 0.37496114785730883
-      },
-      "fee_last_7d_usd": 0.37496114785730883,
-      "vol_last_7d": 37.49611478573088,
-      "bribes_usd": 0.3663582212213101,
-      "volatility": {
-        "current_price": 1.00424943620747,
-        "price_range": {
-          "high": 1.01441686113114,
-          "low": 0.986221749346251,
-          "range": 0.028195111784888982,
-          "mid_price": 1.0007220967195514,
-          "volatility_percentage": 0.5001,
-          "std_dev": 0.005022,
-          "annualized_volatility": 46.81,
-          "metrics": {
-            "num_samples": 121,
-            "variance": 2.5e-05,
-            "hourly_factor": 93.59
-          }
-        },
-        "volume": {
-          "h24": 76.5244069977998,
-          "d7": 388.8374814800026
-        }
-      },
-      "pool_votes_period": 0.10874424319447798
+      "fee_last_7d_usd": 0.6360662679980087,
+      "vol_last_7d": 6360.662679980087,
+      "bribes_usd": 0.6266236388706694,
+      "pool_votes_period": 0.10874424319447798,
+      "vote_percentage": 8.733620063794446e-06,
+      "expected_emissions_shadow": 0.0015424443899947416,
+      "expected_emissions_usd": 0.01903611784827529,
+      "expected_lp_apr": 0.04786202681850577,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x8d0c7fe4814afa5428c79ae6915e44738cc3a39a",
       "symbol": "CL-wS-sGOAT-1.0%",
-      "tvl": 33939.131021844936,
-      "lp_apr": 1.5609021724315335,
+      "tvl": 33311.571553439666,
+      "lp_apr": 1.5921221348049255,
       "stats": {
-        "last_24h_vol": 0,
-        "last_24h_fees": 0,
-        "last_7d_vol": 18.995015085791646,
-        "last_7d_fees": 0.18995015085791644
+        "last_24h_vol": 2.5830794994989854,
+        "last_24h_fees": 0.02583079499498985,
+        "last_7d_vol": 56.95408709005759,
+        "last_7d_fees": 0.5695408709005759
       },
-      "fee_last_7d_usd": 0.18995015085791644,
-      "vol_last_7d": 18.995015085791646,
-      "bribes_usd": 0.3602166492947524,
+      "fee_last_7d_usd": 0.5695408709005759,
+      "vol_last_7d": 56.95408709005759,
+      "bribes_usd": 0.37252229682777294,
       "volatility": {
-        "current_price": 0.00358201926236865,
+        "current_price": 0.00344584624320669,
         "price_range": {
           "high": 0.00392544041692146,
           "low": 0.00333163021648316,
           "range": 0.0005938102004382998,
-          "mid_price": 0.003631830134788164,
-          "volatility_percentage": 4.2757,
-          "std_dev": 0.000153,
-          "annualized_volatility": 400.18,
+          "mid_price": 0.003616276117548632,
+          "volatility_percentage": 4.5111,
+          "std_dev": 0.000155,
           "metrics": {
-            "num_samples": 22,
-            "variance": 0.0,
-            "hourly_factor": 93.59
+            "num_samples": 24,
+            "variance": 0.0
           }
-        },
-        "volume": {
-          "h24": 0,
-          "d7": 502.8484575021676
         }
       },
-      "pool_votes_period": 0.10874424319447798
+      "pool_votes_period": 0.10874424319447798,
+      "vote_percentage": 8.733620063794446e-06,
+      "expected_emissions_shadow": 0.0015424443899947416,
+      "expected_emissions_usd": 0.01903611784827529,
+      "expected_lp_apr": 0.002971574386763217,
+      "shadow_price_usd": 12.341526198127756
+    },
+    {
+      "pool": "0x08020666da56e42b13876b45bf92289c8701e7d4",
+      "symbol": "USDC/8",
+      "tvl": 1100.7301617344783,
+      "lp_apr": 1.660175018466788,
+      "stats": {
+        "last_24h_vol": 10.330162169215349,
+        "last_24h_fees": 0.10330162169215348,
+        "last_7d_vol": 50.456506672845165,
+        "last_7d_fees": 0.5045650667284516
+      },
+      "fee_last_7d_usd": 0.5045650667284516,
+      "vol_last_7d": 50.456506672845165,
+      "bribes_usd": 0.4148312403724123,
+      "volatility": {
+        "current_price": 0.998547512036842,
+        "price_range": {
+          "high": 1.01441686113114,
+          "low": 0.986221749346251,
+          "range": 0.028195111784888982,
+          "mid_price": 1.0007005418162034,
+          "volatility_percentage": 0.5047,
+          "std_dev": 0.005039,
+          "metrics": {
+            "num_samples": 117,
+            "variance": 2.5e-05
+          }
+        }
+      },
+      "pool_votes_period": 0.10874424319447798,
+      "vote_percentage": 8.733620063794446e-06,
+      "expected_emissions_shadow": 0.0015424443899947416,
+      "expected_emissions_usd": 0.01903611784827529,
+      "expected_lp_apr": 0.08992922720955626,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x842af2fb2d600ced25d7d58675a0ce589417028d",
-      "symbol": "CL-wS-BEETS-0.399%",
+      "symbol": "CL-wS-BEETS-0.4007%",
       "tvl": 0,
-      "lp_apr": 77.8035529537124,
+      "lp_apr": 78.28698003555624,
       "stats": {
-        "last_24h_vol": 5.28381876818893,
-        "last_24h_fees": 0.021134678153048706,
-        "last_7d_vol": 34.9080972362708,
-        "last_7d_fees": 0.15375626846989593
+        "last_24h_vol": 1.066516491138909,
+        "last_24h_fees": 0.004261987177845394,
+        "last_7d_vol": 36.4943669860319,
+        "last_7d_fees": 0.16009546728288843
       },
-      "fee_last_7d_usd": 0.15375626846989593,
-      "vol_last_7d": 34.9080972362708,
-      "bribes_usd": 0.1695629821524062,
+      "fee_last_7d_usd": 0.16009546728288843,
+      "vol_last_7d": 36.4943669860319,
+      "bribes_usd": 0.171749914799817,
       "volatility": {
-        "current_price": 0.0261776244936462,
+        "current_price": 0.0269618794320917,
         "price_range": {
           "high": 0.0292611343004129,
           "low": 0.0220581860318878,
           "range": 0.007202948268525102,
-          "mid_price": 0.0249283743461266,
-          "volatility_percentage": 6.6885,
-          "std_dev": 0.001751,
-          "annualized_volatility": 626.01,
+          "mid_price": 0.025067371913657533,
+          "volatility_percentage": 6.4479,
+          "std_dev": 0.001738,
           "metrics": {
-            "num_samples": 154,
-            "variance": 3e-06,
-            "hourly_factor": 93.59
+            "num_samples": 145,
+            "variance": 3e-06
           }
-        },
-        "volume": {
-          "h24": 91.59287775699865,
-          "d7": 359.69904583862154
         }
       },
-      "pool_votes_period": 0.10874424319447798
+      "pool_votes_period": 0.10874424319447798,
+      "vote_percentage": 8.733620063794446e-06,
+      "expected_emissions_shadow": 0.0015424443899947416,
+      "expected_emissions_usd": 0.01903611784827529,
+      "expected_lp_apr": 0,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xbb2e96c784e69ebc9bbf99f748532736c271d09e",
       "symbol": "CL-UNI-WETH-1.0%",
       "tvl": 0,
-      "lp_apr": 23.602219138413915,
+      "lp_apr": 23.74886992092908,
       "stats": {
-        "last_24h_vol": 0.8010737616283475,
-        "last_24h_fees": 0.008010737616283474,
-        "last_7d_vol": 10.375968566056303,
-        "last_7d_fees": 0.10375968566056304
+        "last_24h_vol": 0.796069578913638,
+        "last_24h_fees": 0.00796069578913638,
+        "last_7d_vol": 10.370964383341594,
+        "last_7d_fees": 0.10370964383341595
       },
-      "fee_last_7d_usd": 0.10375968566056304,
-      "vol_last_7d": 10.375968566056303,
-      "bribes_usd": 0.09638038059688932,
+      "fee_last_7d_usd": 0.10370964383341595,
+      "vol_last_7d": 10.370964383341594,
+      "bribes_usd": 0.09609038153552316,
       "volatility": {
         "current_price": 8.23658664108172,
         "price_range": {
@@ -2632,34 +2567,33 @@
           "mid_price": 8.613359343122037,
           "volatility_percentage": 16.1682,
           "std_dev": 1.331712,
-          "annualized_volatility": 1513.26,
           "metrics": {
             "num_samples": 13,
-            "variance": 1.773456,
-            "hourly_factor": 93.59
+            "variance": 1.773456
           }
-        },
-        "volume": {
-          "h24": 0,
-          "d7": 37.47975063734935
         }
       },
-      "pool_votes_period": 0.10874424319447798
+      "pool_votes_period": 0.10874424319447798,
+      "vote_percentage": 8.733620063794446e-06,
+      "expected_emissions_shadow": 0.0015424443899947416,
+      "expected_emissions_usd": 0.01903611784827529,
+      "expected_lp_apr": 0,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x9527122bc2a6d9f0af8c4d8834cc2ae2d9a97ca1",
       "symbol": "USDC/EUL",
-      "tvl": 88.40695088052175,
-      "lp_apr": 2.7520593057169864,
+      "tvl": 88.38279779841639,
+      "lp_apr": 2.7699157894298825,
       "stats": {
-        "last_24h_vol": 1.6770921750432684,
-        "last_24h_fees": 0.016770921750432682,
-        "last_7d_vol": 6.130035252866238,
-        "last_7d_fees": 0.061300352528662366
+        "last_24h_vol": 0.7806336176699589,
+        "last_24h_fees": 0.007806336176699589,
+        "last_7d_vol": 5.2335766954929275,
+        "last_7d_fees": 0.05233576695492927
       },
-      "fee_last_7d_usd": 0.061300352528662366,
-      "vol_last_7d": 6.130035252866238,
-      "bribes_usd": 0.06143029660660359,
+      "fee_last_7d_usd": 0.05233576695492927,
+      "vol_last_7d": 5.2335766954929275,
+      "bribes_usd": 0.06141351363894191,
       "volatility": {
         "current_price": 1.00121735516701,
         "price_range": {
@@ -2669,19 +2603,18 @@
           "mid_price": 1.0000008069554998,
           "volatility_percentage": 0.2286,
           "std_dev": 0.002289,
-          "annualized_volatility": 21.4,
           "metrics": {
             "num_samples": 17,
-            "variance": 5e-06,
-            "hourly_factor": 93.59
+            "variance": 5e-06
           }
-        },
-        "volume": {
-          "h24": 0,
-          "d7": 13.550005824092802
         }
       },
-      "pool_votes_period": 0.10874424319447798
+      "pool_votes_period": 0.10874424319447798,
+      "vote_percentage": 8.733620063794446e-06,
+      "expected_emissions_shadow": 0.0015424443899947416,
+      "expected_emissions_usd": 0.01903611784827529,
+      "expected_lp_apr": 1.11998958255206,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x62c86c34ca232c9c1ebff1e8fdabb182f3a39810",
@@ -2703,36 +2636,35 @@
           "high": 2.55823557104107e-05,
           "low": 2.04880912773195e-05,
           "range": 5.0942644330912e-06,
-          "mid_price": 2.2689464896974987e-05,
-          "volatility_percentage": 5.3224,
+          "mid_price": 2.276989425964478e-05,
+          "volatility_percentage": 5.3815,
           "std_dev": 1e-06,
-          "annualized_volatility": 498.15,
           "metrics": {
-            "num_samples": 46,
-            "variance": 0.0,
-            "hourly_factor": 93.59
+            "num_samples": 42,
+            "variance": 0.0
           }
-        },
-        "volume": {
-          "h24": 64.39307867797571,
-          "d7": 144.64338373340453
         }
       },
-      "pool_votes_period": 0.0
+      "pool_votes_period": 0.0,
+      "vote_percentage": 0.0,
+      "expected_emissions_shadow": 0.0,
+      "expected_emissions_usd": 0.0,
+      "expected_lp_apr": 0,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x81eb3d2ad4f44a059974a1df7bde9839bdb9e093",
       "symbol": "CL-wstkscUSD-scUSD-0.01%",
       "tvl": 0,
-      "lp_apr": 2.0976717774720566,
+      "lp_apr": 2.1107055183174492,
       "stats": {
-        "last_24h_vol": 0.0024775,
-        "last_24h_fees": 2.4775e-07,
-        "last_7d_vol": 270.6064945,
-        "last_7d_fees": 0.02706064945
+        "last_24h_vol": 0,
+        "last_24h_fees": 0,
+        "last_7d_vol": 270.604017,
+        "last_7d_fees": 0.0270604017
       },
-      "fee_last_7d_usd": 0.02706064945,
-      "vol_last_7d": 270.6064945,
+      "fee_last_7d_usd": 0.0270604017,
+      "vol_last_7d": 270.604017,
       "bribes_usd": 0.026994,
       "volatility": {
         "current_price": 0.998969990595675,
@@ -2743,99 +2675,96 @@
           "mid_price": 0.9985586667909222,
           "volatility_percentage": 0.5053,
           "std_dev": 0.005048,
-          "annualized_volatility": 47.3,
           "metrics": {
             "num_samples": 33,
-            "variance": 2.5e-05,
-            "hourly_factor": 93.59
+            "variance": 2.5e-05
           }
-        },
-        "volume": {
-          "h24": 676.1669792859888,
-          "d7": 804.2412457007897
         }
       },
-      "pool_votes_period": 0.0
+      "pool_votes_period": 0.0,
+      "vote_percentage": 0.0,
+      "expected_emissions_shadow": 0.0,
+      "expected_emissions_usd": 0.0,
+      "expected_lp_apr": 0,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x58d21b2f11358d9b3a3addef608b1eadb10a1a57",
       "symbol": "CL-bdUSDC-xUSD-0.025%",
       "tvl": 0,
-      "lp_apr": 1634.6962750652795,
+      "lp_apr": 1644.853349131369,
       "stats": {
-        "last_24h_vol": 4.075939080871036,
-        "last_24h_fees": 0.001018984770217759,
-        "last_7d_vol": 91.3170116545394,
-        "last_7d_fees": 0.02282925291363485
+        "last_24h_vol": 6.808067472998292,
+        "last_24h_fees": 0.0017020168682495731,
+        "last_7d_vol": 98.12507912753769,
+        "last_7d_fees": 0.024531269781884423
       },
-      "fee_last_7d_usd": 0.02282925291363485,
-      "vol_last_7d": 91.3170116545394,
-      "bribes_usd": 0.0,
+      "fee_last_7d_usd": 0.024531269781884423,
+      "vol_last_7d": 98.12507912753769,
+      "bribes_usd": 0.0013476411692420547,
       "volatility": {
-        "current_price": 1.02330660801384e-06,
+        "current_price": 1.03728443830689e-06,
         "price_range": {
           "high": 1.03904725426289e-06,
           "low": 9.67754495007504e-07,
           "range": 7.12927592553861e-08,
-          "mid_price": 1.0156757514287241e-06,
-          "volatility_percentage": 0.8967,
+          "mid_price": 1.0158812591931838e-06,
+          "volatility_percentage": 0.8976,
           "std_dev": 0.0,
-          "annualized_volatility": 83.93,
           "metrics": {
-            "num_samples": 122,
-            "variance": 0.0,
-            "hourly_factor": 93.59
+            "num_samples": 124,
+            "variance": 0.0
           }
-        },
-        "volume": {
-          "h24": 134940.8991817286,
-          "d7": 353441.2118272498
         }
       },
-      "pool_votes_period": 0.0
+      "pool_votes_period": 0.0,
+      "vote_percentage": 0.0,
+      "expected_emissions_shadow": 0.0,
+      "expected_emissions_usd": 0.0,
+      "expected_lp_apr": 0,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x286cc998298d9d0242c9ad30cdb587e0b2f59f22",
       "symbol": "CL-scETH-stkscETH-0.025%",
       "tvl": 0,
-      "lp_apr": 359.5822606353029,
+      "lp_apr": 361.81650054263906,
       "stats": {
-        "last_24h_vol": 0.06302103409904368,
-        "last_24h_fees": 1.5755258524760922e-05,
-        "last_7d_vol": 78.51459473372401,
-        "last_7d_fees": 0.019628648683431005
+        "last_24h_vol": 0.03255620107457305,
+        "last_24h_fees": 8.139050268643262e-06,
+        "last_7d_vol": 78.71717056262565,
+        "last_7d_fees": 0.019679292640656418
       },
-      "fee_last_7d_usd": 0.019628648683431005,
-      "vol_last_7d": 78.51459473372401,
-      "bribes_usd": 0.0030727015681455976,
+      "fee_last_7d_usd": 0.019679292640656418,
+      "vol_last_7d": 78.71717056262565,
+      "bribes_usd": 0.003071811504524042,
       "volatility": {
-        "current_price": 4278.59392204901,
+        "current_price": 4378.45501980809,
         "price_range": {
           "high": 4895.29560094358,
           "low": 459.259958586573,
           "range": 4436.035642357007,
-          "mid_price": 4372.427948536773,
-          "volatility_percentage": 12.3849,
-          "std_dev": 529.900522,
-          "annualized_volatility": 1159.17,
+          "mid_price": 4384.6453166945485,
+          "volatility_percentage": 12.5729,
+          "std_dev": 550.497443,
           "metrics": {
-            "num_samples": 126,
-            "variance": 280794.563394,
-            "hourly_factor": 93.59
+            "num_samples": 116,
+            "variance": 303047.434208
           }
-        },
-        "volume": {
-          "h24": 1209.9363442374365,
-          "d7": 12138.962643669482
         }
       },
-      "pool_votes_period": 0.0
+      "pool_votes_period": 0.0,
+      "vote_percentage": 0.0,
+      "expected_emissions_shadow": 0.0,
+      "expected_emissions_usd": 0.0,
+      "expected_lp_apr": 0,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x8699aaf2fae2c6717e74a59ef9bb02f5aa333f98",
       "symbol": "CL-Moth-EGGS-2.0%",
-      "tvl": -2.2593727823142906,
-      "lp_apr": 6007.2899121479,
+      "tvl": -2.258962328736901,
+      "lp_apr": 6044.615799228496,
       "stats": {
         "last_24h_vol": 0,
         "last_24h_fees": 0,
@@ -2851,28 +2780,27 @@
           "high": 0.000230235596258436,
           "low": 0.000154792050781392,
           "range": 7.5443545477044e-05,
-          "mid_price": 0.00018005523176136453,
-          "volatility_percentage": 11.0504,
-          "std_dev": 2.4e-05,
-          "annualized_volatility": 1034.26,
+          "mid_price": 0.00018214249108165545,
+          "volatility_percentage": 11.6473,
+          "std_dev": 2.5e-05,
           "metrics": {
-            "num_samples": 32,
-            "variance": 0.0,
-            "hourly_factor": 93.59
+            "num_samples": 27,
+            "variance": 0.0
           }
-        },
-        "volume": {
-          "h24": 114.10116383070678,
-          "d7": 173.81077321783596
         }
       },
-      "pool_votes_period": 0.0
+      "pool_votes_period": 0.0,
+      "vote_percentage": 0.0,
+      "expected_emissions_shadow": 0.0,
+      "expected_emissions_usd": 0.0,
+      "expected_lp_apr": 0,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xe21aa0df4c01c279c8a4fdcacbf7c79467442c5a",
       "symbol": "wS/STBL",
-      "tvl": 22.067291959497275,
-      "lp_apr": 11.333628696295214,
+      "tvl": 22.440493571954075,
+      "lp_apr": 11.214391850087992,
       "stats": {
         "last_24h_vol": 0.3233246490826165,
         "last_24h_fees": 0.003233246490826165,
@@ -2881,35 +2809,34 @@
       },
       "fee_last_7d_usd": 0.009771903456596572,
       "vol_last_7d": 0.9771903456596571,
-      "bribes_usd": 0.009533122250462737,
+      "bribes_usd": 0.009694346228563471,
       "volatility": {
         "current_price": 0.0619234191872468,
         "price_range": {
           "high": 0.074218158571519,
           "low": 0.0562239327077572,
           "range": 0.017994225863761808,
-          "mid_price": 0.06407356207460407,
-          "volatility_percentage": 9.692,
-          "std_dev": 0.006002,
-          "annualized_volatility": 907.12,
+          "mid_price": 0.0633278359077617,
+          "volatility_percentage": 9.8182,
+          "std_dev": 0.00608,
           "metrics": {
-            "num_samples": 22,
-            "variance": 3.6e-05,
-            "hourly_factor": 93.59
+            "num_samples": 19,
+            "variance": 3.7e-05
           }
-        },
-        "volume": {
-          "h24": 0,
-          "d7": 9.379673874049368
         }
       },
-      "pool_votes_period": 0.0
+      "pool_votes_period": 0.0,
+      "vote_percentage": 0.0,
+      "expected_emissions_shadow": 0.0,
+      "expected_emissions_usd": 0.0,
+      "expected_lp_apr": 0.0,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x848b805cac41c1684f4c3e28f029a9c46896f3d1",
       "symbol": "wS/8",
-      "tvl": 885.1828267587391,
-      "lp_apr": 0.2826772248378127,
+      "tvl": 908.9980875911795,
+      "lp_apr": 0.2769816127124116,
       "stats": {
         "last_24h_vol": 0,
         "last_24h_fees": 0,
@@ -2918,35 +2845,34 @@
       },
       "fee_last_7d_usd": 0.006331705235049213,
       "vol_last_7d": 2.110568411683071,
-      "bribes_usd": 0.00804879978070782,
+      "bribes_usd": 0.008265347436594381,
       "volatility": {
         "current_price": 0.000540209845720189,
         "price_range": {
           "high": 0.000595138260935467,
           "low": 0.000509908165763501,
           "range": 8.523009517196595e-05,
-          "mid_price": 0.0005427557491111964,
-          "volatility_percentage": 4.013,
-          "std_dev": 2.2e-05,
-          "annualized_volatility": 375.59,
+          "mid_price": 0.0005423008911342748,
+          "volatility_percentage": 4.187,
+          "std_dev": 2.3e-05,
           "metrics": {
-            "num_samples": 41,
-            "variance": 0.0,
-            "hourly_factor": 93.59
+            "num_samples": 37,
+            "variance": 0.0
           }
-        },
-        "volume": {
-          "h24": 30.330018904891396,
-          "d7": 72.62066740575123
         }
       },
-      "pool_votes_period": 0.0
+      "pool_votes_period": 0.0,
+      "vote_percentage": 0.0,
+      "expected_emissions_shadow": 0.0,
+      "expected_emissions_usd": 0.0,
+      "expected_lp_apr": 0.0,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x1d57b8f22c1f9a5831b443077a6fe043a5ac2ffb",
       "symbol": "scUSD/MYRD",
-      "tvl": 17.490200279730548,
-      "lp_apr": 15.797415691789121,
+      "tvl": 17.490193630290626,
+      "lp_apr": 15.895577902390722,
       "stats": {
         "last_24h_vol": 0,
         "last_24h_fees": 0,
@@ -2965,24 +2891,23 @@
           "mid_price": 0.9923134421406623,
           "volatility_percentage": 2.4749,
           "std_dev": 0.024661,
-          "annualized_volatility": 231.64,
           "metrics": {
             "num_samples": 14,
-            "variance": 0.000608,
-            "hourly_factor": 93.59
+            "variance": 0.000608
           }
-        },
-        "volume": {
-          "h24": 0,
-          "d7": 14.356609060102784
         }
       },
-      "pool_votes_period": 0.0
+      "pool_votes_period": 0.0,
+      "vote_percentage": 0.0,
+      "expected_emissions_shadow": 0.0,
+      "expected_emissions_usd": 0.0,
+      "expected_lp_apr": 0.0,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x94e0e30ade03664777475377e31f9f110e112dff",
       "symbol": "CL-WETH-stS-0.3%",
-      "tvl": 0.08823130659351339,
+      "tvl": 0.08871174709558152,
       "lp_apr": 0.0,
       "stats": {
         "last_24h_vol": 0,
@@ -2992,7 +2917,7 @@
       },
       "fee_last_7d_usd": 0,
       "vol_last_7d": 0,
-      "bribes_usd": 4.31025555494565e-15,
+      "bribes_usd": 4.2972864210053045e-15,
       "volatility": {
         "current_price": 4510.55901530366,
         "price_range": {
@@ -3002,24 +2927,23 @@
           "mid_price": 4333.289541682487,
           "volatility_percentage": 8.5151,
           "std_dev": 384.079878,
-          "annualized_volatility": 796.97,
           "metrics": {
             "num_samples": 6,
-            "variance": 147517.352433,
-            "hourly_factor": 93.59
+            "variance": 147517.352433
           }
-        },
-        "volume": {
-          "h24": 0,
-          "d7": 0.00399797841415724
         }
       },
-      "pool_votes_period": 0.0
+      "pool_votes_period": 0.0,
+      "vote_percentage": 0.0,
+      "expected_emissions_shadow": 0.0,
+      "expected_emissions_usd": 0.0,
+      "expected_lp_apr": 0.0,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xe71914eb43f7e20b98406f059555ca24854d9769",
       "symbol": "CL-OS-EGGS-2.0%",
-      "tvl": 0.04936980105347555,
+      "tvl": 0.050233414385857156,
       "lp_apr": 0.0,
       "stats": {
         "last_24h_vol": 0,
@@ -3029,8 +2953,13 @@
       },
       "fee_last_7d_usd": 0,
       "vol_last_7d": 0,
-      "bribes_usd": 2.9941601049823066e-19,
-      "pool_votes_period": 0.0
+      "bribes_usd": 3.0516300159172436e-19,
+      "pool_votes_period": 0.0,
+      "vote_percentage": 0.0,
+      "expected_emissions_shadow": 0.0,
+      "expected_emissions_usd": 0.0,
+      "expected_lp_apr": 0.0,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x94fb2a14d55288d9f7fa10ad79022b95f95c04cb",
@@ -3055,19 +2984,18 @@
           "mid_price": 0.09265934328980374,
           "volatility_percentage": 2.6574,
           "std_dev": 0.002541,
-          "annualized_volatility": 248.72,
           "metrics": {
             "num_samples": 3,
-            "variance": 6e-06,
-            "hourly_factor": 93.59
+            "variance": 6e-06
           }
-        },
-        "volume": {
-          "h24": 0,
-          "d7": 0.9280354135268449
         }
       },
-      "pool_votes_period": 0.0
+      "pool_votes_period": 0.0,
+      "vote_percentage": 0.0,
+      "expected_emissions_shadow": 0.0,
+      "expected_emissions_usd": 0.0,
+      "expected_lp_apr": 0,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x350598c4c17ddc02049e34bfdf4555422d2d670e",
@@ -3092,19 +3020,18 @@
           "mid_price": 1.597922092392797e-05,
           "volatility_percentage": 23.3121,
           "std_dev": 3e-06,
-          "annualized_volatility": 2181.89,
           "metrics": {
             "num_samples": 3,
-            "variance": 0.0,
-            "hourly_factor": 93.59
+            "variance": 0.0
           }
-        },
-        "volume": {
-          "h24": 0,
-          "d7": 0.5601530715072812
         }
       },
-      "pool_votes_period": 0.0
+      "pool_votes_period": 0.0,
+      "vote_percentage": 0.0,
+      "expected_emissions_shadow": 0.0,
+      "expected_emissions_usd": 0.0,
+      "expected_lp_apr": 0,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x7a02fe073ad157ead83c5e3400acf8bf7e2e8c14",
@@ -3119,7 +3046,7 @@
       },
       "fee_last_7d_usd": 0,
       "vol_last_7d": 0,
-      "bribes_usd": 3.008386980856575e-19,
+      "bribes_usd": 3.047187547e-19,
       "volatility": {
         "current_price": 0.0010350248303501,
         "price_range": {
@@ -3129,19 +3056,18 @@
           "mid_price": 0.0011111811301367876,
           "volatility_percentage": 15.0258,
           "std_dev": 0.000156,
-          "annualized_volatility": 1406.34,
           "metrics": {
             "num_samples": 13,
-            "variance": 0.0,
-            "hourly_factor": 93.59
+            "variance": 0.0
           }
-        },
-        "volume": {
-          "h24": 0,
-          "d7": 67.97188486170788
         }
       },
-      "pool_votes_period": 0.0
+      "pool_votes_period": 0.0,
+      "vote_percentage": 0.0,
+      "expected_emissions_shadow": 0.0,
+      "expected_emissions_usd": 0.0,
+      "expected_lp_apr": 0,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x81a0a42d9bdf7ac9ef5003a2d0fdef42a01c8cc7",
@@ -3156,8 +3082,13 @@
       },
       "fee_last_7d_usd": 0,
       "vol_last_7d": 0,
-      "bribes_usd": 0.001089573204667661,
-      "pool_votes_period": 0.0
+      "bribes_usd": 0.0010991818950052005,
+      "pool_votes_period": 0.0,
+      "vote_percentage": 0.0,
+      "expected_emissions_shadow": 0.0,
+      "expected_emissions_usd": 0.0,
+      "expected_lp_apr": 0,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x842c2c71172d1b36b71be609fc9faf30b1cd84bd",
@@ -3172,7 +3103,7 @@
       },
       "fee_last_7d_usd": 0,
       "vol_last_7d": 0,
-      "bribes_usd": 4.297908040954005e-15,
+      "bribes_usd": 4.296663074102781e-15,
       "volatility": {
         "current_price": 4526.8623794072,
         "price_range": {
@@ -3182,19 +3113,18 @@
           "mid_price": 4492.038301753712,
           "volatility_percentage": 3.6199,
           "std_dev": 163.867956,
-          "annualized_volatility": 338.8,
           "metrics": {
             "num_samples": 7,
-            "variance": 26852.707018,
-            "hourly_factor": 93.59
+            "variance": 26852.707018
           }
-        },
-        "volume": {
-          "h24": 0,
-          "d7": 1.2440844896149024
         }
       },
-      "pool_votes_period": 0.0
+      "pool_votes_period": 0.0,
+      "vote_percentage": 0.0,
+      "expected_emissions_shadow": 0.0,
+      "expected_emissions_usd": 0.0,
+      "expected_lp_apr": 0,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0x9275a08c720238aab2b926a422563dad768449ce",
@@ -3219,19 +3149,18 @@
           "mid_price": 0.004324237119200392,
           "volatility_percentage": 10.6804,
           "std_dev": 0.000409,
-          "annualized_volatility": 999.63,
           "metrics": {
             "num_samples": 7,
-            "variance": 0.0,
-            "hourly_factor": 93.59
+            "variance": 0.0
           }
-        },
-        "volume": {
-          "h24": 0,
-          "d7": 0.3980591775627342
         }
       },
-      "pool_votes_period": 0.0
+      "pool_votes_period": 0.0,
+      "vote_percentage": 0.0,
+      "expected_emissions_shadow": 0.0,
+      "expected_emissions_usd": 0.0,
+      "expected_lp_apr": 0,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xb0e617f9d6467da3bfd0700c63a69aff0e5275cc",
@@ -3246,7 +3175,7 @@
       },
       "fee_last_7d_usd": 0,
       "vol_last_7d": 0,
-      "bribes_usd": 3.008386980856575e-19,
+      "bribes_usd": 3.047187547e-19,
       "volatility": {
         "current_price": 0.000866920424786344,
         "price_range": {
@@ -3256,19 +3185,18 @@
           "mid_price": 0.0008288836465151925,
           "volatility_percentage": 4.4059,
           "std_dev": 3.8e-05,
-          "annualized_volatility": 412.37,
           "metrics": {
             "num_samples": 23,
-            "variance": 0.0,
-            "hourly_factor": 93.59
+            "variance": 0.0
           }
-        },
-        "volume": {
-          "h24": 0,
-          "d7": 5177.512779629437
         }
       },
-      "pool_votes_period": 0.0
+      "pool_votes_period": 0.0,
+      "vote_percentage": 0.0,
+      "expected_emissions_shadow": 0.0,
+      "expected_emissions_usd": 0.0,
+      "expected_lp_apr": 0,
+      "shadow_price_usd": 12.341526198127756
     },
     {
       "pool": "0xdc038341a5618f55a15c21741061d9ec8f6a3560",
@@ -3283,8 +3211,13 @@
       },
       "fee_last_7d_usd": 0,
       "vol_last_7d": 0,
-      "bribes_usd": 3.008386980856575e-19,
-      "pool_votes_period": 0.0
+      "bribes_usd": 3.047187547e-19,
+      "pool_votes_period": 0.0,
+      "vote_percentage": 0.0,
+      "expected_emissions_shadow": 0.0,
+      "expected_emissions_usd": 0.0,
+      "expected_lp_apr": 0,
+      "shadow_price_usd": 12.341526198127756
     }
   ]
 }

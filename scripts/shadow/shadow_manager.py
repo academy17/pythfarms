@@ -14,7 +14,8 @@ def main():
     fetch_parser = subparsers.add_parser("fetch", help="Fetch votes and rewards data")
     fetch_parser.add_argument("--type", choices=["votes", "rewards", "all"], default="all", help="Type of data to fetch")
     fetch_parser.add_argument("--period", type=int, help="Period to fetch (default: current period)")
-    fetch_parser.add_argument("--historical_dashboard_path", type=str, help="Path to existing dashboard for historical fetch")  # <-- Add this line here
+    fetch_parser.add_argument("--historical_dashboard_path", type=str, help="Path to existing dashboard for historical fetch")
+    fetch_parser.add_argument("--skip-volatility", action="store_true", help="Skip fetching volatility data to speed up the process")
 
     # Optimize subcommand
     optimize_parser = subparsers.add_parser("optimize", help="Run vote optimizer")
@@ -32,7 +33,9 @@ def main():
 
     if args.command == "fetch":
         logger.info(f"Fetching data for period {args.period if args.period else '[current]'}")
-        fetch_votes.run_fetch(period=args.period, historical_dashboard_path=args.historical_dashboard_path)
+        if args.skip_volatility:
+            logger.info("Skipping volatility data collection")
+        fetch_votes.run_fetch(period=args.period, historical_dashboard_path=args.historical_dashboard_path, skip_volatility=args.skip_volatility)
     elif args.command == "optimize":
         save = not args.display
         logger.info(f"Optimizing votes for period {args.period if args.period else '[next/historical]'}")

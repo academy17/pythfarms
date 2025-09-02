@@ -23,6 +23,7 @@ SHADOW_API_URL = os.getenv(
     "SHADOW_API_URL",
     "https://api.shadow.so/mixed-pairs?tokens=False&poolData=false"
 )
+SHADOW_INFO_URL = "https://api.shadow.so/info"
 GECKOTERMINAL_API_URL = 'https://api.geckoterminal.com/api/v2'
 
 def calculate_volatility_metrics(candles):
@@ -72,8 +73,7 @@ def calculate_volatility_metrics(candles):
         'volatility_percentage': round(volatility_percentage, 4),  # 4 decimal places for percentage
         'debug': {
             'num_samples': len(closes),
-            'variance': round(variance, 6),
-            'hourly_factor': round((HOURS_IN_YEAR ** 0.5), 2)  # Should be ~93.9
+            'variance': round(variance, 6)
         }
     }
 
@@ -118,12 +118,7 @@ def fetch_geckoterminal_volatility(pool_address):
         if not metrics:
             return None
             
-        # Get volume data from the last 24h and 7d
-        volumes = [candle[5] for candle in candles]  # volume is at index 5
-        vol_24h = sum(volumes[-24:]) if len(volumes) >= 24 else 0
-        vol_7d = sum(volumes)
-        
-        # Construct response with detailed metrics
+        # Construct response with detailed metrics - no volume structure
         volatility = {
             'current_price': metrics['current_price'],
             'price_range': {
@@ -133,16 +128,10 @@ def fetch_geckoterminal_volatility(pool_address):
                 'mid_price': metrics['mean_price'],
                 'volatility_percentage': metrics['volatility_percentage'],
                 'std_dev': metrics['std_dev'],
-                'annualized_volatility': metrics['annualized_volatility'],
                 'metrics': {
                     'num_samples': metrics['debug']['num_samples'],
-                    'variance': metrics['debug']['variance'],
-                    'hourly_factor': metrics['debug']['hourly_factor']
+                    'variance': metrics['debug']['variance']
                 }
-            },
-            'volume': {
-                'h24': vol_24h,
-                'd7': vol_7d
             }
         }
         
@@ -192,6 +181,67 @@ def get_total_votes_period(period):
         logger.error(f"❌ Failed to get total votes for period {period}: {e}")
         return Decimal(0)
 
+def calculate_expected_lp_apr(pools, total_votes):
+    """
+    Calculate expected LP APR based on vote allocation:
+    expected_lp_apr = (pool_votes / total_votes) * next_epoch_emissions_usd * 52 / pool_tvl * 100
+    
+    Args:
+        pools (list): List of pool data dictionaries
+        total_votes (float): Total votes for the period
+    
+    Returns:
+        list: Updated pools list with expected_lp_apr field
+    """
+    try:
+        # Fetch Shadow info data
+        response = requests.get(SHADOW_INFO_URL, timeout=30)
+        response.raise_for_status()
+        info_data = response.json()
+        
+        # Extract the next epoch emissions data
+        next_epoch_emissions = info_data.get('nextEpochEmissions', 0)
+        next_epoch_emissions_usd = info_data.get('nextEpochEmissionsUSD', 0)
+        shadow_price_usd = info_data.get('shadowPriceUSD', 0)
+        current_period = info_data.get('currentPeriod', 0)
+        
+        logger.info(f"Next epoch emissions: {next_epoch_emissions:.2f} SHADOW (${next_epoch_emissions_usd:.2f})")
+        logger.info(f"SHADOW price: ${shadow_price_usd:.4f}")
+        logger.info(f"Current period: {current_period}")
+        
+        # Calculate expected LP APR for each pool
+        updated_pools = []
+        for pool in pools:
+            pool_votes = pool.get('pool_votes_period', 0)
+            pool_tvl = pool.get('tvl', 0)
+            
+            # Calculate vote percentage
+            vote_percentage = pool_votes / total_votes if total_votes > 0 else 0
+            
+            # Calculate expected emissions for this pool
+            pool_emissions_usd = vote_percentage * next_epoch_emissions_usd
+            pool_emissions_shadow = vote_percentage * next_epoch_emissions
+            
+            # Calculate expected APR (annualized: *52 weeks, percentage: *100)
+            expected_lp_apr = 0
+            if pool_tvl > 0:
+                expected_lp_apr = (pool_emissions_usd * 52 / pool_tvl) * 100
+            
+            # Add to pool data
+            updated_pool = pool.copy()
+            updated_pool['vote_percentage'] = vote_percentage * 100  # Convert to percentage
+            updated_pool['expected_emissions_shadow'] = pool_emissions_shadow
+            updated_pool['expected_emissions_usd'] = pool_emissions_usd
+            updated_pool['expected_lp_apr'] = expected_lp_apr
+            updated_pool['shadow_price_usd'] = shadow_price_usd
+            updated_pools.append(updated_pool)
+        
+        return updated_pools
+    except Exception as e:
+        logger.error(f"❌ Failed to calculate expected LP APR: {e}")
+        # Return original pools if there's an error
+        return pools
+
 def get_pool_votes_period(pool_addr, period):
     w3, contract = get_web3_and_contract()
     if not (w3 and contract):
@@ -205,7 +255,7 @@ def get_pool_votes_period(pool_addr, period):
         logger.error(f"❌ Failed to get votes for pool {pool_addr}, period {period}: {e}")
         return Decimal(0)
 
-def fetch_pools_from_api():
+def fetch_pools_from_api(skip_volatility=False):
     try:
         response = requests.get(SHADOW_API_URL)
         response.raise_for_status()
@@ -249,16 +299,17 @@ def fetch_pools_from_api():
             }
             
             # Get volatility data from GeckoTerminal with rate limiting
-            try:
-                pool_addr = entry["pool"]
-                # Rate limit: sleep 2 seconds between requests (30 requests/minute)
-                time.sleep(2)
-                logger.info(f"Fetching volatility data for pool {entry['symbol']} ({pool_addr})")
-                volatility_data = fetch_geckoterminal_volatility(pool_addr)
-                if volatility_data:
-                    entry["volatility"] = volatility_data
-            except Exception as e:
-                logger.warning(f"Failed to fetch volatility data for pool {entry['pool']}: {e}")
+            if not skip_volatility:
+                try:
+                    pool_addr = entry["pool"]
+                    # Rate limit: sleep 2 seconds between requests (30 requests/minute)
+                    time.sleep(2)
+                    logger.info(f"Fetching volatility data for pool {entry['symbol']} ({pool_addr})")
+                    volatility_data = fetch_geckoterminal_volatility(pool_addr)
+                    if volatility_data:
+                        entry["volatility"] = volatility_data
+                except Exception as e:
+                    logger.warning(f"Failed to fetch volatility data for pool {entry['pool']}: {e}")
             
             output.append(entry)
         return output
@@ -266,7 +317,7 @@ def fetch_pools_from_api():
         logger.error(f"❌ Failed to fetch pools from API: {e}")
         return []
 
-def fetch_votes(period=None):
+def fetch_votes(period=None, skip_volatility=False):
     """Fetch pools from API and votes for the given period, return dashboard dict"""
     if period is None:
         period = get_current_period()
@@ -274,7 +325,7 @@ def fetch_votes(period=None):
             logger.error("❌ Failed to get current period")
             return None
 
-    pools = fetch_pools_from_api()
+    pools = fetch_pools_from_api(skip_volatility)
     if not pools:
         logger.error("❌ No pools fetched from API")
         return None
@@ -297,13 +348,17 @@ def fetch_votes(period=None):
         e['pool_votes_period'] = float(pool_votes)
         augmented.append(e)
 
+    # Sort by votes received
     augmented.sort(key=lambda x: x.get('pool_votes_period', 0), reverse=True)
+    
+    # Calculate expected LP APRs based on vote allocation
+    augmented_with_apr = calculate_expected_lp_apr(augmented, float(total_votes))
 
     output = {
         'period': period,
         'start_date': start_date.isoformat(),
         'total_votes_period': float(total_votes),
-        'pools': augmented
+        'pools': augmented_with_apr
     }
 
     return output
@@ -373,10 +428,15 @@ def fetch_historical_votes(period, dashboard_path):
         json.dump(dashboard, f, indent=2)
     logger.info(f"✅ Saved historical votes dashboard to {out_path}")
 
-def run_fetch(period=None, historical_dashboard_path=None):
+def run_fetch(period=None, historical_dashboard_path=None, skip_volatility=False):
     """
     If historical_dashboard_path is provided, update that dashboard with on-chain votes for the given period.
     Otherwise, fetch current pools/bribes from API and on-chain votes.
+    
+    Args:
+        period (int, optional): The period to fetch data for. If None, the current period is used.
+        historical_dashboard_path (str, optional): Path to existing dashboard for historical fetch.
+        skip_volatility (bool, optional): If True, skip fetching volatility data to speed up the process.
     """
     if historical_dashboard_path:
         if period is None:
@@ -391,7 +451,7 @@ def run_fetch(period=None, historical_dashboard_path=None):
         else:
             logger.info(f"Fetching votes dashboard for period {period}")
 
-        dashboard = fetch_votes(period)
+        dashboard = fetch_votes(period, skip_volatility)
         if dashboard:
             save_votes_dashboard(dashboard, period)
             logger.info(f"✅ Dashboard for period {period} saved/overwritten.")

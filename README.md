@@ -16,6 +16,29 @@ Argument:
 
 ## 1. fetch_votes.py
 
+#### Examples
+
+Fetch votes dashboard for the next period:
+```bash
+python scripts/shadow/shadow_manager.py fetch
+```
+
+Fetch votes dashboard for a specific period:
+```bash
+python scripts/shadow/shadow_manager.py fetch --period 2899
+```
+
+Fetch historical votes for a previous period (using an existing dashboard):
+```bash
+python scripts/shadow/shadow_manager.py fetch --period 2898 --historical_dashboard_path data/shadow/historical/2898_votes_dashboard_170725.json
+```
+
+Fetch votes and skip fetching volatility data:
+```bash
+python scripts/shadow/shadow_manager.py fetch --skip-volatility
+
+```
+
 ### What It Does
 
 - Fetches pools from the Shadow API.
@@ -48,23 +71,6 @@ This script is intended to be called from the manager (`shadow_manager.py`), but
 | --historical_dashboard_path| Path to dashboard for historical fetch              | `--historical_dashboard_path data/shadow/2898_votes_dashboard.json` |
 
 
-
-#### Examples
-
-Fetch votes dashboard for the next period:
-```bash
-python scripts/shadow/shadow_manager.py fetch
-```
-
-Fetch votes dashboard for a specific period:
-```bash
-python scripts/shadow/shadow_manager.py fetch --period 2899
-```
-
-Fetch historical votes for a previous period (using an existing dashboard):
-```bash
-python scripts/shadow/shadow_manager.py fetch --period 2898 --historical_dashboard_path data/shadow/historical/2898_votes_dashboard_170725.json
-```
 
 #### Output
 
