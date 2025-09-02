@@ -26,42 +26,64 @@ SHADOW_API_URL = os.getenv(
 GECKOTERMINAL_API_URL = 'https://api.geckoterminal.com/api/v2'
 
 def calculate_volatility_metrics(candles):
-    """Calculate volatility metrics from OHLCV candles
+    """Calculate volatility metrics from OHLCV candles using standard deviation
     Each candle is [timestamp, open, high, low, close, volume]
+    
+    Example calculation:
+    For prices: $100, $102, $99, $101
+    Mean = $100.50
+    Deviations = -0.5, 1.5, -1.5, 0.5
+    Squared deviations = 0.25, 2.25, 2.25, 0.25
+    Average = 1.25
+    Standard deviation = √1.25 ≈ 1.118
+    As percentage of current price = (1.118/101) * 100 ≈ 1.11%
     """
     if not candles or len(candles) < 2:  # Need at least 2 candles
         return None
         
-    # Extract all highs and lows from the candles
-    period_high = max(float(candle[2]) for candle in candles)  # high is at index 2
-    period_low = min(float(candle[3]) for candle in candles)   # low is at index 3
-    current_close = float(candles[0][4])  # most recent close price
+    # Extract close prices (newest first)
+    closes = [float(candle[4]) for candle in candles]  # close is at index 4
+    current_close = closes[0]  # most recent close
     
-    # Calculate metrics
-    price_range = period_high - period_low
-    mid_price = (period_high + period_low) / 2
-    half_range = price_range / 2
+    mean_price = sum(closes) / len(closes)
     
-    # Calculate percentage volatility (half range as percentage of mid price)
-    volatility_percentage = (half_range / mid_price) * 100 if mid_price > 0 else 0
+    deviations = [price - mean_price for price in closes]
     
+    squared_deviations = [dev ** 2 for dev in deviations]
+    
+    variance = sum(squared_deviations) / len(squared_deviations)
+    
+    std_dev = variance ** 0.5
+    
+    volatility_percentage = (std_dev / current_close) * 100 if current_close > 0 else 0
+    HOURS_IN_YEAR = 24 * 365
+    
+    # Also keep track of simple high/low for reference
+    period_high = max(closes)
+    period_low = min(closes)
+    
+    # Return detailed metrics for analysis
     return {
         'high': period_high,
         'low': period_low,
-        'range': price_range,
-        'mid_price': mid_price,
-        'volatility_percentage': volatility_percentage,
-        'current_price': current_close
+        'current_price': current_close,
+        'mean_price': mean_price,
+        'std_dev': round(std_dev, 6),
+        'volatility_percentage': round(volatility_percentage, 4),  # 4 decimal places for percentage
+        'debug': {
+            'num_samples': len(closes),
+            'variance': round(variance, 6),
+            'hourly_factor': round((HOURS_IN_YEAR ** 0.5), 2)  # Should be ~93.9
+        }
     }
 
 def fetch_geckoterminal_volatility(pool_address):
     """Fetch and calculate 7-day volatility metrics from GeckoTerminal OHLCV data"""
     try:
-        # Construct URL for hourly candles (168 hours = 1 week)
         url = f"{GECKOTERMINAL_API_URL}/networks/sonic/pools/{pool_address}/ohlcv/hour"
         params = {
-            'aggregate': 1,
-            'limit': 168  # 7 days worth of hourly candles
+            'aggregate': '1',
+            'limit': '168'  # 7 days worth of hourly candles
         }
         
         resp = requests.get(url, params=params, timeout=30)
@@ -69,34 +91,54 @@ def fetch_geckoterminal_volatility(pool_address):
         data = resp.json()
         
         # Check if we have valid OHLCV data
-        candles = data.get('data', {}).get('attributes', {}).get('ohlcv_list', [])
-        if not candles:
+        ohlcv_list = data.get('data', {}).get('attributes', {}).get('ohlcv_list', [])
+        if not ohlcv_list:
             logger.warning(f"No OHLCV data found for pool {pool_address}")
             return None
             
-        # Sort candles by timestamp (newest first) to ensure proper order
+        # Convert the OHLCV data to our format and ensure all values are valid
+        # GeckoTerminal format: [timestamp, open, high, low, close, volume]
+        candles = []
+        for candle in ohlcv_list:
+            try:
+                if all(x is not None for x in candle):  # ensure no None values
+                    candles.append([float(x) for x in candle])
+            except (TypeError, ValueError):
+                continue
+                
+        if not candles:
+            logger.warning(f"No valid candle data for pool {pool_address}")
+            return None
+            
+        # Sort candles by timestamp (newest first)
         candles.sort(key=lambda x: x[0], reverse=True)
             
         # Calculate volatility metrics
-        # Each candle is [timestamp, open, high, low, close, volume]
         metrics = calculate_volatility_metrics(candles)
         if not metrics:
             return None
             
         # Get volume data from the last 24h and 7d
-        volumes = [float(candle[5]) for candle in candles]  # volume is at index 5
+        volumes = [candle[5] for candle in candles]  # volume is at index 5
         vol_24h = sum(volumes[-24:]) if len(volumes) >= 24 else 0
         vol_7d = sum(volumes)
         
-        # Construct response
+        # Construct response with detailed metrics
         volatility = {
             'current_price': metrics['current_price'],
             'price_range': {
                 'high': metrics['high'],
                 'low': metrics['low'],
-                'range': metrics['range'],
-                'mid_price': metrics['mid_price'],
-                'volatility_percentage': metrics['volatility_percentage']
+                'range': metrics['high'] - metrics['low'],
+                'mid_price': metrics['mean_price'],
+                'volatility_percentage': metrics['volatility_percentage'],
+                'std_dev': metrics['std_dev'],
+                'annualized_volatility': metrics['annualized_volatility'],
+                'metrics': {
+                    'num_samples': metrics['debug']['num_samples'],
+                    'variance': metrics['debug']['variance'],
+                    'hourly_factor': metrics['debug']['hourly_factor']
+                }
             },
             'volume': {
                 'h24': vol_24h,
