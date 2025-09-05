@@ -1,0 +1,32 @@
+{
+  "our_voting_power": 800.8995563771492,
+  "aero_price_usd": 1.16,
+  "nft_value_usd": 929.04,
+  "total_expected_usd_per_epoch": 58.24,
+  "forecasted_apr_percent": 325.98,
+  "current_votes": {
+    "allocations": [
+      {
+        "symbol": "vAMM-WETH/VRTX",
+        "pool": "0xe20eeb487186ec2e9272b9d2b5732d31e115d3e3",
+        "votes": 547.869273246978,
+        "pct": 68,
+        "exp_usd": 29.48
+      },
+      {
+        "symbol": "vAMM-GNUS/AERO",
+        "pool": "0x73dddbe505f9197138785e1ccfa2988705ce4bfd",
+        "votes": 245.59488985773143,
+        "pct": 31,
+        "exp_usd": 15.96
+      },
+      {
+        "symbol": "vAMM-AERO/QI",
+        "pool": "0x44d92817e3409556e15ba0f7bd3fd48b49c907d6",
+        "votes": 7.435393272440045,
+        "pct": 1,
+        "exp_usd": 12.8
+      }
+    ]
+  }
+}
