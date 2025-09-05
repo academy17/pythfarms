@@ -1,1 +1,6 @@
 .env
+
+# Data directories
+/input_data/
+/optimized_votes/
+/analytics/
