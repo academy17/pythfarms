@@ -191,6 +191,88 @@ python scripts/shadow/shadow_manager.py optimize --period 2899 --display
 
 ---
 
+## 3. lp_optimizer.py
+
+### What It Does
+
+- Loads a dashboard file for a given period.
+- Uses an equal marginal utility algorithm to optimize liquidity provision (LP) across pools.
+- Calculates expected returns based on annualized fee data instead of using provided LP APR values.
+- Accounts for how adding liquidity affects the APR (dilution effect).
+- Provides weekly and annual return projections for each allocation.
+- Includes TVL information to give context about pool sizes.
+- Allows filtering to only include top N pools by TVL for more consistency.
+
+### Example Output
+
+```
+================ LP OPTIMIZATION RESULTS ================
+Total Investment: $10000.00
+Expected Annual Return: $5250.57
+Expected Weekly Return: $100.97
+Expected Portfolio APR: 52.51%
+----------------------------------------------------------
+Pool                  Amount ($)    %      TVL     7d Fees  Ann. APR  Adj. APR  Weekly Return  Annual Return
+----------------------------------------------------------
+CL-USDC-x33-0.3%     $4277.38  42.77%   $1541    $52.70   177.87%   47.10%     $38.74    $2014.69
+CL-wS-Anon-0.3%      $2148.28  21.48%    $336     $9.61   148.62%   20.11%      $8.31     $432.10
+CL-USDC-SHADOW-1.0%  $1771.76  17.72%    $881    $10.95    64.67%   21.47%      $7.32     $380.48
+CL-wS-SHADOW-1.0%    $1388.61  13.89%  $20035   $714.58   185.46%  173.44%     $46.32    $2408.44
+```
+
+### Usage
+
+Run via the manager (shadow_manager.py):
+
+```bash
+python scripts/shadow/shadow_manager.py lp_optimize
+```
+
+#### Flags
+
+| Flag         | Description                                         | Example                                                   |
+|--------------|-----------------------------------------------------|-----------------------------------------------------------|
+| --dashboard  | Path to votes dashboard file                        | `--dashboard input_data/shadow/votes_dashboard.json`      |
+| --amount     | Investment amount in USD                            | `--amount 10000`                                          |
+| --save       | Save results to file (default: True)                | `--save`                                                  |
+| --display    | Display results in terminal (default: True)         | `--display`                                               |
+| --top        | Only consider top N pools by TVL                    | `--top 30`                                                |
+
+#### Examples
+
+Optimize LP positions with interactive prompts:
+```bash
+python scripts/shadow/shadow_manager.py lp_optimize
+```
+
+Optimize LP positions with specific parameters:
+```bash
+python scripts/shadow/shadow_manager.py lp_optimize --amount 10000 --dashboard input_data/shadow/votes_dashboard.json
+```
+
+Optimize LP positions with only top pools by TVL:
+```bash
+python scripts/shadow/shadow_manager.py lp_optimize --amount 10000 --dashboard input_data/shadow/votes_dashboard.json --top 30
+```
+
+#### Output
+
+- `optimized_lp/shadow/{period}_optimized_lp_{date}.json`
+- `optimized_lp/shadow/optimized_lp.json`
+
+The output includes:
+- Total investment amount
+- Expected annual and weekly returns
+- Expected portfolio APR
+- Per-pool allocations with:
+  - Investment amount and percentage
+  - Pool TVL (Total Value Locked)
+  - 7-day fees
+  - Annualized and adjusted APR
+  - Expected weekly and annual returns
+
+---
+
 
 # Aerodrome Finance Vote Fetcher & Optimizer
 

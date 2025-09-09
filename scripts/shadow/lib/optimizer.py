@@ -317,14 +317,14 @@ def save_calldata(result, owner):
         "_pools": pools,
         "_weights": weights
     }
-    path = f"optimized_votes/shadow/optimized_votes_calldata.json"
+    path = f"optimized_lp/shadow/optimized_lp.json"
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w") as f:
         json.dump(calldata, f, indent=2)
     logger.info(f"✅ Saved calldata output to {path}")
     return path
 
-def run_optimize(period=None, save=True, is_historical=False):
+def run_optimize(period=None, save=True, is_historical=False, recompute=False):
     """
     Main entry point for running the optimizer.
     
@@ -332,6 +332,7 @@ def run_optimize(period=None, save=True, is_historical=False):
         period: Period to optimize for, or None for current/next period
         save: Whether to save results to file
         is_historical: Whether this is a historical optimization
+        recompute: Whether to prompt for manual dashboard file input
     """
     if not (SHADOW_RPC_URL and SHADOW_VOTER_ADDRESS):
         logger.error("❌ RPC_URL or CONTRACT_ADDRESS not set in env.")
@@ -360,7 +361,11 @@ def run_optimize(period=None, save=True, is_historical=False):
     
     logger.info(f"Optimizing for period {period}")
     
-    if is_historical:
+    # Determine dashboard path
+    if recompute:
+        logger.info("Recompute flag set - prompting for dashboard file path")
+        dashboard_path = input(f"Enter path to dashboard file for period {period} (e.g., input_data/shadow/votes_dashboard.json): ")
+    elif is_historical:
         dashboard_path = input(f"Enter path to historical dashboard for period {period} (e.g., input_data/shadow/historical/{period}_votes_dashboard_ddmmyy.json): ")
     else:
         dashboard_path = f'input_data/shadow/{period}_votes_dashboard.json'

@@ -286,13 +286,11 @@ def fetch_pools_from_api(skip_volatility=False):
                 "tvl": p.get("tvl", 0),
                 "lp_apr": p.get("lpApr", 0),
                 "stats": {
-                    "last_24h_vol": stats.get("last_24h_vol", 0),
+                    "last_24h_volume": stats.get("last_24h_vol", 0),
                     "last_24h_fees": stats.get("last_24h_fees", 0),
-                    "last_7d_vol": stats.get("last_7d_vol", 0),
+                    "last_7d_volume": stats.get("last_7d_vol", 0),
                     "last_7d_fees": stats.get("last_7d_fees", 0)
                 },
-                "fee_last_7d_usd": stats.get("last_7d_fees", 0),
-                "vol_last_7d": stats.get("last_7d_vol", 0),
                 "bribes_usd": p.get("voteBribesUsd", 0),
                 "tvl": p.get("tvl", 0),
                 "lp_apr": p.get("lpApr", 0)

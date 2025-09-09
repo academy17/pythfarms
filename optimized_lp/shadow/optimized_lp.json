@@ -1,0 +1,35 @@
+{
+  "total_investment": 100000.0,
+  "total_expected_annual_return": 51926.05590724042,
+  "total_expected_weekly_return": 998.5779982161619,
+  "expected_portfolio_apr": 51.92605590724042,
+  "allocations": [
+    {
+      "symbol": "CL-USDC-stS-0.1047%",
+      "pool": "0x2bcb79fd1e0c4251b6f94daee25d4c6ff330cdf8",
+      "amount": 51654.190085289825,
+      "pct": 51.65,
+      "tvl": 231261.60399384724,
+      "original_lp_apr": 145.512279191445,
+      "annualized_rewards_apr": 51.45306426961232,
+      "adjusted_rewards_apr": 42.058868477525294,
+      "expected_annual_return": 21725.167871102956,
+      "expected_weekly_return": 417.791689828903,
+      "last_7d_fees": 2288.291956420972
+    },
+    {
+      "symbol": "wS/GOGLZ",
+      "pool": "0xbd0313c1986f7ef59c8ea58cc85714ae2aa5b89d",
+      "amount": 48345.809914710175,
+      "pct": 48.35,
+      "tvl": 371858.4798022461,
+      "original_lp_apr": 88.12047791359417,
+      "annualized_rewards_apr": 70.59007856312802,
+      "adjusted_rewards_apr": 62.468470565322434,
+      "expected_annual_return": 30200.888036137465,
+      "expected_weekly_return": 580.7863083872589,
+      "last_7d_fees": 5047.984481462674
+    }
+  ],
+  "period": 2906
+}
