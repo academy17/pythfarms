@@ -255,7 +255,7 @@ def get_pool_votes_period(pool_addr, period):
         logger.error(f"❌ Failed to get votes for pool {pool_addr}, period {period}: {e}")
         return Decimal(0)
 
-def fetch_pools_from_api(skip_volatility=False):
+def fetch_pools_from_api(with_volatility=False):
     try:
         response = requests.get(SHADOW_API_URL)
         response.raise_for_status()
@@ -297,7 +297,7 @@ def fetch_pools_from_api(skip_volatility=False):
             }
             
             # Get volatility data from GeckoTerminal with rate limiting
-            if not skip_volatility:
+            if with_volatility:
                 try:
                     pool_addr = entry["pool"]
                     # Rate limit: sleep 2 seconds between requests (30 requests/minute)
@@ -315,7 +315,7 @@ def fetch_pools_from_api(skip_volatility=False):
         logger.error(f"❌ Failed to fetch pools from API: {e}")
         return []
 
-def fetch_votes(period=None, skip_volatility=False):
+def fetch_votes(period=None, with_volatility=False):
     """Fetch pools from API and votes for the given period, return dashboard dict"""
     if period is None:
         period = get_current_period()
@@ -323,7 +323,7 @@ def fetch_votes(period=None, skip_volatility=False):
             logger.error("❌ Failed to get current period")
             return None
 
-    pools = fetch_pools_from_api(skip_volatility)
+    pools = fetch_pools_from_api(with_volatility)
     if not pools:
         logger.error("❌ No pools fetched from API")
         return None
@@ -426,7 +426,7 @@ def fetch_historical_votes(period, dashboard_path):
         json.dump(dashboard, f, indent=2)
     logger.info(f"✅ Saved historical votes dashboard to {out_path}")
 
-def run_fetch(period=None, historical_dashboard_path=None, skip_volatility=False):
+def run_fetch(period=None, historical_dashboard_path=None, with_volatility=False):
     """
     If historical_dashboard_path is provided, update that dashboard with on-chain votes for the given period.
     Otherwise, fetch current pools/bribes from API and on-chain votes.
@@ -434,7 +434,7 @@ def run_fetch(period=None, historical_dashboard_path=None, skip_volatility=False
     Args:
         period (int, optional): The period to fetch data for. If None, the current period is used.
         historical_dashboard_path (str, optional): Path to existing dashboard for historical fetch.
-        skip_volatility (bool, optional): If True, skip fetching volatility data to speed up the process.
+        with_volatility (bool, optional): If True, fetch volatility data (slower but more comprehensive).
     """
     if historical_dashboard_path:
         if period is None:
@@ -449,7 +449,7 @@ def run_fetch(period=None, historical_dashboard_path=None, skip_volatility=False
         else:
             logger.info(f"Fetching votes dashboard for period {period}")
 
-        dashboard = fetch_votes(period, skip_volatility)
+        dashboard = fetch_votes(period, with_volatility)
         if dashboard:
             save_votes_dashboard(dashboard, period)
             logger.info(f"✅ Dashboard for period {period} saved/overwritten.")

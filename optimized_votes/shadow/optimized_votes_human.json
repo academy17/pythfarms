@@ -1,28 +1,21 @@
 {
-  "total_expected_usd": 1066.89,
+  "total_expected_usd": 1841.63,
   "allocations": [
     {
-      "symbol": "CL-USDC-Anon-0.241%",
-      "pool": "0x9b480e05a9e907d8c7a1ecc676f66355dc1e4888",
-      "votes": 3445.7791876423707,
-      "pct": 57,
-      "exp_usd": 722.8
+      "symbol": "CL-NEST-YOLK-0.3%",
+      "pool": "0x43e1ac3298678f9e889fdd23a3ad1c6b7d13fc83",
+      "votes": 3345.852853942678,
+      "pct": 56,
+      "exp_usd": 1023.22
     },
     {
-      "symbol": "wS/GOGLZ",
-      "pool": "0xbd0313c1986f7ef59c8ea58cc85714ae2aa5b89d",
-      "votes": 2093.3847448131614,
-      "pct": 35,
-      "exp_usd": 282.18
-    },
-    {
-      "symbol": "CL-wS-x33-1.0%",
-      "pool": "0xcf0a945ed064ac32ec8d178f865f650a9f9a2fdb",
-      "votes": 484.17291908797785,
-      "pct": 8,
-      "exp_usd": 61.91
+      "symbol": "CL-USDC-U$D-0.125%",
+      "pool": "0x50145377c6042aaf09dd7e03a4149ae095997cf3",
+      "votes": 2677.4839976008334,
+      "pct": 44,
+      "exp_usd": 818.41
     }
   ],
-  "re_run": false,
-  "period": 2905
+  "re_run": true,
+  "period": 2906
 }

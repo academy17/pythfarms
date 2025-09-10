@@ -33,10 +33,9 @@ Fetch historical votes for a previous period (using an existing dashboard):
 python scripts/shadow/shadow_manager.py fetch --period 2898 --historical_dashboard_path data/shadow/historical/2898_votes_dashboard_170725.json
 ```
 
-Fetch votes and skip fetching volatility data:
+Fetch votes and include volatility data:
 ```bash
-python scripts/shadow/shadow_manager.py fetch --skip-volatility
-
+python scripts/shadow/shadow_manager.py fetch --with-volatility
 ```
 
 ### What It Does
@@ -69,6 +68,7 @@ This script is intended to be called from the manager (`shadow_manager.py`), but
 |----------------------------|-----------------------------------------------------|------------------------------------------------------------|
 | --period                   | Specify the period number to fetch                  | `--period 2899`                                            |
 | --historical_dashboard_path| Path to dashboard for historical fetch              | `--historical_dashboard_path data/shadow/2898_votes_dashboard.json` |
+| --with-volatility          | Include volatility data (slower but more comprehensive) | `--with-volatility`                                     |
 
 
 
@@ -191,33 +191,34 @@ python scripts/shadow/shadow_manager.py optimize --period 2899 --display
 
 ---
 
-## 3. lp_optimizer.py
+
+## 3. fetch_lp_data.py
 
 ### What It Does
 
-- Loads a dashboard file for a given period.
-- Uses an equal marginal utility algorithm to optimize liquidity provision (LP) across pools.
-- Calculates expected returns based on annualized fee data instead of using provided LP APR values.
-- Accounts for how adding liquidity affects the APR (dilution effect).
-- Provides weekly and annual return projections for each allocation.
-- Includes TVL information to give context about pool sizes.
-- Allows filtering to only include top N pools by TVL for more consistency.
+- Fetches pools from the Shadow API
+- Calculates emissions-based APR for both the current and next epoch
+- For each pool, calculates:
+  - Current epoch APR: Rewards being earned now based on votes from last epoch
+  - Next epoch APR: Expected rewards for next epoch based on current votes
+  - APR at different investment sizes (default: $1k, $10k, $50k)
+  - How investment size impacts APR due to dilution effects
+- Produces a comprehensive LP dashboard showing how APR scales with investment size
+- Helps identify optimal pools for LP positions based on emissions rewards
 
 ### Example Output
 
 ```
-================ LP OPTIMIZATION RESULTS ================
-Total Investment: $10000.00
-Expected Annual Return: $5250.57
-Expected Weekly Return: $100.97
-Expected Portfolio APR: 52.51%
-----------------------------------------------------------
-Pool                  Amount ($)    %      TVL     7d Fees  Ann. APR  Adj. APR  Weekly Return  Annual Return
-----------------------------------------------------------
-CL-USDC-x33-0.3%     $4277.38  42.77%   $1541    $52.70   177.87%   47.10%     $38.74    $2014.69
-CL-wS-Anon-0.3%      $2148.28  21.48%    $336     $9.61   148.62%   20.11%      $8.31     $432.10
-CL-USDC-SHADOW-1.0%  $1771.76  17.72%    $881    $10.95    64.67%   21.47%      $7.32     $380.48
-CL-wS-SHADOW-1.0%    $1388.61  13.89%  $20035   $714.58   185.46%  173.44%     $46.32    $2408.44
+================ LP DASHBOARD ================
+Date: 2025-09-10
+Showing top 30 pools by next epoch APR
+----------------------------------------------
+Pool                 TVL      Curr APR   Next APR  APR @ $1k  APR @ $10k APR @ $50k
+----------------------------------------------
+CL-USDC-stS-0.1047%   $231.26K    51.45%    50.89%     50.67%     48.92%     43.84%
+wS/GOGLZ              $371.86K    70.59%    48.63%     48.53%     47.73%     44.72%
+USDC/EUL                $0.09M     2.19%     2.05%      2.05%      2.04%      2.00%
+...
 ```
 
 ### Usage
@@ -225,51 +226,39 @@ CL-wS-SHADOW-1.0%    $1388.61  13.89%  $20035   $714.58   185.46%  173.44%     $
 Run via the manager (shadow_manager.py):
 
 ```bash
-python scripts/shadow/shadow_manager.py lp_optimize
+python scripts/shadow/shadow_manager.py lp_dashboard
 ```
 
 #### Flags
 
-| Flag         | Description                                         | Example                                                   |
-|--------------|-----------------------------------------------------|-----------------------------------------------------------|
-| --dashboard  | Path to votes dashboard file                        | `--dashboard input_data/shadow/votes_dashboard.json`      |
-| --amount     | Investment amount in USD                            | `--amount 10000`                                          |
-| --save       | Save results to file (default: True)                | `--save`                                                  |
-| --display    | Display results in terminal (default: True)         | `--display`                                               |
-| --top        | Only consider top N pools by TVL                    | `--top 30`                                                |
+| Flag         | Description                                         | Example                            |
+|--------------|-----------------------------------------------------|-----------------------------------|
+| --sizes      | Custom investment sizes to calculate APR for        | `--sizes 5000 25000 100000`       |
+| --top        | Number of top pools to display (default: 30)        | `--top 50`                        |
+| --no-save    | Don't save the dashboard to file                    | `--no-save`                       |
+| --no-display | Don't display the dashboard in terminal             | `--no-display`                    |
 
 #### Examples
 
-Optimize LP positions with interactive prompts:
+Generate default LP dashboard:
 ```bash
-python scripts/shadow/shadow_manager.py lp_optimize
+python scripts/shadow/shadow_manager.py lp_dashboard
 ```
 
-Optimize LP positions with specific parameters:
+Generate LP dashboard with custom investment sizes:
 ```bash
-python scripts/shadow/shadow_manager.py lp_optimize --amount 10000 --dashboard input_data/shadow/votes_dashboard.json
+python scripts/shadow/shadow_manager.py lp_dashboard --sizes 5000 25000 100000
 ```
 
-Optimize LP positions with only top pools by TVL:
+Show more pools in the dashboard:
 ```bash
-python scripts/shadow/shadow_manager.py lp_optimize --amount 10000 --dashboard input_data/shadow/votes_dashboard.json --top 30
+python scripts/shadow/shadow_manager.py lp_dashboard --top 50
 ```
 
 #### Output
 
-- `optimized_lp/shadow/{period}_optimized_lp_{date}.json`
-- `optimized_lp/shadow/optimized_lp.json`
-
-The output includes:
-- Total investment amount
-- Expected annual and weekly returns
-- Expected portfolio APR
-- Per-pool allocations with:
-  - Investment amount and percentage
-  - Pool TVL (Total Value Locked)
-  - 7-day fees
-  - Annualized and adjusted APR
-  - Expected weekly and annual returns
+- `lp_dashboard/shadow/lp_dashboard_{date}.json`
+- `lp_dashboard/shadow/lp_dashboard.json`
 
 ---
 

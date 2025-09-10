@@ -317,7 +317,7 @@ def save_calldata(result, owner):
         "_pools": pools,
         "_weights": weights
     }
-    path = f"optimized_lp/shadow/optimized_lp.json"
+    path = f"optimized_votes/shadow/optimized_votes_calldata.json"
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w") as f:
         json.dump(calldata, f, indent=2)
@@ -361,11 +361,7 @@ def run_optimize(period=None, save=True, is_historical=False, recompute=False):
     
     logger.info(f"Optimizing for period {period}")
     
-    # Determine dashboard path
-    if recompute:
-        logger.info("Recompute flag set - prompting for dashboard file path")
-        dashboard_path = input(f"Enter path to dashboard file for period {period} (e.g., input_data/shadow/votes_dashboard.json): ")
-    elif is_historical:
+    if is_historical:
         dashboard_path = input(f"Enter path to historical dashboard for period {period} (e.g., input_data/shadow/historical/{period}_votes_dashboard_ddmmyy.json): ")
     else:
         dashboard_path = f'input_data/shadow/{period}_votes_dashboard.json'

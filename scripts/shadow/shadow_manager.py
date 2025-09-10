@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import logging
-from lib import fetch_votes, optimizer, analytics, lp_optimizer
+from lib import fetch_votes, optimizer, analytics, lp_optimizer_old, fetch_lp_data
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -15,7 +15,7 @@ def main():
     fetch_parser.add_argument("--type", choices=["votes", "rewards", "all"], default="all", help="Type of data to fetch")
     fetch_parser.add_argument("--period", type=int, help="Period to fetch (default: current period)")
     fetch_parser.add_argument("--historical_dashboard_path", type=str, help="Path to existing dashboard for historical fetch")
-    fetch_parser.add_argument("--skip-volatility", action="store_true", help="Skip fetching volatility data to speed up the process")
+    fetch_parser.add_argument("--with-volatility", action="store_true", help="Include volatility data (slower but more comprehensive)")
 
     # Optimize subcommand
     optimize_parser = subparsers.add_parser("optimize", help="Run vote optimizer")
@@ -38,13 +38,20 @@ def main():
     lp_optimize_parser.add_argument("--display", action="store_true", default=True, help="Display results")
     lp_optimize_parser.add_argument("--top", type=int, help="Only consider top N pools by TVL")
 
+    # LP Dashboard subcommand
+    lp_dashboard_parser = subparsers.add_parser("lp_dashboard", help="Generate APR dashboard for LP positions at different investment sizes")
+    lp_dashboard_parser.add_argument("--sizes", type=float, nargs="+", help="Investment sizes to calculate APR for (default: 1000, 10000, 50000)")
+    lp_dashboard_parser.add_argument("--top", type=int, default=30, help="Number of top pools to display (default: 30)")
+    lp_dashboard_parser.add_argument("--no-save", action="store_true", help="Don't save dashboard to file")
+    lp_dashboard_parser.add_argument("--no-display", action="store_true", help="Don't display dashboard")
+
     args = parser.parse_args()
 
     if args.command == "fetch":
         logger.info(f"Fetching data for period {args.period if args.period else '[current]'}")
-        if args.skip_volatility:
-            logger.info("Skipping volatility data collection")
-        fetch_votes.run_fetch(period=args.period, historical_dashboard_path=args.historical_dashboard_path, skip_volatility=args.skip_volatility)
+        if args.with_volatility:
+            logger.info("Including volatility data collection (may take longer)")
+        fetch_votes.run_fetch(period=args.period, historical_dashboard_path=args.historical_dashboard_path, with_volatility=args.with_volatility)
     elif args.command == "optimize":
         save = not args.display
         logger.info(f"Optimizing votes for period {args.period if args.period else '[next/historical]'}")
@@ -61,12 +68,22 @@ def main():
     
     elif args.command == "lp_optimize":
         logger.info("Running LP optimization")
-        lp_optimizer.run_lp_optimize(
+        lp_optimizer_old.run_lp_optimize(
             dashboard_path=args.dashboard,
             investment_amount=args.amount,
             save=args.save,
             display=args.display,
             top_n_pools=args.top
+        )
+    
+    elif args.command == "lp_dashboard":
+        logger.info("Generating LP APR dashboard")
+        investment_sizes = args.sizes if args.sizes else None
+        fetch_lp_data.run_fetch_lp_data(
+            investment_sizes=investment_sizes,
+            display=not args.no_display,
+            save=not args.no_save,
+            top_n=args.top
         )
     
     else:

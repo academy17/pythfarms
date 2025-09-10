@@ -1,26 +1,33 @@
 {
-  "total_expected_usd": 0.01,
+  "total_expected_usd": 183.91,
   "allocations": [
     {
-      "symbol": "vAMM-WETH/VRTX",
-      "pool": "0xe20eeb487186ec2e9272b9d2b5732d31e115d3e3",
-      "votes": 585.88230712284,
-      "pct": 73,
-      "exp_usd": 0.01
+      "symbol": "WETH/DIEM",
+      "pool": "0x9b5afe0fea549df6c1a56f3aee6426969b1ac323",
+      "votes": 751.2810614993354,
+      "pct": 94,
+      "exp_usd": 161.78
     },
     {
-      "symbol": "sAMM-USDC/USD+",
-      "pool": "0x418457ca08fa5ec77f811b105f2c585cd051ac10",
-      "votes": 131.41132467124422,
-      "pct": 16,
-      "exp_usd": 0.0
+      "symbol": "vAMM-GNUS/AERO",
+      "pool": "0x73dddbe505f9197138785e1ccfa2988705ce4bfd",
+      "votes": 36.861594932049364,
+      "pct": 5,
+      "exp_usd": 16.1
     },
     {
-      "symbol": "WETH/SOLACE",
-      "pool": "0xcafd76397efc53129e7a967a4b746d1899b479fa",
-      "votes": 83.60592458306557,
-      "pct": 10,
-      "exp_usd": 0.0
+      "symbol": "sAMM-DAI/USDC",
+      "pool": "0x67b00b46fa4f4f24c03855c5c8013c0b938b3eec",
+      "votes": 11.123712091399193,
+      "pct": 1,
+      "exp_usd": 5.61
+    },
+    {
+      "symbol": "vAMM-BNKR/AERO",
+      "pool": "0x50e63b43c4d7d8522bab55070ba03e6eb6795d97",
+      "votes": 1.6331878543648364,
+      "pct": 0,
+      "exp_usd": 0.42
     }
   ]
 }
