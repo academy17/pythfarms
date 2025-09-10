@@ -1,5 +1,7 @@
 # Shadow Protocol Vote Fetcher & Optimizer
 
+Note: see in example subsection or in scripts/readme.md how to fetch data (incl. ts data for vol or not), optimize, and get lp output
+
 This module provides two main tools for working with Shadow protocol voting data:
 
 - **fetch_votes**: Fetches pool data and on-chain votes for a given period, saving a dashboard JSON file for analytics and optimization. 
