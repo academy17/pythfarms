@@ -1,7 +1,15 @@
 .env
+.venv/
+venv/
+.enotes.md
+.ehowto.md
+.gitignore
+
+
 
 # Data directories
 /input_data/
 /optimized_votes/
 /analytics/
+/optimized_lp/
 /optimized_lp_old/
