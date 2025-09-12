@@ -387,9 +387,6 @@ def filter_votable_pools(pools):
         if "pool" not in p:
             p["pool"] = p.get("lp", zero_addr)
     
-    # Sort by liquidity
-    votable.sort(key=lambda x: int(x["liquidity"]), reverse=True)
-    
     logger.info(f"→ {len(votable)} votable pools after filtering")
     return votable
 
@@ -460,6 +457,7 @@ def enrich_pools(w3, pools):
     enriched_pools.sort(key=lambda x: x.get("tvl_usd", 0), reverse=True)
     
     logger.info(f"Enriched {len(enriched_pools)} pools with TVL data")
+    logger.info(f"Top 3 pools by TVL: {[f'{p.get('symbol')} (${p.get('tvl_usd'):,.2f})' for p in enriched_pools[:3]]}")
     return enriched_pools
 
 def calculate_apr_at_investment_size(pool_data, investment_amount, rewards_usd):
@@ -514,15 +512,20 @@ def calculate_lp_data(pools, investment_sizes=None):
     if not w3:
         logger.error("❌ Failed to connect to RPC")
         return []
-    
-    # Get current period
-    current_period = get_current_epoch()
-    
+        
     # Get total weight
-    total_weight = get_total_weight()
+    on_chain_total_weight = get_total_weight()
     
     # Get relay votes
     relay_votes = fetch_relay_votes(w3, pools)
+    
+    # Calculate total relay votes
+    total_relay_votes = sum(relay_votes.values())
+    logger.info(f"ℹ️ Total relay votes: {total_relay_votes}")
+    
+    # Add relay votes to on-chain weight for grand total
+    adjusted_total_weight = on_chain_total_weight + total_relay_votes
+    logger.info(f"ℹ️ Adjusted total weight (including relays): {adjusted_total_weight}")
     
     # Get weekly emissions and price
     weekly_emissions = get_weekly_emissions()
@@ -545,11 +548,11 @@ def calculate_lp_data(pools, investment_sizes=None):
         # Add relay votes to regular votes for total weight
         total_pool_weight = weight + relay_weight
         
-        # Calculate weight percentage based on combined weight
-        weight_pct = (total_pool_weight / total_weight * 100) if total_weight > 0 else Decimal('0')
+        # Calculate weight percentage based on combined weight and adjusted total
+        weight_pct = (total_pool_weight / adjusted_total_weight * 100) if adjusted_total_weight > 0 else Decimal('0')
         
-        # Calculate rewards based on combined weight allocation
-        rewards = (total_pool_weight / total_weight) * weekly_emissions_usd if total_weight > 0 else Decimal('0')
+        # Calculate rewards based on combined weight allocation and adjusted total
+        rewards = (total_pool_weight / adjusted_total_weight) * weekly_emissions_usd if adjusted_total_weight > 0 else Decimal('0')
         
         # Calculate base APR
         tvl_usd = Decimal(str(pool.get('tvl_usd', 0)))
@@ -570,7 +573,7 @@ def calculate_lp_data(pools, investment_sizes=None):
         updated_pool.update({
             'weight': float(weight),
             'relay_votes': float(relay_weight),
-            'total_weight': float(total_pool_weight),
+            'total_pool_weight': float(total_pool_weight),
             'weight_pct': float(weight_pct),
             'weekly_rewards': float(rewards),
             'apr': float(base_apr),
@@ -595,14 +598,28 @@ def save_lp_dashboard(lp_data, investment_sizes=None):
     if investment_sizes is None:
         investment_sizes = DEFAULT_INVESTMENT_SIZES
     
+    w3 = get_web3()
+    if not w3:
+        logger.error("❌ Failed to connect to RPC")
+        return None
+    
     current_period = get_current_epoch()
     date_str = datetime.datetime.now().strftime("%Y%m%d")
+    
+    # Get weights for context
+    on_chain_weight = get_total_weight()
+    relay_votes = fetch_relay_votes(w3, lp_data)
+    total_relay_votes = sum(relay_votes.values())
+    adjusted_total_weight = on_chain_weight + total_relay_votes
     
     # Create dashboard data
     dashboard = {
         'period': current_period,
         'date': date_str,
         'investment_sizes': [float(size) for size in investment_sizes],
+        'on_chain_total_weight': float(on_chain_weight),
+        'total_relay_votes': float(total_relay_votes),
+        'adjusted_total_weight': float(adjusted_total_weight),
         'pools': lp_data
     }
     
@@ -637,6 +654,19 @@ def display_lp_dashboard(pools, investment_sizes=None, top_n=30):
     # Print header
     print("\n================ AERO LP DASHBOARD ================")
     print(f"Date: {datetime.datetime.now().strftime('%Y-%m-%d')}")
+    
+    # Get total weights for display
+    w3 = get_web3()
+    if w3:
+        on_chain_weight = get_total_weight()
+        relay_votes_data = fetch_relay_votes(w3, pools)
+        total_relay_votes = sum(relay_votes_data.values())
+        adjusted_total_weight = on_chain_weight + total_relay_votes
+        
+        print(f"On-chain weight: {on_chain_weight:,.2f}")
+        print(f"Total relay votes: {total_relay_votes:,.2f}")
+        print(f"Adjusted total weight: {adjusted_total_weight:,.2f}")
+    
     print(f"Showing top {len(display_pools)} pools by APR")
     print("--------------------------------------------------")
     
@@ -709,15 +739,16 @@ def run_fetch_lp_data(investment_sizes=None, display=True, save=True, top_n=30):
     # Step 2: Filter votable pools
     votable_pools = filter_votable_pools(all_pools)
     
-    # Step 3: Use only top N pools for performance
-    top_pools = votable_pools[:top_n]
-    logger.info(f"→ Using top {len(top_pools)} pools by TVL")
+    # Step 3: Enrich pools with symbols and TVL
+    enriched_pools = enrich_pools(w3, votable_pools)
     
-    # Step 4: Enrich pools with symbols and TVL
-    enriched_pools = enrich_pools(w3, top_pools)
+    # Step 4: Sort by TVL and select top N
+    enriched_pools.sort(key=lambda x: x.get("tvl_usd", 0), reverse=True)
+    top_pools = enriched_pools[:top_n]
+    logger.info(f"→ Selected top {len(top_pools)} pools by TVL")
     
     # Step 5: Calculate LP APR data
-    lp_data = calculate_lp_data(enriched_pools, investment_sizes)
+    lp_data = calculate_lp_data(top_pools, investment_sizes)
     
     # Step 6: Display dashboard
     if display:
