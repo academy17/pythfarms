@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-# filepath: d:\Pyth\pythfarms\scripts\aero\lib\fetch_lp_data.py
+
 import os
 import json
 import requests
@@ -9,6 +8,17 @@ from decimal import Decimal, getcontext, ROUND_HALF_UP
 from web3 import Web3
 from web3.exceptions import ContractLogicError
 from dotenv import load_dotenv
+
+#!/usr/bin/env python3
+VOTER_ADDRESS = os.getenv("VOTER_ADDRESS")
+VE_ADDRESS = os.getenv("VE_ADDRESS")
+MINTER_ADDRESS = os.getenv("MINTER_ADDRESS", "0xeb018363f0a9af8f91f06fee6613a751b2a33fe5")  # Default address provided
+AERO_ADDRESS = os.getenv("AERO_ADDRESS")
+PAGE_SIZE = int(os.getenv("PAGE_SIZE", 200))
+
+# Relay support
+RELAY_ACCOUNT = os.getenv("RELAY_ACCOUNT")
+RELAY_SUGAR_ADDRESS = os.getenv("RELAY_SUGAR_ADDRESS")
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -28,7 +38,9 @@ MINTER_ADDRESS = os.getenv("MINTER_ADDRESS", "0xeb018363f0a9af8f91f06fee6613a751
 AERO_ADDRESS = os.getenv("AERO_ADDRESS")
 PAGE_SIZE = int(os.getenv("PAGE_SIZE", 200))
 
-# CoinGecko URLs
+# Relay support
+RELAY_ACCOUNT = os.getenv("RELAY_ACCOUNT")
+RELAY_SUGAR_ADDRESS = os.getenv("RELAY_SUGAR_ADDRESS")
 COINGECKO_SIMPLE_PRICE_URL = "https://api.coingecko.com/api/v3/simple/price"
 COINGECKO_COINS_LIST_URL = "https://api.coingecko.com/api/v3/coins/list?include_platform=true"
 COINGECKO_AERO_ID = os.getenv("COINGECKO_AERO_ID", "aerodrome-finance")  # Default value
@@ -46,6 +58,7 @@ LP_SUGAR_ABI = load_abi("LpSugar")
 REWARDS_SUGAR_ABI = load_abi("RewardsSugar")
 VOTER_ABI = load_abi("Voter")
 MINTER_ABI = load_abi("Minter")
+RELAY_SUGAR_ABI = load_abi("RelaySugar")  # Add RelaySugar ABI
 
 ERC20_ABI = [
     {
@@ -167,7 +180,8 @@ def get_pool_weight(pool_addr):
             abi=VOTER_ABI
         )
         
-        # For Aero, we use weights(gauge) to get the votes/weight for a pool
+        # For Aero, we use weights(pool) to get the votes/weight for a pool
+        # The weights function expects the pool address, not the gauge address
         weight = voter.functions.weights(w3.to_checksum_address(pool_addr)).call()
         return from_wei(weight)
     except Exception as e:
@@ -211,6 +225,51 @@ def get_weekly_emissions():
     except Exception as e:
         logger.error(f"❌ Failed to get weekly emissions: {e}")
         return Decimal('0')
+
+def fetch_relay_votes(w3, pools):
+    """Fetch relay votes data"""
+    logger.info("🔍 Fetching relay votes data...")
+    
+    if not RELAY_ACCOUNT or not RELAY_SUGAR_ADDRESS:
+        logger.warning("⚠️ Missing RELAY_ACCOUNT or RELAY_SUGAR_ADDRESS, skipping relay votes fetch")
+        return {}
+    
+    # Create a mapping of pool addresses to symbols for quick lookup
+    pool_symbols = {p.get("pool", "").lower(): p.get("symbol", "") for p in pools if "pool" in p}
+    
+    try:
+        # Create contract instance
+        relay_sugar = w3.eth.contract(
+            address=w3.to_checksum_address(RELAY_SUGAR_ADDRESS),
+            abi=RELAY_SUGAR_ABI
+        )
+        
+        # Fetch all relays for the account
+        relays_raw = relay_sugar.functions.all(w3.to_checksum_address(RELAY_ACCOUNT)).call()
+        logger.info(f"→ Retrieved {len(relays_raw)} Relay entries")
+        
+        relay_totals = {}
+        for raw in relays_raw:
+            # Parse relay struct
+            decimals_raw = raw[1]
+            voting_amount_raw = raw[3]
+            votes_arr = raw[6] if isinstance(raw[6], list) else []
+            
+            voting_amount_hr = Decimal(voting_amount_raw) / (Decimal(10) ** int(decimals_raw))
+            
+            # Add votes to totals
+            if voting_amount_hr > 0:
+                for (pool_addr, weight_raw) in votes_arr:
+                    pool_l = pool_addr.lower()
+                    weight_hr = Decimal(weight_raw) / (Decimal(10) ** 18)
+                    relay_totals[pool_l] = relay_totals.get(pool_l, Decimal(0)) + weight_hr
+        
+        logger.info(f"✅ Processed relay votes for {len(relay_totals)} pools")
+        return relay_totals
+    
+    except Exception as e:
+        logger.error(f"❌ Error fetching relay votes: {e}")
+        return {}
 
 def fetch_coingecko_token_ids(tokens):
     """Map token addresses to CoinGecko IDs"""
@@ -323,6 +382,11 @@ def filter_votable_pools(pools):
         and p.get("gauge_alive", False) is True
     ]
     
+    # Add pool address to each pool for vote weight calculation
+    for p in votable:
+        if "pool" not in p:
+            p["pool"] = p.get("lp", zero_addr)
+    
     # Sort by liquidity
     votable.sort(key=lambda x: int(x["liquidity"]), reverse=True)
     
@@ -433,8 +497,11 @@ def calculate_lp_data(pools, investment_sizes=None):
     """
     Calculate LP APR data for all pools at different investment sizes
     
+    This function calculates APR based on the vote weights for each pool,
+    including relay votes to get a more accurate picture.
+    
     Args:
-        pools: List of pool data
+        pools: List of pool data (each pool should have a 'pool' field with the pool address)
         investment_sizes: List of investment amounts to calculate APR for
         
     Returns:
@@ -443,11 +510,19 @@ def calculate_lp_data(pools, investment_sizes=None):
     if investment_sizes is None:
         investment_sizes = DEFAULT_INVESTMENT_SIZES
     
+    w3 = get_web3()
+    if not w3:
+        logger.error("❌ Failed to connect to RPC")
+        return []
+    
     # Get current period
     current_period = get_current_epoch()
     
     # Get total weight
     total_weight = get_total_weight()
+    
+    # Get relay votes
+    relay_votes = fetch_relay_votes(w3, pools)
     
     # Get weekly emissions and price
     weekly_emissions = get_weekly_emissions()
@@ -458,16 +533,23 @@ def calculate_lp_data(pools, investment_sizes=None):
     
     updated_pools = []
     for pool in pools:
-        pool_address = pool.get('gauge')  # Use gauge address for voting
+        # Use pool address for voting weights, not gauge address
+        pool_address = pool.get('pool')
         
-        # Get weight for this pool
+        # Get on-chain weight for this pool
         weight = get_pool_weight(pool_address)
         
-        # Calculate weight percentage
-        weight_pct = (weight / total_weight * 100) if total_weight > 0 else Decimal('0')
+        # Get relay votes for this pool
+        relay_weight = relay_votes.get(pool_address.lower(), Decimal('0'))
         
-        # Calculate rewards based on weight allocation
-        rewards = (weight / total_weight) * weekly_emissions_usd if total_weight > 0 else Decimal('0')
+        # Add relay votes to regular votes for total weight
+        total_pool_weight = weight + relay_weight
+        
+        # Calculate weight percentage based on combined weight
+        weight_pct = (total_pool_weight / total_weight * 100) if total_weight > 0 else Decimal('0')
+        
+        # Calculate rewards based on combined weight allocation
+        rewards = (total_pool_weight / total_weight) * weekly_emissions_usd if total_weight > 0 else Decimal('0')
         
         # Calculate base APR
         tvl_usd = Decimal(str(pool.get('tvl_usd', 0)))
@@ -487,6 +569,8 @@ def calculate_lp_data(pools, investment_sizes=None):
         updated_pool = pool.copy()
         updated_pool.update({
             'weight': float(weight),
+            'relay_votes': float(relay_weight),
+            'total_weight': float(total_pool_weight),
             'weight_pct': float(weight_pct),
             'weekly_rewards': float(rewards),
             'apr': float(base_apr),
@@ -557,7 +641,7 @@ def display_lp_dashboard(pools, investment_sizes=None, top_n=30):
     print("--------------------------------------------------")
     
     # Print column headers
-    header = f"{'Pool':20} {'TVL':>12} {'APR':>10}"
+    header = f"{'Pool':20} {'TVL':>12} {'Weight':>10} {'Relay':>10} {'APR':>8}"
     for size_str in investment_str:
         header += f" {f'APR @ {size_str}':>10}"
     print(header)
@@ -574,7 +658,10 @@ def display_lp_dashboard(pools, investment_sizes=None, top_n=30):
         else:  # 1M or more
             tvl = f"${tvl_val/1000000:.2f}M".rjust(12)
         
-        apr = f"{pool.get('apr', 0):.2f}%".rjust(10)
+        # Format weights
+        weight = f"{pool.get('weight', 0):.2f}".rjust(10)
+        relay_votes = f"{pool.get('relay_votes', 0):.2f}".rjust(10)
+        apr = f"{pool.get('apr', 0):.2f}%".rjust(8)
         
         line = f"{symbol} {tvl} {apr}"
         
