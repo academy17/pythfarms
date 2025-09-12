@@ -408,6 +408,45 @@ Forecasted APR: 16.72%
 ==================================================
 ```
 
+
+## 3. fetch_lp_data.py
+
+### What It Does
+
+- Fetches pools from Aerodrome
+- Calculates emissions-based APR for both the current and next epoch
+- For each pool, calculates:
+  - Current epoch APR: Rewards being earned now based on votes from last epoch
+  - Next epoch APR: Expected rewards for next epoch based on current votes
+  - APR at different investment sizes (default: $1k, $10k, $50k)
+  - How investment size impacts APR due to dilution effects
+- Produces a comprehensive LP dashboard showing how APR scales with investment size
+- Helps identify optimal pools for LP positions based on emissions rewards
+
+### Example Output
+
+```
+================ AERO LP DASHBOARD ================
+Date: 2025-09-12
+Showing top 30 pools by APR
+--------------------------------------------------
+Pool                          TVL        APR APR @ $1.0k APR @ $10.0k APR @ $50.0k
+--------------------------------------------------
+WETH/noice             $108.17K   2106.82%   2087.53%   1928.53%   1440.81%
+ZORA/WETH              $368.33K    804.80%    802.63%    783.53%    708.61%
+WETH/TOSHI             $270.85K    666.61%    664.16%    642.88%    562.73%
+Mog/WETH                $70.73K    558.90%    551.11%    489.67%    327.43%
+...
+```
+
+### Usage
+
+Run via the manager (shadow_manager.py):
+
+```bash
+python scripts/aero/aero_manager.py lp_dashboard
+```
+
 ## Environment Setup
 
 Ensure your .env file contains the following variables:
