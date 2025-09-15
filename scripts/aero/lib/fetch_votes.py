@@ -495,6 +495,7 @@ def create_votes_dashboard(w3, pools, relays=None):
     
     # Add weights to pools
     augmented_pools = []
+    pool_summed_weights = Decimal(0)
     for entry in pools:
         pool_addr = entry["pool"].lower()
         
@@ -503,6 +504,8 @@ def create_votes_dashboard(w3, pools, relays=None):
         try:
             raw = voter.functions.weights(w3.to_checksum_address(pool_addr)).call()
             weight_hr = Decimal(raw) / Decimal(10**18)
+            # Sum the weights for all pools
+            pool_summed_weights += weight_hr
         except Exception:
             pass
         
@@ -524,10 +527,13 @@ def create_votes_dashboard(w3, pools, relays=None):
         
         augmented_pools.append(e)
     
+    logger.info(f"Sum of all pool weights: {pool_summed_weights}")
+    
     # Create dashboard
     dashboard = {
         "total_weight": float(total_weight),
         "our_voting_power": float(our_nft_weight),
+        "pool_summed_weights": float(pool_summed_weights),
         "pools": augmented_pools
     }
     

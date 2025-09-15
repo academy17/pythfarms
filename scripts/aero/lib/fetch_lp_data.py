@@ -545,14 +545,14 @@ def calculate_lp_data(pools, investment_sizes=None):
         # Get relay votes for this pool
         relay_weight = relay_votes.get(pool_address.lower(), Decimal('0'))
         
-        # Add relay votes to regular votes for total weight
-        total_pool_weight = weight + relay_weight
+        # Store relay weight for reference but don't use it in calculations currently
+        total_pool_weight = weight  # Remove relay_weight from this calculation
         
-        # Calculate weight percentage based on combined weight and adjusted total
-        weight_pct = (total_pool_weight / adjusted_total_weight * 100) if adjusted_total_weight > 0 else Decimal('0')
+        # Calculate weight percentage based on on-chain weight only
+        weight_pct = (weight / on_chain_total_weight * 100) if on_chain_total_weight > 0 else Decimal('0')
         
-        # Calculate rewards based on combined weight allocation and adjusted total
-        rewards = (total_pool_weight / adjusted_total_weight) * weekly_emissions_usd if adjusted_total_weight > 0 else Decimal('0')
+        # Calculate rewards based on on-chain weight allocation only
+        rewards = (weight / on_chain_total_weight) * weekly_emissions_usd if on_chain_total_weight > 0 else Decimal('0')
         
         # Calculate base APR
         tvl_usd = Decimal(str(pool.get('tvl_usd', 0)))
@@ -620,10 +620,9 @@ def save_lp_dashboard(lp_data, investment_sizes=None):
         'on_chain_total_weight': float(on_chain_weight),
         'total_relay_votes': float(total_relay_votes),
         'adjusted_total_weight': float(adjusted_total_weight),
+        'note': "APR calculations now use on-chain weight only, ignoring relay votes",
         'pools': lp_data
-    }
-    
-    # Save to files
+    }    # Save to files
     dated_path = f'lp_dashboard/aero/lp_dashboard_{date_str}.json'
     current_path = f'lp_dashboard/aero/lp_dashboard.json'
     
@@ -645,8 +644,9 @@ def display_lp_dashboard(pools, investment_sizes=None, top_n=30):
     if investment_sizes is None:
         investment_sizes = DEFAULT_INVESTMENT_SIZES
     
-    # Limit to top N pools
-    display_pools = pools[:min(top_n, len(pools))]
+    # Sort by APR for display and limit to top N pools
+    sorted_pools = sorted(pools, key=lambda x: x.get('apr', 0), reverse=True)
+    display_pools = sorted_pools[:min(top_n, len(sorted_pools))]
     
     # Format investment sizes for display
     investment_str = [f"${size/1000}k" for size in investment_sizes]
@@ -664,8 +664,9 @@ def display_lp_dashboard(pools, investment_sizes=None, top_n=30):
         adjusted_total_weight = on_chain_weight + total_relay_votes
         
         print(f"On-chain weight: {on_chain_weight:,.2f}")
-        print(f"Total relay votes: {total_relay_votes:,.2f}")
+        print(f"Total relay votes: {total_relay_votes:,.2f} (not used in APR calculation)")
         print(f"Adjusted total weight: {adjusted_total_weight:,.2f}")
+        print(f"NOTE: APR calculations now use on-chain weight only, ignoring relay votes")
     
     print(f"Showing top {len(display_pools)} pools by APR")
     print("--------------------------------------------------")
@@ -742,19 +743,15 @@ def run_fetch_lp_data(investment_sizes=None, display=True, save=True, top_n=30):
     # Step 3: Enrich pools with symbols and TVL
     enriched_pools = enrich_pools(w3, votable_pools)
     
-    # Step 4: Sort by TVL and select top N
-    enriched_pools.sort(key=lambda x: x.get("tvl_usd", 0), reverse=True)
-    top_pools = enriched_pools[:top_n]
-    logger.info(f"→ Selected top {len(top_pools)} pools by TVL")
+    # Step 4: Calculate LP APR data for all votable pools
+    # We calculate APR for all pools even though we might only display the top N
+    lp_data = calculate_lp_data(enriched_pools, investment_sizes)
     
-    # Step 5: Calculate LP APR data
-    lp_data = calculate_lp_data(top_pools, investment_sizes)
-    
-    # Step 6: Display dashboard
+    # Step 5: Display dashboard - only show top pools by APR
     if display:
         display_lp_dashboard(lp_data, investment_sizes, top_n)
     
-    # Step 7: Save dashboard
+    # Step 6: Save dashboard - save ALL pools to ensure complete data for other tools
     if save:
         save_lp_dashboard(lp_data, investment_sizes)
     
