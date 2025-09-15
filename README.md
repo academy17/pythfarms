@@ -408,6 +408,62 @@ Forecasted APR: 16.72%
 ==================================================
 ```
 
+## 4. lp_optimized.py
+
+### What It Does
+
+- Simulates optimal vote allocation based on current votes and bribes
+- Assumes that the remaining votes (total vote power minus current votes) will be allocated optimally
+- Fetches total potential voting power from the veAERO contract
+- Calculates what APRs would look like if remaining votes were allocated according to equal marginal strategy
+- Shows how LPs could benefit from the simulated optimal voting scenario
+- Helps identify pools that might receive higher vote weight in the future
+- Requires a votes_dashboard and lp_dashboard to compute the optimized votes and the aprs from them.
+
+### Example Output
+
+```
+===== Top 30 Pools by APR (Optimized) =====
+1. WETH/USDC - APR: 123.45% - TVL: $62,439,102.55 - Weight: 15.23%
+2. WETH/cbBTC - APR: 92.31% - TVL: $29,837,389.91 - Weight: 8.76%
+3. USDC/cbBTC - APR: 78.65% - TVL: $25,160,849.28 - Weight: 5.43%
+...
+```
+
+### Usage
+
+Run via the manager (aero_manager.py):
+
+```bash
+python scripts/aero/aero_manager.py lp_optimized
+```
+
+#### Flags
+
+| Flag         | Description                                           | Example                            |
+|--------------|-------------------------------------------------------|-----------------------------------|
+| --votes      | Path to votes dashboard JSON                          | `--votes input_data/custom.json`  |
+| --lp         | Path to LP dashboard JSON                             | `--lp lp_dashboard/custom.json`   |
+| --output     | Path to save optimized LP dashboard                   | `--output custom/output.json`     |
+| --top        | Number of top pools to display (default: 30)          | `--top 50`                        |
+| --no-display | Don't display the dashboard in terminal               | `--no-display`                    |
+
+#### Examples
+
+Generate default optimized LP dashboard:
+```bash
+python scripts/aero/aero_manager.py lp_optimized
+```
+
+Use custom input files:
+```bash
+python scripts/aero/aero_manager.py lp_optimized --votes custom_votes.json --lp custom_lp.json
+```
+
+#### Output
+
+- `lp_optimized/aero/optimized_lp.json`: Contains optimized LP dashboard with simulated APRs
+
 
 ## 3. fetch_lp_data.py
 
