@@ -130,9 +130,9 @@ def fetch_geckoterminal_volatility(pool_address, network="base"):
         volatility = {
             'current_price': metrics['current_price'],
             'price_range': {
-                'high': metrics['high'],
-                'low': metrics['low'],
-                'range': metrics['high'] - metrics['low'],
+                'high': metrics['high_close'],
+                'low': metrics['low_close'],
+                'range': metrics['high_close'] - metrics['low_close'],
                 'mid_price': metrics['mean_price'],
                 'volatility_percentage': metrics['volatility_percentage'],
                 'std_dev': metrics['std_dev'],
