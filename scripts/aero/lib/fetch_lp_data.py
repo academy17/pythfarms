@@ -423,6 +423,15 @@ def enrich_pools(w3, pools):
             symbol = f"{sym0}/{sym1}"
             pool["symbol"] = symbol
         
+        # Add type_name based on pool type
+        pool_type = pool.get("type", -1)
+        if pool_type == 0:
+            pool["type_name"] = "Stable"
+        elif pool_type == 1:
+            pool["type_name"] = "Volatile"
+        else:
+            pool["type_name"] = "Concentrated Liquidity"
+        
         # Calculate TVL in USD
         token0 = pool.get("token0", "").lower()
         token1 = pool.get("token1", "").lower()
@@ -575,7 +584,7 @@ def calculate_lp_data(pools, investment_sizes=None):
             'relay_votes': float(relay_weight),
             'total_pool_weight': float(total_pool_weight),
             'weight_pct': float(weight_pct),
-            'weekly_rewards': float(rewards),
+            'weekly_rewards_usd': float(rewards),
             'apr': float(base_apr),
             'apr_by_investment': {str(size): float(apr) for size, apr in apr_by_investment.items()}
         })
@@ -585,7 +594,41 @@ def calculate_lp_data(pools, investment_sizes=None):
     # Sort by APR, descending
     updated_pools.sort(key=lambda x: x.get('apr', 0), reverse=True)
     
-    return updated_pools
+    # Filter the fields to keep only what's needed
+    cleaned_pools = []
+    for pool in updated_pools:
+        # Keep only the required fields for each pool
+        cleaned_pool = {
+            'lp': pool.get('lp'),
+            'symbol': pool.get('symbol'),
+            'decimals': pool.get('decimals'),
+            'liquidity': pool.get('liquidity'),
+            'type': pool.get('type'),
+            'type_name': pool.get('type_name'),
+            'token0': pool.get('token0'),
+            'token1': pool.get('token1'),
+            'gauge': pool.get('gauge'),
+            'gauge_alive': pool.get('gauge_alive'),
+            'emissions': pool.get('emissions'),
+            'pool_fee': pool.get('pool_fee'),
+            'token0_fees': pool.get('token0_fees'),
+            'token1_fees': pool.get('token1_fees'),
+            'tvl_usd': pool.get('tvl_usd'),
+            'token0_price': pool.get('token0_price'),
+            'token1_price': pool.get('token1_price'),
+            'relay_votes': pool.get('relay_votes'),
+            'total_pool_weight': pool.get('total_pool_weight'),
+            'weight_pct': pool.get('weight_pct'),
+            'weekly_rewards_usd': pool.get('weekly_rewards_usd'),
+            'apr': pool.get('apr'),
+            'apr_by_investment': pool.get('apr_by_investment')
+        }
+        cleaned_pools.append(cleaned_pool)
+    
+    # Sort by TVL, descending
+    cleaned_pools.sort(key=lambda x: x.get('tvl_usd', 0), reverse=True)
+    
+    return cleaned_pools
 
 def save_lp_dashboard(lp_data, investment_sizes=None):
     """
@@ -620,7 +663,7 @@ def save_lp_dashboard(lp_data, investment_sizes=None):
         'on_chain_total_weight': float(on_chain_weight),
         'total_relay_votes': float(total_relay_votes),
         'adjusted_total_weight': float(adjusted_total_weight),
-        'note': "APR calculations now use on-chain weight only, ignoring relay votes",
+        'note': "APR calculations now use on-chain weight only, relay votes are implied and carried over from last epoch",
         'pools': lp_data
     }    # Save to files
     dated_path = f'lp_dashboard/aero/lp_dashboard_{date_str}.json'
@@ -644,8 +687,8 @@ def display_lp_dashboard(pools, investment_sizes=None, top_n=30):
     if investment_sizes is None:
         investment_sizes = DEFAULT_INVESTMENT_SIZES
     
-    # Sort by APR for display and limit to top N pools
-    sorted_pools = sorted(pools, key=lambda x: x.get('apr', 0), reverse=True)
+    # Sort by TVL for display and limit to top N pools
+    sorted_pools = sorted(pools, key=lambda x: x.get('tvl_usd', 0), reverse=True)
     display_pools = sorted_pools[:min(top_n, len(sorted_pools))]
     
     # Format investment sizes for display
@@ -668,11 +711,11 @@ def display_lp_dashboard(pools, investment_sizes=None, top_n=30):
         print(f"Adjusted total weight: {adjusted_total_weight:,.2f}")
         print(f"NOTE: APR calculations now use on-chain weight only, ignoring relay votes")
     
-    print(f"Showing top {len(display_pools)} pools by APR")
+    print(f"Showing top {len(display_pools)} pools by TVL")
     print("--------------------------------------------------")
     
     # Print column headers
-    header = f"{'Pool':20} {'TVL':>12} {'Weight':>10} {'Relay':>10} {'APR':>8}"
+    header = f"{'Pool':20} {'TVL':>12} {'Weight':>10} {'APR':>8}"
     for size_str in investment_str:
         header += f" {f'APR @ {size_str}':>10}"
     print(header)
@@ -690,11 +733,17 @@ def display_lp_dashboard(pools, investment_sizes=None, top_n=30):
             tvl = f"${tvl_val/1000000:.2f}M".rjust(12)
         
         # Format weights
-        weight = f"{pool.get('weight', 0):.2f}".rjust(10)
-        relay_votes = f"{pool.get('relay_votes', 0):.2f}".rjust(10)
+        weight_val = pool.get('total_pool_weight', 0)
+        if weight_val < 1000:
+            weight = f"{weight_val:.2f}".rjust(10)
+        elif weight_val < 1000000:  # Less than 1M
+            weight = f"{weight_val/1000:.2f}K".rjust(10)
+        else:  # 1M or more
+            weight = f"{weight_val/1000000:.2f}M".rjust(10)
+            
         apr = f"{pool.get('apr', 0):.2f}%".rjust(8)
         
-        line = f"{symbol} {tvl} {apr}"
+        line = f"{symbol} {tvl} {weight} {apr}"
         
         # Add APR at different investment sizes
         apr_by_inv = pool.get('apr_by_investment', {})

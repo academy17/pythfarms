@@ -4,7 +4,7 @@ import os
 import argparse
 import logging
 from dotenv import load_dotenv
-from lib import fetch_votes, optimizer, analytics, fetch_lp_data, fetch_lp_data_previous_epoch, lp_optimized
+from lib import fetch_votes, optimizer, analytics, fetch_lp_data, fetch_lp_data_previous_epoch, lp_optimized, fetch_volatility
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -48,6 +48,12 @@ def main():
     lp_optimized_parser.add_argument("--top", type=int, default=30, help="Number of top pools to display")
     lp_optimized_parser.add_argument("--no-display", action="store_true", help="Don't display the dashboard in terminal")
     
+    # Fetch Volatility command
+    volatility_parser = subparsers.add_parser("fetch_volatility", help="Fetch volatility data for pools")
+    volatility_parser.add_argument("--max", type=int, default=30, help="Maximum number of pools to process")
+    volatility_parser.add_argument("--rate-limit", type=int, default=2, help="Seconds to wait between API calls to avoid rate limiting")
+    volatility_parser.add_argument("--force", action="store_true", help="Force update for all pools")
+    
     args = parser.parse_args()
     
     if args.command == "fetch":
@@ -88,6 +94,29 @@ def main():
             display=not args.no_display,
             top_n=args.top
         )
+    elif args.command == "fetch_volatility":
+        logger.info("Fetching volatility data for pools")
+        result = fetch_volatility.run_fetch_volatility(
+            max_pools=args.max,
+            rate_limit_seconds=args.rate_limit,
+            force_update=args.force
+        )
+        # Display a summary of the volatility data
+        if result and "pools" in result:
+            pools_data = result["pools"]
+            # Sort pools by volatility percentage
+            sorted_pools = sorted(
+                [(addr, data) for addr, data in pools_data.items() if "price_range" in data],
+                key=lambda x: x[1]["price_range"]["volatility_percentage"],
+                reverse=True
+            )
+            
+            logger.info(f"\n===== Top {min(10, len(sorted_pools))} Most Volatile Pools =====")
+            for i, (addr, data) in enumerate(sorted_pools[:10]):
+                symbol = data.get("symbol", "Unknown")
+                vol_pct = data["price_range"]["volatility_percentage"]
+                price = data.get("current_price", 0)
+                logger.info(f"{i+1}. {symbol} - Volatility: {vol_pct:.4f}% - Price: ${price:.6f}")
     else:
         parser.print_help()
 

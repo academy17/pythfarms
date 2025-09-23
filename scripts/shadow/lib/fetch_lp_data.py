@@ -367,7 +367,7 @@ def display_lp_dashboard(pools, investment_sizes=None, top_n=30):
     
     print("\n================ LP DASHBOARD ================")
     print(f"Date: {datetime.datetime.now().strftime('%Y-%m-%d')}")
-    print(f"Showing top {top_n} pools by next epoch APR")
+    print(f"Showing top {top_n} pools by TVL")
     print("----------------------------------------------")
     
     
@@ -380,7 +380,14 @@ def display_lp_dashboard(pools, investment_sizes=None, top_n=30):
     
     for i, pool in enumerate(pools[:top_n]):
         symbol = pool.get('symbol', '')[:18].ljust(18)
-        tvl = f"${pool.get('tvl', 0)/1000000:.2f}M".rjust(12)
+        
+        # Format TVL with K or M suffix
+        tvl_val = pool.get('tvl', 0)
+        if tvl_val < 1000000:  # Less than 1M
+            tvl = f"${tvl_val/1000:.2f}K".rjust(12)
+        else:  # 1M or more
+            tvl = f"${tvl_val/1000000:.2f}M".rjust(12)
+            
         curr_apr = f"{pool.get('current_epoch', {}).get('apr', 0):.2f}%".rjust(10)
         next_apr = f"{pool.get('next_epoch', {}).get('apr', 0):.2f}%".rjust(10)
         

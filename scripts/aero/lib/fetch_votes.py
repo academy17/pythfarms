@@ -350,16 +350,22 @@ def fetch_fees_and_bribes(w3, pool_info, contract_prices):
 
         total_usd = fees_usd + bribes_usd
         
+        # Determine pool type name based on type code
+        type_name = "Concentrated Liquidity"  # default for unknown types
+        if info["type"] == 0:
+            type_name = "Stable"
+        elif info["type"] == 1:
+            type_name = "Volatile"
+        
         results.append({
             "pool": pool_addr,
             "symbol": info["symbol"],
             "type": info["type"],
-            "fee0_amount": fee0_amt,
-            "fee1_amount": fee1_amt,
+            "type_name": type_name,
             "fees_usd": float(fees_usd),
             "bribes_usd": float(bribes_usd),
             "bribes": bribe_list,
-            "total_usd": float(total_usd),
+            "total_bribes_fees_usd": float(total_usd),
             "token0_price": float(token0_price),
             "token1_price": float(token1_price),
             "reserve0": float(reserve0),
@@ -367,7 +373,7 @@ def fetch_fees_and_bribes(w3, pool_info, contract_prices):
             "tvl": float(tvl)
         })
     
-    results.sort(key=lambda x: x["total_usd"], reverse=True)
+    results.sort(key=lambda x: x["total_bribes_fees_usd"], reverse=True)
     
     logger.info(f"Processed fees and bribes for {len(results)} pools")
     return results
@@ -541,8 +547,8 @@ def create_votes_dashboard(w3, pools, relays=None):
     if relays:
         dashboard["relays"] = relays
     
-    # Sort by total_usd
-    dashboard["pools"].sort(key=lambda x: x["total_usd"], reverse=True)
+    # Sort by total_bribes_fees_usd
+    dashboard["pools"].sort(key=lambda x: x["total_bribes_fees_usd"], reverse=True)
     
     logger.info(f"Created dashboard with {len(augmented_pools)} pools")
     save_json(dashboard, DASHBOARD_PATH)

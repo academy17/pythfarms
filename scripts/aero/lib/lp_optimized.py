@@ -134,8 +134,8 @@ def calculate_optimal_votes(vote_data, lp_data):
     for pool in vote_data.get("pools", []):
         pool_addr = pool.get("pool", "").lower()
         if pool_addr:
-            # Use total_usd (bribes + fees) as the reward
-            reward = Decimal(str(pool.get("total_usd", 0)))
+            # Use total_bribes_fees_usd (bribes + fees) as the reward (updated field name)
+            reward = Decimal(str(pool.get("total_bribes_fees_usd", 0)))
             # Current on-chain weight only (ignore relay votes)
             weight = Decimal(str(pool.get("weight", 0)))
             
@@ -245,14 +245,14 @@ def create_optimized_lp_dashboard(votes_path, lp_path, output_path):
         "current_on_chain_votes": float(current_on_chain_votes),
         "pool_weights_sum": float(pool_weights_sum),
         "votes_to_optimize": float(total_vote_power - current_on_chain_votes),
-        "optimized_weights": {addr: float(weight) for addr, weight in optimal_votes.items()},
+        "implied_weights_optimized": {addr: float(weight) for addr, weight in optimal_votes.items()},
         "pools": []
     }
     
-    # Copy the pools and update APRs based on optimized votes
+        # Copy the pools and update APRs based on optimized votes
     for pool in lp_data.get("pools", []):
         new_pool = pool.copy()
-        pool_addr = pool.get("pool", "").lower()
+        pool_addr = pool.get("lp", "").lower()  # Using lp instead of pool field
         
         # Get optimized votes for this pool
         optimized_vote = optimal_votes.get(pool_addr, Decimal("0"))
@@ -270,13 +270,14 @@ def create_optimized_lp_dashboard(votes_path, lp_path, output_path):
             apr = (pool_emissions_usd * 52) / tvl_usd * 100
             
             # Update pool data with weight information
-            original_weight = float(pool.get("weight", 0))
+            # Using total_pool_weight instead of weight field
+            original_weight = float(pool.get("total_pool_weight", 0))
             optimized_weight = float(optimized_vote)
             
             # Ensure we never use a negative difference due to data inconsistencies
             weight_diff = max(0, optimized_weight - original_weight)
             
-            new_pool["optimized_weight"] = optimized_weight  # Use optimized_weight instead of weight
+            new_pool["implied_weight_optimized"] = optimized_weight  # Renamed from optimized_weight
             new_pool["original_weight"] = original_weight
             new_pool["weight_diff"] = weight_diff
             new_pool["weight_pct"] = float(vote_share * 100)
@@ -372,7 +373,7 @@ def display_optimized_dashboard(dashboard, top_n=30):
         symbol = pool.get('symbol', 'Unknown')[:18]
         apr = pool.get('apr', 0)
         tvl = pool.get('tvl_usd', 0)
-        optimized_weight = pool.get('optimized_weight', 0)
+        optimized_weight = pool.get('implied_weight_optimized', 0)
         original_weight = pool.get('original_weight', 0)
         weight_diff = pool.get('weight_diff', 0)
         weight_pct = pool.get('weight_pct', 0)
