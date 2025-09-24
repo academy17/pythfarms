@@ -485,8 +485,8 @@ def build_relay_totals(relays):
     out = {}
     for r in relays:
         pool = r["pool_addr"]
-        amount = r["voting_amount_raw"]
-        out[pool] = out.get(pool, 0) + amount
+        amount = Decimal(str(r["voting_amount_raw"])) if isinstance(r["voting_amount_raw"], (int, float)) else r["voting_amount_raw"]
+        out[pool] = out.get(pool, Decimal('0')) + amount
     return out
 
 def create_votes_dashboard_at_block(w3, pools, block_number, relays=None):
@@ -516,14 +516,16 @@ def create_votes_dashboard_at_block(w3, pools, block_number, relays=None):
     # Get global weights
     total_weight = 0
     try:
-        total_weight = voter.functions.totalWeight().call(block_identifier=block_number)
+        raw_total = voter.functions.totalWeight().call(block_identifier=block_number)
+        total_weight = Decimal(raw_total) / Decimal(10**18)
     except Exception as e:
         logger.error(f"Error getting total weight: {e}")
     
     # Get our NFT balance
     our_nft_weight = 0
     try:
-        our_nft_weight = ve.functions.balanceOfNFT(NFT_ID).call(block_identifier=block_number)
+        raw_nft = ve.functions.balanceOfNFT(NFT_ID).call(block_identifier=block_number)
+        our_nft_weight = Decimal(raw_nft) / Decimal(10**18)
     except Exception as e:
         logger.error(f"Error getting NFT balance: {e}")
     
@@ -544,12 +546,14 @@ def create_votes_dashboard_at_block(w3, pools, block_number, relays=None):
         # Get on-chain weight for this pool
         pool_weight = 0
         try:
-            pool_weight = voter.functions.weights(w3.to_checksum_address(pool_addr)).call(block_identifier=block_number)
+            raw_weight = voter.functions.weights(w3.to_checksum_address(pool_addr)).call(block_identifier=block_number)
+            pool_weight = Decimal(raw_weight) / Decimal(10**18)
         except Exception as e:
             logger.error(f"Error getting weight for pool {pool_addr}: {e}")
         
         # Get relay weight for this pool
-        relay_weight = relay_totals.get(pool_addr, 0)
+        raw_relay_weight = relay_totals.get(pool_addr, 0)
+        relay_weight = Decimal(raw_relay_weight) / Decimal(10**18) if raw_relay_weight > 0 else 0
         
         # Calculate percentage of total weights
         if total_weight > 0:
@@ -567,11 +571,11 @@ def create_votes_dashboard_at_block(w3, pools, block_number, relays=None):
         
         # Create augmented pool entry
         augmented_entry = {**entry}
-        augmented_entry["on_chain_weight"] = pool_weight
-        augmented_entry["on_chain_weight_pct"] = float(weight_pct)
-        augmented_entry["relay_weight"] = relay_weight
-        augmented_entry["total_weight"] = pool_weight + relay_weight
-        augmented_entry["our_vote_impact"] = float(our_vote_impact)
+        augmented_entry["on_chain_weight"] = float(pool_weight)
+        augmented_entry["on_chain_weight_pct"] = float(weight_pct) if isinstance(weight_pct, Decimal) else weight_pct
+        augmented_entry["relay_weight"] = float(relay_weight)
+        augmented_entry["total_weight"] = float(pool_weight + relay_weight)
+        augmented_entry["our_vote_impact"] = float(our_vote_impact) if isinstance(our_vote_impact, Decimal) else our_vote_impact
         
         augmented_pools.append(augmented_entry)
     
@@ -580,7 +584,7 @@ def create_votes_dashboard_at_block(w3, pools, block_number, relays=None):
     # Get epoch at this block
     epoch = estimate_epoch_from_block(w3, block_number)
     
-    # Create dashboard
+    # Create dashboard with all Decimal values converted to float
     dashboard = {
         "block_number": block_number,
         "epoch": epoch,
@@ -684,7 +688,7 @@ def run_fetch_votes_previous_epoch():
     save_json(dashboard, dated_path)
     
     # Also save as the default file
-    default_path = f"{PREVIOUS_VOTES_DIR}/votes_dashboard_previous.json"
+    default_path = f"{PREVIOUS_VOTES_DIR}/previous_votes_dashboard.json"
     save_json(dashboard, default_path)
     
     logger.info(f"✅ Previous epoch votes data saved to {dated_path} and {default_path}")

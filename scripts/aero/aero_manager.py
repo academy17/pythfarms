@@ -18,11 +18,16 @@ def main():
     # Fetch command
     fetch_parser = subparsers.add_parser("fetch", help="Fetch vote data and create dashboard")
     fetch_parser.add_argument("--historical", action="store_true", help="Fetch historical data")
+
+    # Fetch Previous command
+    fetch_previous_parser = subparsers.add_parser("fetch-previous", help="Fetch vote data from previous epoch")
     
     # Optimize command
     optimize_parser = subparsers.add_parser("optimize", help="Optimize vote allocation")
     optimize_parser.add_argument("--display", action="store_true", help="Display results instead of saving")
-    
+    optimize_parser.add_argument("--previous", action="store_true", help="Use previous epoch's votes dashboard")
+    optimize_parser.add_argument("--votes", help="Path to votes dashboard JSON", default="input_data/aero/votes_dashboard.json")
+
     # Analyze command
     analyze_parser = subparsers.add_parser("analyze", help="Analyze votes")
     analyze_parser.add_argument("--compare", action="store_true", help="Compare with optimal allocation")
@@ -59,10 +64,19 @@ def main():
     if args.command == "fetch":
         logger.info("Fetching votes data")
         fetch_votes.run_fetch(is_historical=args.historical)
+    elif args.command == "fetch-previous":
+        logger.info("Fetching votes data from previous epoch")
+        from lib import fetch_votes_previous_epoch
+        result = fetch_votes_previous_epoch.run_fetch_votes_previous_epoch()
+        if result:
+            logger.info("✅ Successfully fetched previous epoch votes data")
     elif args.command == "optimize":
         logger.info("Optimizing votes")
         save = not args.display
-        optimizer.run_optimize(save=save)
+        votes_path = "previous_votes/aero/previous_votes_dashboard.json" if args.previous else args.votes
+        if args.previous:
+            logger.info("Using previous epoch's votes dashboard")
+        optimizer.run_optimize(save=save, votes_path=votes_path)
     elif args.command == "analyze":
         logger.info("Analyzing votes")
         analytics.run_analyze(compare=args.compare)

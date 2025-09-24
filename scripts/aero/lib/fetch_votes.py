@@ -366,6 +366,7 @@ def fetch_fees_and_bribes(w3, pool_info, contract_prices):
             "bribes_usd": float(bribes_usd),
             "bribes": bribe_list,
             "total_bribes_fees_usd": float(total_usd),
+            "total_usd": float(total_usd),  # Adding for optimizer compatibility
             "token0_price": float(token0_price),
             "token1_price": float(token1_price),
             "reserve0": float(reserve0),
@@ -426,8 +427,8 @@ def fetch_relay_votes(w3, enriched_pools):
                     vote_entries.append({
                         "pool": pool_l,
                         "symbol": pool_symbols.get(pool_l, ""),
-                        "weight_hr": float(weight_hr),
-                        "percent": float(percent)
+                        "weight": float(weight_hr),
+                        "weight_pct": float(percent)
                     })
             
             # Format voting amount for human display
@@ -502,6 +503,11 @@ def create_votes_dashboard(w3, pools, relays=None):
     # Add weights to pools
     augmented_pools = []
     pool_summed_weights = Decimal(0)
+    timestamp = current_epoch_start_ts()
+
+    # Add timestamp information to dashboard
+    current_epoch_time = datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
+    
     for entry in pools:
         pool_addr = entry["pool"].lower()
         
@@ -526,10 +532,21 @@ def create_votes_dashboard(w3, pools, relays=None):
         # Get relay votes for this pool
         relay_votes_hr = relay_totals.get(pool_addr, Decimal(0))
         
+        # Calculate weight percentages
+        weight_pct = (weight_hr / total_weight * 100) if total_weight > 0 else 0
+
+        # Calculate what percentage our vote would be
+        our_vote_impact = 0
+        if total_weight > 0 and our_nft_weight > 0:
+            our_vote_impact = (our_nft_weight / total_weight) * 100
+
         e = entry.copy()
-        e["weight"] = float(weight_hr)
+        e["on_chain_weight"] = float(weight_hr)
+        e["on_chain_weight_pct"] = float(weight_pct)
+        e["relay_weight"] = float(relay_votes_hr)
+        e["total_weight"] = float(weight_hr + relay_votes_hr)
         e["our_votes"] = float(our_votes_hr)
-        e["relay_votes"] = float(relay_votes_hr)
+        e["our_vote_impact"] = float(our_vote_impact)
         
         augmented_pools.append(e)
     
@@ -537,6 +554,8 @@ def create_votes_dashboard(w3, pools, relays=None):
     
     # Create dashboard
     dashboard = {
+        "timestamp": timestamp,
+        "date": current_epoch_time.strftime('%Y-%m-%d %H:%M:%S'),
         "total_weight": float(total_weight),
         "our_voting_power": float(our_nft_weight),
         "pool_summed_weights": float(pool_summed_weights),

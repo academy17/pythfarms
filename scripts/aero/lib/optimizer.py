@@ -17,8 +17,8 @@ MAX_ITERS = 100
 TOP_N = 6  # For display
 TOTAL_WEIGHT_TARGET = Decimal(100) * (Decimal(10) ** 18)  # sum weights to 100e18
 
-# Paths
-DASHBOARD_PATH = "input_data/aero/votes_dashboard.json"
+# Default paths
+DEFAULT_DASHBOARD_PATH = "input_data/aero/votes_dashboard.json"
 HUMAN_OUT_PATH = "optimized_votes/aero/optimized_votes_human.json"
 BOT_OUT_PATH = "optimized_votes/aero/optimized_votes_bot.txt"
 CALLDATA_OUT_PATH = "optimized_votes/aero/optimized_votes_calldata.json"
@@ -127,7 +127,8 @@ def run_optimization(dashboard):
     for p in pools:
         addr = p["pool"].lower()
         R = Decimal(str(p.get("total_usd", 0)))
-        W = Decimal(str(p.get("weight", 0)))
+        # Try on_chain_weight first, fall back to weight for backwards compatibility
+        W = Decimal(str(p.get("on_chain_weight", p.get("weight", 0))))
         base.append((addr, R, W))
     
     # Check if we have voting power to allocate
@@ -154,7 +155,9 @@ def run_optimization(dashboard):
         sym = p.get("symbol", "")
         pct = (d / total_alloc * Decimal(100)).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
         total_usd_dec = Decimal(str(p.get("total_usd", 0)))
-        fraction = (d / (W + d)) if (W + d) > 0 else Decimal(0)
+        current_pool_weight = Decimal(str(p.get("on_chain_weight", p.get("weight", 0))))  # Current pool weight
+        new_total_pool_weight = current_pool_weight + d  # Add our new votes to get new total
+        fraction = d / new_total_pool_weight if new_total_pool_weight > 0 else Decimal(0)  # Our share of the pool
         exp_usd_dec = (total_usd_dec * fraction).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         exp_usd = float(exp_usd_dec)
         
@@ -186,17 +189,19 @@ def run_optimization(dashboard):
     
     return human_output, bot_output
 
-def run_optimize(save=True):
+def run_optimize(save=True, votes_path=None):
     """
     Main entry point for optimizing votes
     
     Args:
         save: Whether to save results to file (True) or display them (False)
+        votes_path: Path to the votes dashboard JSON file. If None, uses default path.
     """
     logger.info("Starting vote optimization")
     
     # Load dashboard
-    dashboard = load_json(DASHBOARD_PATH)
+    dashboard_path = votes_path if votes_path else DEFAULT_DASHBOARD_PATH
+    dashboard = load_json(dashboard_path)
     if not dashboard:
         return None
     
