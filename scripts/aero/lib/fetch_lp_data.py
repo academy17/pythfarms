@@ -543,6 +543,117 @@ def calculate_lp_data(pools, investment_sizes=None):
     
     logger.info(f"ℹ️ Weekly emissions: {weekly_emissions} AERO (${weekly_emissions_usd})")
     
+    # Fetch our LP positions to integrate with dashboard
+    logger.info("🔍 Fetching our LP positions to integrate with dashboard...")
+    
+    # Import the functions here to avoid circular imports
+    from .fetch_our_lp_data import fetch_our_positions, calculate_positions_value
+    
+    our_positions = fetch_our_positions(w3)
+    
+    # Instead of calling calculate_positions_value which would make another API call to CoinGecko,
+    # we'll calculate the values ourselves using the token prices we already have
+    enriched_positions = []
+    
+    # Create a mapping of token addresses to prices from our existing data
+    all_token_prices = {}
+    for pool in pools:
+        token0 = pool.get('token0', '').lower()
+        token1 = pool.get('token1', '').lower()
+        price0 = pool.get('token0_price', 0)
+        price1 = pool.get('token1_price', 0)
+        
+        if token0 and price0:
+            all_token_prices[token0] = Decimal(str(price0))
+        if token1 and price1:
+            all_token_prices[token1] = Decimal(str(price1))
+    
+    logger.info(f"Reusing {len(all_token_prices)} token prices from pools data")
+    
+    # Now calculate values using our existing price data
+    for pos in our_positions:
+        try:
+            # Get pool from the position
+            lp_contract = w3.eth.contract(
+                address=w3.to_checksum_address(pos['lp']),
+                abi=[{
+                    "inputs": [],
+                    "name": "token0",
+                    "outputs": [{"type": "address", "name": ""}],
+                    "stateMutability": "view",
+                    "type": "function"
+                }, {
+                    "inputs": [],
+                    "name": "token1",
+                    "outputs": [{"type": "address", "name": ""}],
+                    "stateMutability": "view",
+                    "type": "function"
+                }]
+            )
+            
+            token0 = lp_contract.functions.token0().call().lower()
+            token1 = lp_contract.functions.token1().call().lower()
+            
+            # Get symbols
+            symbol0 = get_token_symbol(w3, token0) or token0[:6]
+            symbol1 = get_token_symbol(w3, token1) or token1[:6]
+            pool_symbol = f"{symbol0}/{symbol1}"
+            
+            # Get token decimals
+            dec0 = get_token_decimals(w3, token0)
+            dec1 = get_token_decimals(w3, token1)
+            
+            # Calculate amounts (staked + unstaked)
+            amount0 = Decimal(str(pos['amount0'])) + Decimal(str(pos['staked0']))
+            amount1 = Decimal(str(pos['amount1'])) + Decimal(str(pos['staked1']))
+            
+            # Convert to human readable
+            amount0_human = amount0 / (Decimal(10) ** dec0)
+            amount1_human = amount1 / (Decimal(10) ** dec1)
+            
+            # Get prices from our existing price data
+            price0 = all_token_prices.get(token0, Decimal(0))
+            price1 = all_token_prices.get(token1, Decimal(0))
+            
+            # Calculate total value
+            value0_usd = amount0_human * price0
+            value1_usd = amount1_human * price1
+            total_value_usd = value0_usd + value1_usd
+            
+            enriched_pos = {
+                'pool': pos['lp'],
+                'symbol': pool_symbol,
+                'amount0_human': float(amount0_human),
+                'amount1_human': float(amount1_human),
+                'token0_symbol': symbol0,
+                'token1_symbol': symbol1,
+                'token0_price': float(price0),
+                'token1_price': float(price1),
+                'value0_usd': float(value0_usd),
+                'value1_usd': float(value1_usd),
+                'total_value_usd': float(total_value_usd)
+            }
+            
+            enriched_positions.append(enriched_pos)
+            
+        except Exception as e:
+            logger.error(f"Error processing position for pool {pos['lp']}: {e}")
+    
+    # Create lookup of pools where we have LP positions
+    our_lp_pools = {}
+    for pos in enriched_positions:
+        pool_addr = pos['pool'].lower()
+        our_lp_pools[pool_addr] = {
+            'amount0_human': pos.get('amount0_human', 0),
+            'amount1_human': pos.get('amount1_human', 0),
+            'value0_usd': pos.get('value0_usd', 0),
+            'value1_usd': pos.get('value1_usd', 0),
+            'total_value_usd': pos.get('total_value_usd', 0)
+        }
+        logger.info(f"Our LP in pool {pos['symbol']} ({pool_addr}): ${pos.get('total_value_usd', 0):.2f}")
+    
+    logger.info(f"✅ Found {len(our_lp_pools)} pools where we have LP positions")
+    
     updated_pools = []
     for pool in pools:
         # Use pool address for voting weights, not gauge address
@@ -577,6 +688,15 @@ def calculate_lp_data(pools, investment_sizes=None):
         for size in investment_sizes:
             apr_by_investment[str(size)] = calculate_apr_at_investment_size(pool, size, rewards)
         
+        # Check if we have LP position in this pool
+        pool_address_lower = pool_address.lower()
+        our_lp_data = our_lp_pools.get(pool_address_lower, {})
+        has_our_lp = pool_address_lower in our_lp_pools
+        
+        if has_our_lp:
+            logger.info(f"Found our LP in pool: {pool.get('symbol')} ({pool_address})")
+            logger.info(f"  Value: ${our_lp_data.get('total_value_usd', 0):.2f}")
+        
         # Update pool with calculated data
         updated_pool = pool.copy()
         updated_pool.update({
@@ -586,7 +706,9 @@ def calculate_lp_data(pools, investment_sizes=None):
             'weight_pct': float(weight_pct),
             'weekly_rewards_usd': float(rewards),
             'apr': float(base_apr),
-            'apr_by_investment': {str(size): float(apr) for size, apr in apr_by_investment.items()}
+            'apr_by_investment': {str(size): float(apr) for size, apr in apr_by_investment.items()},
+            'has_our_lp': has_our_lp,
+            'our_lp_data': our_lp_data if has_our_lp else None
         })
         
         updated_pools.append(updated_pool)
@@ -621,7 +743,9 @@ def calculate_lp_data(pools, investment_sizes=None):
             'weight_pct': pool.get('weight_pct'),
             'weekly_rewards_usd': pool.get('weekly_rewards_usd'),
             'apr': pool.get('apr'),
-            'apr_by_investment': pool.get('apr_by_investment')
+            'apr_by_investment': pool.get('apr_by_investment'),
+            'has_our_lp': pool.get('has_our_lp', False),
+            'our_lp_data': pool.get('our_lp_data')
         }
         cleaned_pools.append(cleaned_pool)
     
@@ -655,6 +779,19 @@ def save_lp_dashboard(lp_data, investment_sizes=None):
     total_relay_votes = sum(relay_votes.values())
     adjusted_total_weight = on_chain_weight + total_relay_votes
     
+    # Calculate our LP position totals
+    pools_with_our_lp = [p for p in lp_data if p.get('has_our_lp', False)]
+    our_lp_pools_count = len(pools_with_our_lp)
+    our_lp_total_value = sum(p.get('our_lp_data', {}).get('total_value_usd', 0) 
+                              for p in lp_data if p.get('has_our_lp', False))
+    
+    logger.info(f"Final Summary: Found {our_lp_pools_count} pools with our LP positions out of {len(lp_data)} total pools")
+    logger.info(f"Total value of our LP positions: ${our_lp_total_value:.2f}")
+    
+    if our_lp_pools_count > 0:
+        for p in pools_with_our_lp:
+            logger.info(f"LP in {p.get('symbol')}: ${p.get('our_lp_data', {}).get('total_value_usd', 0):.2f}")
+    
     # Create dashboard data
     dashboard = {
         'period': current_period,
@@ -664,6 +801,10 @@ def save_lp_dashboard(lp_data, investment_sizes=None):
         'total_relay_votes': float(total_relay_votes),
         'adjusted_total_weight': float(adjusted_total_weight),
         'note': "APR calculations now use on-chain weight only, relay votes are implied and carried over from last epoch",
+        'our_lp_summary': {
+            'pools_count': our_lp_pools_count,
+            'total_value_usd': float(our_lp_total_value)
+        },
         'pools': lp_data
     }    # Save to files
     dated_path = f'lp_dashboard/aero/lp_dashboard_{date_str}.json'
@@ -715,7 +856,7 @@ def display_lp_dashboard(pools, investment_sizes=None, top_n=30):
     print("--------------------------------------------------")
     
     # Print column headers
-    header = f"{'Pool':20} {'TVL':>12} {'Weight':>10} {'APR':>8}"
+    header = f"{'Pool':20} {'TVL':>12} {'Weight':>10} {'APR':>8} {'Our LP':>8}"
     for size_str in investment_str:
         header += f" {f'APR @ {size_str}':>10}"
     print(header)
@@ -743,7 +884,11 @@ def display_lp_dashboard(pools, investment_sizes=None, top_n=30):
             
         apr = f"{pool.get('apr', 0):.2f}%".rjust(8)
         
-        line = f"{symbol} {tvl} {weight} {apr}"
+        # Add our LP indicator
+        has_our_lp = pool.get('has_our_lp', False)
+        our_lp_indicator = "✓".rjust(8) if has_our_lp else "".rjust(8)
+        
+        line = f"{symbol} {tvl} {weight} {apr} {our_lp_indicator}"
         
         # Add APR at different investment sizes
         apr_by_inv = pool.get('apr_by_investment', {})
