@@ -257,4 +257,4 @@ def run_fetch_volatility(max_pools=None, rate_limit_seconds=2, force_update=Fals
     return result
 
 if __name__ == "__main__":
-    run_fetch_volatility(max_pools=30)
+    run_fetch_volatility(max_pools=100)

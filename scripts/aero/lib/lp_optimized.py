@@ -10,7 +10,7 @@ from decimal import Decimal, getcontext
 from web3 import Web3
 from dotenv import load_dotenv
 
-from .optimizer import equal_marginal
+from .optimizer import equal_marginal_combined
 
 # Set precision for decimal calculations
 getcontext().prec = 28
@@ -148,13 +148,17 @@ def calculate_optimal_votes(vote_data, lp_data):
         return {addr: weight for addr, weight in pool_weights.items() if weight > 0}
     
     # Prepare input for equal marginal optimizer
-    rw_pairs = [(addr, reward, pool_weights.get(addr, Decimal("0"))) 
-                for addr, reward in pool_bribes.items() if reward > 0]
+    # We need to adapt the data for equal_marginal_combined which needs (pool_addr, reward, weight, lp_fraction, weekly_rewards_usd)
+    # For this simulation, we're not using LP positions, so set lp_fraction and weekly_rewards_usd to 0
+    combined_data = [(addr, reward, pool_weights.get(addr, Decimal("0")), Decimal("0"), Decimal("0")) 
+                    for addr, reward in pool_bribes.items() if reward > 0]
     
     # Run equal marginal optimization
-    logger.info(f"🧮 Running equal marginal optimization for {len(rw_pairs)} pools...")
+    logger.info(f"🧮 Running equal marginal optimization for {len(combined_data)} pools...")
     logger.info(f"🔒 Preserving all current votes and optimizing only the remaining {votes_to_optimize:,.2f} votes")
-    optimal_allocations = equal_marginal(rw_pairs, votes_to_optimize)
+    # Calculate total system votes for equal_marginal_combined (not used in this simulation but required by the function)
+    S_total = sum(w for _, _, w, _, _ in combined_data) + votes_to_optimize
+    optimal_allocations = equal_marginal_combined(combined_data, votes_to_optimize, S_total)
     
     # Create a map of optimal allocations
     optimal_votes = {}

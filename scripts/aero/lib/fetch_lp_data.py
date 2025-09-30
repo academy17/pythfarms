@@ -189,22 +189,63 @@ def get_pool_weight(pool_addr):
         return Decimal('0')
 
 def get_aero_price():
-    """Get AERO token price from CoinGecko"""
-    try:
-        params = {
-            'ids': COINGECKO_AERO_ID,
-            'vs_currencies': 'usd'
-        }
-        response = requests.get(COINGECKO_SIMPLE_PRICE_URL, params=params)
-        response.raise_for_status()
-        data = response.json()
-        
-        price = Decimal(str(data.get(COINGECKO_AERO_ID, {}).get('usd', 0)))
-        logger.info(f"ℹ️ AERO price: ${price}")
-        return price
-    except Exception as e:
-        logger.error(f"❌ Failed to get AERO price: {e}")
-        return Decimal('0')
+    """Get AERO token price from CoinGecko with retry mechanism"""
+    import time
+    import random
+    
+    max_retries = 5
+    base_delay = 2  # Start with a 2-second delay
+    
+    for attempt in range(max_retries):
+        try:
+            # Add a small random delay before each request to avoid rate limiting
+            if attempt > 0:
+                # Exponential backoff with jitter
+                delay = base_delay * (2 ** attempt) + random.uniform(0.1, 1.0)
+                logger.info(f"Rate limited by CoinGecko. Retrying in {delay:.2f} seconds (attempt {attempt+1}/{max_retries})...")
+                time.sleep(delay)
+            
+            params = {
+                'ids': COINGECKO_AERO_ID,
+                'vs_currencies': 'usd'
+            }
+            
+            # Add a custom user agent to avoid being blocked
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
+                'Accept': 'application/json'
+            }
+            
+            response = requests.get(COINGECKO_SIMPLE_PRICE_URL, params=params, headers=headers, timeout=10)
+            
+            # Check for rate limiting response
+            if response.status_code == 429:
+                logger.warning(f"CoinGecko rate limit hit. Will retry...")
+                continue
+                
+            response.raise_for_status()
+            data = response.json()
+            
+            price = Decimal(str(data.get(COINGECKO_AERO_ID, {}).get('usd', 0)))
+            logger.info(f"ℹ️ AERO price: ${price}")
+            return price
+            
+        except requests.exceptions.RequestException as e:
+            logger.warning(f"CoinGecko API request failed (attempt {attempt+1}/{max_retries}): {e}")
+            # Only continue retrying for specific errors
+            if "429" in str(e) or "timeout" in str(e).lower():
+                continue
+            else:
+                logger.error(f"❌ Failed to get AERO price (non-retriable error): {e}")
+                break
+        except Exception as e:
+            logger.error(f"❌ Failed to get AERO price: {e}")
+            break
+    
+    # If we've exhausted all retries or hit a non-retriable error, use fallback price
+    # You might want to use a hardcoded recent price as a last resort
+    logger.warning("Using fallback AERO price after all retries failed")
+    return Decimal('1.01')  # Approximate recent price as fallback
 
 def get_weekly_emissions():
     """Get weekly emissions from Minter contract"""
@@ -654,16 +695,37 @@ def calculate_lp_data(pools, investment_sizes=None):
     
     logger.info(f"✅ Found {len(our_lp_pools)} pools where we have LP positions")
     
+    logger.info("Optimizing pool processing...")
+    
+    # First, fetch weights only for pools where we have LP positions
+    # This reduces RPC calls dramatically
+    our_lp_pool_addresses = list(our_lp_pools.keys())
+    
+    # Create a mapping of pool addresses to weights
+    # We only fetch weights for pools where we have LP positions
+    pool_weights = {}
+    for addr in our_lp_pool_addresses:
+        weight = get_pool_weight(addr)
+        pool_weights[addr] = weight
+        logger.info(f"Fetched weight for our LP pool {addr}: {weight}")
+    
+    # Batch process the rest of the pools
     updated_pools = []
+    processed_count = 0
+    
     for pool in pools:
-        # Use pool address for voting weights, not gauge address
         pool_address = pool.get('pool')
+        pool_address_lower = pool_address.lower()
         
-        # Get on-chain weight for this pool
-        weight = get_pool_weight(pool_address)
+        # Check if we have LP position in this pool
+        our_lp_data = our_lp_pools.get(pool_address_lower, {})
+        has_our_lp = pool_address_lower in our_lp_pools
+        
+        # Get weight - only fetch from chain for our LP pools, default to 0 for others
+        weight = pool_weights.get(pool_address_lower, Decimal('0'))
         
         # Get relay votes for this pool
-        relay_weight = relay_votes.get(pool_address.lower(), Decimal('0'))
+        relay_weight = relay_votes.get(pool_address_lower, Decimal('0'))
         
         # Store relay weight for reference but don't use it in calculations currently
         total_pool_weight = weight  # Remove relay_weight from this calculation
@@ -683,18 +745,14 @@ def calculate_lp_data(pools, investment_sizes=None):
         else:
             base_apr = (rewards * 52 / tvl_usd * 100)
         
-        # Calculate APR at different investment sizes
+        # Calculate APR at different investment sizes - only if we have LP or it's a top pool
         apr_by_investment = {}
-        for size in investment_sizes:
-            apr_by_investment[str(size)] = calculate_apr_at_investment_size(pool, size, rewards)
-        
-        # Check if we have LP position in this pool
-        pool_address_lower = pool_address.lower()
-        our_lp_data = our_lp_pools.get(pool_address_lower, {})
-        has_our_lp = pool_address_lower in our_lp_pools
+        if has_our_lp or processed_count < 50:  # Only calculate for our LP pools or top 50 pools
+            for size in investment_sizes:
+                apr_by_investment[str(size)] = calculate_apr_at_investment_size(pool, size, rewards)
         
         if has_our_lp:
-            logger.info(f"Found our LP in pool: {pool.get('symbol')} ({pool_address})")
+            logger.info(f"Processing pool with our LP: {pool.get('symbol')} ({pool_address})")
             logger.info(f"  Value: ${our_lp_data.get('total_value_usd', 0):.2f}")
         
         # Update pool with calculated data
@@ -712,6 +770,11 @@ def calculate_lp_data(pools, investment_sizes=None):
         })
         
         updated_pools.append(updated_pool)
+        processed_count += 1
+        
+        # Log progress periodically
+        if processed_count % 50 == 0:
+            logger.info(f"Processed {processed_count}/{len(pools)} pools...")
     
     # Sort by APR, descending
     updated_pools.sort(key=lambda x: x.get('apr', 0), reverse=True)
@@ -785,8 +848,14 @@ def save_lp_dashboard(lp_data, investment_sizes=None):
     our_lp_total_value = sum(p.get('our_lp_data', {}).get('total_value_usd', 0) 
                               for p in lp_data if p.get('has_our_lp', False))
     
+    # Get weekly emissions data directly from source
+    weekly_emissions = get_weekly_emissions()
+    aero_price = get_aero_price()
+    total_weekly_emissions_usd = weekly_emissions * aero_price
+    
     logger.info(f"Final Summary: Found {our_lp_pools_count} pools with our LP positions out of {len(lp_data)} total pools")
     logger.info(f"Total value of our LP positions: ${our_lp_total_value:.2f}")
+    logger.info(f"Total weekly emissions: {weekly_emissions} AERO (${total_weekly_emissions_usd})")
     
     if our_lp_pools_count > 0:
         for p in pools_with_our_lp:
@@ -800,6 +869,9 @@ def save_lp_dashboard(lp_data, investment_sizes=None):
         'on_chain_total_weight': float(on_chain_weight),
         'total_relay_votes': float(total_relay_votes),
         'adjusted_total_weight': float(adjusted_total_weight),
+        'total_weekly_emissions': float(weekly_emissions),
+        'aero_price': float(aero_price),
+        'total_weekly_emissions_usd': float(total_weekly_emissions_usd),
         'note': "APR calculations now use on-chain weight only, relay votes are implied and carried over from last epoch",
         'our_lp_summary': {
             'pools_count': our_lp_pools_count,
@@ -828,9 +900,17 @@ def display_lp_dashboard(pools, investment_sizes=None, top_n=30):
     if investment_sizes is None:
         investment_sizes = DEFAULT_INVESTMENT_SIZES
     
-    # Sort by TVL for display and limit to top N pools
-    sorted_pools = sorted(pools, key=lambda x: x.get('tvl_usd', 0), reverse=True)
-    display_pools = sorted_pools[:min(top_n, len(sorted_pools))]
+    logger.info("Generating dashboard display...")
+    
+    # First, get pools with our LP positions
+    our_lp_pools = [p for p in pools if p.get('has_our_lp', False)]
+    
+    # Then get top pools by TVL for the rest
+    pools_without_our_lp = [p for p in pools if not p.get('has_our_lp', False)]
+    sorted_by_tvl = sorted(pools_without_our_lp, key=lambda x: x.get('tvl_usd', 0), reverse=True)
+    
+    # Combine our LP pools with top TVL pools
+    display_pools = our_lp_pools + sorted_by_tvl[:max(0, top_n - len(our_lp_pools))]
     
     # Format investment sizes for display
     investment_str = [f"${size/1000}k" for size in investment_sizes]
@@ -839,20 +919,17 @@ def display_lp_dashboard(pools, investment_sizes=None, top_n=30):
     print("\n================ AERO LP DASHBOARD ================")
     print(f"Date: {datetime.datetime.now().strftime('%Y-%m-%d')}")
     
-    # Get total weights for display
-    w3 = get_web3()
-    if w3:
-        on_chain_weight = get_total_weight()
-        relay_votes_data = fetch_relay_votes(w3, pools)
-        total_relay_votes = sum(relay_votes_data.values())
-        adjusted_total_weight = on_chain_weight + total_relay_votes
-        
-        print(f"On-chain weight: {on_chain_weight:,.2f}")
-        print(f"Total relay votes: {total_relay_votes:,.2f} (not used in APR calculation)")
-        print(f"Adjusted total weight: {adjusted_total_weight:,.2f}")
-        print(f"NOTE: APR calculations now use on-chain weight only, ignoring relay votes")
+    # Use cached total weights for display (avoid additional RPC calls)
+    on_chain_weight = sum(Decimal(str(p.get('weight', 0))) for p in pools)
+    total_relay_votes = sum(Decimal(str(p.get('relay_votes', 0))) for p in pools)
+    adjusted_total_weight = on_chain_weight + total_relay_votes
     
-    print(f"Showing top {len(display_pools)} pools by TVL")
+    print(f"On-chain weight: {on_chain_weight:,.2f}")
+    print(f"Total relay votes: {total_relay_votes:,.2f} (not used in APR calculation)")
+    print(f"Adjusted total weight: {adjusted_total_weight:,.2f}")
+    print(f"NOTE: APR calculations now use on-chain weight only, ignoring relay votes")
+    
+    print(f"Showing {len(our_lp_pools)} pools with our LP positions + {min(top_n - len(our_lp_pools), len(sorted_by_tvl))} top pools by TVL")
     print("--------------------------------------------------")
     
     # Print column headers

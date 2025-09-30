@@ -27,6 +27,10 @@ def main():
     optimize_parser.add_argument("--display", action="store_true", help="Display results instead of saving")
     optimize_parser.add_argument("--previous", action="store_true", help="Use previous epoch's votes dashboard")
     optimize_parser.add_argument("--votes", help="Path to votes dashboard JSON", default="input_data/aero/votes_dashboard.json")
+    optimize_parser.add_argument("--lp", help="Path to LP dashboard JSON", default="lp_dashboard/aero/lp_dashboard.json")
+    optimize_parser.add_argument("--no-lp", action="store_true", help="Optimize votes without considering LP positions")
+    optimize_parser.add_argument("--with-volatility", action="store_true", help="Apply volatility penalty to volatile pools")
+    optimize_parser.add_argument("--gamma", type=float, default=1.0, help="Volatility penalty coefficient (default 1.0, higher = stronger penalty)")
 
     # Analyze command
     analyze_parser = subparsers.add_parser("analyze", help="Analyze votes")
@@ -74,9 +78,23 @@ def main():
         logger.info("Optimizing votes")
         save = not args.display
         votes_path = "previous_votes/aero/previous_votes_dashboard.json" if args.previous else args.votes
-        if args.previous:
-            logger.info("Using previous epoch's votes dashboard")
-        optimizer.run_optimize(save=save, votes_path=votes_path)
+        
+        # Determine LP dashboard path
+        if args.no_lp:
+            lp_path = None
+            logger.info("Skipping LP positions in optimization as requested")
+        else:
+            if args.lp:
+                lp_path = args.lp
+            else:
+                lp_path = "lp_dashboard_previous/aero/lp_dashboard.json" if args.previous else "lp_dashboard/aero/lp_dashboard.json"
+            
+            logger.info(f"Using votes dashboard: {votes_path}")
+            logger.info(f"Using LP dashboard: {lp_path}")
+        
+        # Run the optimizer with LP positions data and volatility if requested
+        optimizer.run_optimize(save=save, votes_path=votes_path, lp_path=lp_path, 
+                              with_volatility=args.with_volatility, gamma=args.gamma)
     elif args.command == "analyze":
         logger.info("Analyzing votes")
         analytics.run_analyze(compare=args.compare)

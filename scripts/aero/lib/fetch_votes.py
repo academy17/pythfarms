@@ -521,10 +521,10 @@ def create_votes_dashboard(w3, pools, relays=None):
         except Exception:
             pass
         
-        # Get our votes for this pool
+        # Get our votes for this pool (from Voter contract, not Ve)
         our_votes_hr = 0
         try:
-            raw = ve.functions.votes(NFT_ID, w3.to_checksum_address(pool_addr)).call()
+            raw = voter.functions.votes(NFT_ID, w3.to_checksum_address(pool_addr)).call()
             our_votes_hr = Decimal(raw) / Decimal(10**18)
         except Exception:
             pass
