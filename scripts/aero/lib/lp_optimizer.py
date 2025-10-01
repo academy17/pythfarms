@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# filepath: d:\Pyth\pythfarms\scripts\aero\lib\lp_optimized.py
+# filepath: d:\Pyth\pythfarms\scripts\aero\lib\lp_optimizer.py
 
 import os
 import json
@@ -407,7 +407,7 @@ def display_optimized_dashboard(dashboard, top_n=30):
         row = f"{i+1:3} {symbol:20} {tvl_display:>12} {apr:>7.2f}% {optimized_display:>10} {original_display:>10} {diff_display:>10} {weight_pct:>5.2f}%"
         logger.info(row)
 
-def run_lp_optimized(votes_path=None, lp_path=None, output_path=None, display=False, top_n=30):
+def run_lp_optimizer(votes_path=None, lp_path=None, output_path=None, display=False, top_n=30):
     """Main function to run the LP optimized dashboard generation"""
     # Use default paths if not provided
     votes_path = votes_path or VOTES_DASHBOARD_DEFAULT
@@ -433,7 +433,7 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    run_lp_optimized(
+    run_lp_optimizer(
         votes_path=args.votes,
         lp_path=args.lp,
         output_path=args.output,

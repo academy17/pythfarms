@@ -4,7 +4,7 @@ import os
 import argparse
 import logging
 from dotenv import load_dotenv
-from lib import fetch_votes, optimizer, analytics, fetch_lp_data, fetch_lp_data_previous_epoch, lp_optimized, fetch_volatility
+from lib import fetch_votes, optimizer, analytics, fetch_lp_data, fetch_lp_data_previous_epoch, lp_optimizer, fetch_volatility
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -50,12 +50,12 @@ def main():
     lp_dashboard_previous_parser.add_argument("--no-display", action="store_true", help="Don't display the dashboard in terminal")
     
     # LP Optimized command
-    lp_optimized_parser = subparsers.add_parser("lp_optimized", help="Generate optimized LP dashboard with simulated vote allocation")
-    lp_optimized_parser.add_argument("--votes", help="Path to votes dashboard JSON", default="input_data/aero/votes_dashboard.json")
-    lp_optimized_parser.add_argument("--lp", help="Path to LP dashboard JSON", default="lp_dashboard/aero/lp_dashboard.json")
-    lp_optimized_parser.add_argument("--output", help="Path to save optimized LP dashboard", default="lp_optimized/aero/optimized_lp.json")
-    lp_optimized_parser.add_argument("--top", type=int, default=30, help="Number of top pools to display")
-    lp_optimized_parser.add_argument("--no-display", action="store_true", help="Don't display the dashboard in terminal")
+    lp_optimizer_parser = subparsers.add_parser("lp_optimizer", help="Generate optimized LP dashboard with simulated vote allocation")
+    lp_optimizer_parser.add_argument("--votes", help="Path to votes dashboard JSON", default="input_data/aero/votes_dashboard.json")
+    lp_optimizer_parser.add_argument("--lp", help="Path to LP dashboard JSON", default="lp_dashboard/aero/lp_dashboard.json")
+    lp_optimizer_parser.add_argument("--output", help="Path to save optimized LP dashboard", default="lp_optimized/aero/optimized_lp.json")
+    lp_optimizer_parser.add_argument("--top", type=int, default=30, help="Number of top pools to display")
+    lp_optimizer_parser.add_argument("--no-display", action="store_true", help="Don't display the dashboard in terminal")
     
     # Fetch Volatility command
     volatility_parser = subparsers.add_parser("fetch_volatility", help="Fetch volatility data for pools")
