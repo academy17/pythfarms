@@ -123,9 +123,13 @@ load_dotenv()
 RPC_URL = os.getenv("RPC_URL")
 LP_SUGAR_ADDRESS = os.getenv("LP_SUGAR_ADDRESS")
 AERO_SAFE_ADDRESS = os.getenv("AERO_SAFE_ADDRESS", "").strip()  # Strip whitespace
+LP_ADDRESSES = os.getenv("LP_ADDRESSES", "").strip()  # New: support for multiple addresses
 PAGE_SIZE = int(os.getenv("PAGE_SIZE", 200))
 
-# Validate address format
+# Process addresses
+lp_address_list = []
+
+# First add the AERO_SAFE_ADDRESS if present
 if AERO_SAFE_ADDRESS:
     # Remove 0x prefix if present
     clean_addr = AERO_SAFE_ADDRESS.replace('0x', '').lower()
@@ -133,13 +137,45 @@ if AERO_SAFE_ADDRESS:
     if len(clean_addr) != 40 or not all(c in '0123456789abcdef' for c in clean_addr):
         logger.error(f"❌ Invalid address format: {AERO_SAFE_ADDRESS}")
         logger.error("Address should be 40 hex characters (excluding 0x prefix)")
-        AERO_SAFE_ADDRESS = None
     else:
-        AERO_SAFE_ADDRESS = f"0x{clean_addr}"
+        lp_address_list.append(f"0x{clean_addr}")
 
-def fetch_our_positions(w3):
-    """Fetch all our LP positions using LpSugar"""
-    logger.info("🔍 Fetching our LP positions via LpSugar...")
+# Then process the comma-separated list of LP_ADDRESSES
+if LP_ADDRESSES:
+    for addr in LP_ADDRESSES.split(','):
+        addr = addr.strip()
+        if not addr:
+            continue
+        # Remove 0x prefix if present
+        clean_addr = addr.replace('0x', '').lower()
+        # Check if it's a valid hex string of correct length
+        if len(clean_addr) != 40 or not all(c in '0123456789abcdef' for c in clean_addr):
+            logger.error(f"❌ Invalid address format in LP_ADDRESSES: {addr}")
+            logger.error("Address should be 40 hex characters (excluding 0x prefix)")
+        else:
+            lp_address_list.append(f"0x{clean_addr}")
+
+# Deduplicate addresses
+lp_address_list = list(set(lp_address_list))
+
+def fetch_our_positions(w3, addresses=None):
+    """Fetch all our LP positions using LpSugar for multiple addresses
+    
+    Args:
+        w3: Web3 instance
+        addresses: List of addresses to fetch positions for. If None, uses lp_address_list
+        
+    Returns:
+        List of formatted position dictionaries
+    """
+    if addresses is None:
+        addresses = lp_address_list
+    
+    if not addresses:
+        logger.error("❌ No valid addresses to fetch positions for")
+        return []
+    
+    logger.info(f"🔍 Fetching LP positions via LpSugar for {len(addresses)} addresses...")
     
     lp_sugar = w3.eth.contract(
         address=w3.to_checksum_address(LP_SUGAR_ADDRESS),
@@ -154,41 +190,50 @@ def fetch_our_positions(w3):
     
     field_names = [c["name"] for c in fn_abi["outputs"][0]["components"]]
     
-    # Fetch positions in batches
-    offset = 0
-    all_positions = []
-    while True:
-        try:
-            batch = lp_sugar.functions.positions(
-                PAGE_SIZE, 
-                offset, 
-                w3.to_checksum_address(AERO_SAFE_ADDRESS)
-            ).call()
-            
-            if not batch:
+    # Fetch positions for each address
+    all_formatted_positions = []
+    
+    for address in addresses:
+        logger.info(f"Fetching positions for {address}...")
+        # Fetch positions in batches
+        offset = 0
+        address_positions = []
+        
+        while True:
+            try:
+                batch = lp_sugar.functions.positions(
+                    PAGE_SIZE, 
+                    offset, 
+                    w3.to_checksum_address(address)
+                ).call()
+                
+                if not batch:
+                    break
+                address_positions.extend(batch)
+                offset += PAGE_SIZE
+                
+                logger.info(f"Retrieved {len(batch)} positions in batch for {address}")
+            except ContractLogicError as e:
+                logger.error(f"Error fetching positions for {address}: {e}")
                 break
-            all_positions.extend(batch)
-            offset += PAGE_SIZE
+        
+        # Format positions for this address
+        for entry in address_positions:
+            pos_dict = {}
+            for name, val in zip(field_names, entry):
+                # Convert bytes to hex strings
+                if isinstance(val, (bytes, bytearray)):
+                    pos_dict[name] = "0x" + val.hex()
+                else:
+                    pos_dict[name] = val
             
-            logger.info(f"Retrieved {len(batch)} positions in batch")
-        except ContractLogicError as e:
-            logger.error(f"Error fetching positions: {e}")
-            break
+            # Add the address this position belongs to
+            pos_dict['owner_address'] = address
+            
+            all_formatted_positions.append(pos_dict)
     
-    # Format positions
-    formatted_positions = []
-    for entry in all_positions:
-        pos_dict = {}
-        for name, val in zip(field_names, entry):
-            # Convert bytes to hex strings
-            if isinstance(val, (bytes, bytearray)):
-                pos_dict[name] = "0x" + val.hex()
-            else:
-                pos_dict[name] = val
-        formatted_positions.append(pos_dict)
-    
-    logger.info(f"✅ Retrieved {len(formatted_positions)} total positions")
-    return formatted_positions
+    logger.info(f"✅ Retrieved {len(all_formatted_positions)} total positions across {len(addresses)} addresses")
+    return all_formatted_positions
 
 def calculate_positions_value(w3, positions):
     """Calculate USD value of positions"""
@@ -290,7 +335,8 @@ def calculate_positions_value(w3, positions):
                 'token1_price': float(price1),
                 'value0_usd': float(value0_usd),
                 'value1_usd': float(value1_usd),
-                'total_value_usd': float(total_value_usd)
+                'total_value_usd': float(total_value_usd),
+                'owner_address': pos.get('owner_address')  # Include the owner address
             }
             
             enriched_positions.append(enriched_pos)
@@ -308,8 +354,8 @@ def main():
     logger.info("Starting LP position value calculation...")
     
     # Check required environment variables
-    if not AERO_SAFE_ADDRESS:
-        logger.error("❌ AERO_SAFE_ADDRESS not set in environment variables")
+    if not lp_address_list:
+        logger.error("❌ No valid LP addresses found. Please set AERO_SAFE_ADDRESS or LP_ADDRESSES in environment variables")
         return
     
     if not LP_SUGAR_ADDRESS:
@@ -321,7 +367,7 @@ def main():
         logger.error("❌ Failed to connect to RPC")
         return
         
-    logger.info(f"Using safe address: {AERO_SAFE_ADDRESS}")
+    logger.info(f"Using {len(lp_address_list)} addresses: {', '.join(lp_address_list)}")
     
     # Fetch positions
     positions = fetch_our_positions(w3)
@@ -332,16 +378,45 @@ def main():
     # Calculate values
     valued_positions = calculate_positions_value(w3, positions)
     
+    # Group positions by pool address
+    positions_by_pool = {}
+    for pos in valued_positions:
+        pool_addr = pos['pool']
+        if pool_addr not in positions_by_pool:
+            positions_by_pool[pool_addr] = []
+        positions_by_pool[pool_addr].append(pos)
+    
+    # Consolidate positions for the same pool
+    consolidated_positions = []
+    for pool_addr, pool_positions in positions_by_pool.items():
+        if len(pool_positions) == 1:
+            consolidated_positions.append(pool_positions[0])
+        else:
+            # Multiple positions in the same pool - combine them
+            combined = pool_positions[0].copy()
+            combined['addresses'] = [p['owner_address'] for p in pool_positions]
+            
+            # Sum up the values and amounts
+            for key in ['amount0_human', 'amount1_human', 'value0_usd', 'value1_usd', 'total_value_usd']:
+                combined[key] = sum(p[key] for p in pool_positions)
+            
+            consolidated_positions.append(combined)
+    
+    # Sort by total value
+    consolidated_positions.sort(key=lambda x: x['total_value_usd'], reverse=True)
+    
     # Display results
-    total_value = sum(pos['total_value_usd'] for pos in valued_positions)
+    total_value = sum(pos['total_value_usd'] for pos in consolidated_positions)
     
     print("\n================ Our LP Positions ================")
     print(f"Total Value: ${total_value:,.2f}")
+    print(f"Total Addresses: {len(lp_address_list)}")
+    print(f"Total Unique Pools: {len(consolidated_positions)}")
     print("--------------------------------------------------")
     print(f"{'Pool':25} {'TVL ($)':>15} {'Token 0':>12} {'Token 1':>12}")
     print("--------------------------------------------------")
     
-    for pos in valued_positions:
+    for pos in consolidated_positions:
         symbol = pos['symbol'][:23].ljust(23)
         value = f"${pos['total_value_usd']:,.2f}".rjust(15)
         amt0 = f"{pos['amount0_human']:.4f}".rjust(12)

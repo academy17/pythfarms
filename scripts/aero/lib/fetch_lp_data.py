@@ -590,6 +590,7 @@ def calculate_lp_data(pools, investment_sizes=None):
     # Import the functions here to avoid circular imports
     from .fetch_our_lp_data import fetch_our_positions, calculate_positions_value
     
+    # Fetch LP positions from all addresses defined in the environment variables
     our_positions = fetch_our_positions(w3)
     
     # Instead of calling calculate_positions_value which would make another API call to CoinGecko,
@@ -684,16 +685,31 @@ def calculate_lp_data(pools, investment_sizes=None):
     our_lp_pools = {}
     for pos in enriched_positions:
         pool_addr = pos['pool'].lower()
-        our_lp_pools[pool_addr] = {
-            'amount0_human': pos.get('amount0_human', 0),
-            'amount1_human': pos.get('amount1_human', 0),
-            'value0_usd': pos.get('value0_usd', 0),
-            'value1_usd': pos.get('value1_usd', 0),
-            'total_value_usd': pos.get('total_value_usd', 0)
-        }
+        
+        # If we already have this pool, sum up the values
+        if pool_addr in our_lp_pools:
+            our_lp_pools[pool_addr]['amount0_human'] += pos.get('amount0_human', 0)
+            our_lp_pools[pool_addr]['amount1_human'] += pos.get('amount1_human', 0)
+            our_lp_pools[pool_addr]['value0_usd'] += pos.get('value0_usd', 0)
+            our_lp_pools[pool_addr]['value1_usd'] += pos.get('value1_usd', 0)
+            our_lp_pools[pool_addr]['total_value_usd'] += pos.get('total_value_usd', 0)
+        else:
+            # Otherwise, create a new entry
+            our_lp_pools[pool_addr] = {
+                'amount0_human': pos.get('amount0_human', 0),
+                'amount1_human': pos.get('amount1_human', 0),
+                'value0_usd': pos.get('value0_usd', 0),
+                'value1_usd': pos.get('value1_usd', 0),
+                'total_value_usd': pos.get('total_value_usd', 0)
+            }
+            
         logger.info(f"Our LP in pool {pos['symbol']} ({pool_addr}): ${pos.get('total_value_usd', 0):.2f}")
     
     logger.info(f"✅ Found {len(our_lp_pools)} pools where we have LP positions")
+    
+    # Log the summed values for each pool
+    for pool_addr, pool_data in our_lp_pools.items():
+        logger.info(f"Summed LP in pool {pool_addr}: ${pool_data.get('total_value_usd', 0):.2f}")
     
     logger.info("Optimizing pool processing...")
     
