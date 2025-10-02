@@ -123,7 +123,7 @@ load_dotenv()
 RPC_URL = os.getenv("RPC_URL")
 LP_SUGAR_ADDRESS = os.getenv("LP_SUGAR_ADDRESS")
 AERO_SAFE_ADDRESS = os.getenv("AERO_SAFE_ADDRESS", "").strip()  # Strip whitespace
-LP_ADDRESSES = os.getenv("LP_ADDRESSES", "").strip()  # New: support for multiple addresses
+LP_ADDRESSES = os.getenv("AERO_LP_WALLETS", "").strip()  # New: support for multiple addresses
 PAGE_SIZE = int(os.getenv("PAGE_SIZE", 200))
 
 # Process addresses

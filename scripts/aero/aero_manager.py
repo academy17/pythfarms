@@ -117,9 +117,9 @@ def main():
             logger.info(f"\n===== Top {min(args.top, len(pools))} Pools by APR (Previous Epoch) =====")
             for i, pool in enumerate(pools[:args.top]):
                 logger.info(f"{i+1}. {pool.get('symbol', 'Unknown')} - APR: {pool.get('apr', 0):.2f}% - TVL: ${pool.get('tvl_usd', 0):,.2f}")
-    elif args.command == "lp_optimized":
+    elif args.command == "lp_optimizer":
         logger.info("Generating optimized LP dashboard")
-        lp_optimized.run_lp_optimized(
+        lp_optimizer.run_lp_optimized(
             votes_path=args.votes,
             lp_path=args.lp,
             output_path=args.output,
