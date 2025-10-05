@@ -10,6 +10,9 @@ from web3 import Web3
 from web3.exceptions import ContractLogicError
 from dotenv import load_dotenv
 
+# Import LP fetching functionality
+from .fetch_our_lp_data import fetch_our_positions, calculate_positions_value, lp_address_list as LP_ADDRESS_LIST
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -24,6 +27,18 @@ VE_ADDRESS = os.getenv("VE_ADDRESS")
 NFT_ID = int(os.getenv("NFT_ID", "0"))
 PAGE_SIZE = int(os.getenv("PAGE_SIZE", 200))
 DASHBOARD_PATH = "input_data/aero/votes_dashboard.json"
+MINTER_ADDRESS = os.getenv("MINTER_ADDRESS", "0xeb018363f0a9af8f91f06fee6613a751b2a33fe5")  # Default address provided
+
+# LP Position constants
+AERO_SAFE_ADDRESS = os.getenv("AERO_SAFE_ADDRESS", "").strip()  # Strip whitespace
+LP_ADDRESSES = os.getenv("AERO_LP_WALLETS", "").strip()  # Multiple LP addresses
+
+# Protocol pools that should always be included with LP data
+PROTOCOL_POOLS = os.getenv("PROTOCOL_POOLS", "").strip()
+PROTOCOL_POOLS_LIST = [addr.strip().lower() for addr in PROTOCOL_POOLS.split(",") if addr.strip()] if PROTOCOL_POOLS else []
+
+# CoinGecko constants for AERO price
+COINGECKO_AERO_ID = "aerodrome-finance"
 
 # CoinGecko URLs
 COINGECKO_SIMPLE_PRICE_URL = "https://api.coingecko.com/api/v3/simple/price"
@@ -38,6 +53,7 @@ LP_SUGAR_ABI = load_abi("LpSugar")
 REWARDS_SUGAR_ABI = load_abi("RewardsSugar")
 VOTER_ABI = load_abi("Voter")
 VE_ABI = load_abi("Ve")
+MINTER_ABI = load_abi("Minter")
 
 ERC20_ABI = [
     {
@@ -96,6 +112,90 @@ def get_token_symbol(w3, token_addr):
         s = None
     _token_symbol_cache[key] = s
     return s
+
+def from_wei(wei_amount):
+    """Convert wei to ether with proper decimal handling"""
+    return Decimal(str(wei_amount)) / Decimal(10**18)
+
+def get_aero_price():
+    """Get AERO token price from CoinGecko with retry mechanism"""
+    import time
+    import random
+    
+    max_retries = 5
+    base_delay = 2  # Start with a 2-second delay
+    
+    for attempt in range(max_retries):
+        try:
+            # Add a small random delay before each request to avoid rate limiting
+            if attempt > 0:
+                # Exponential backoff with jitter
+                delay = base_delay * (2 ** attempt) + random.uniform(0.1, 1.0)
+                logger.info(f"Rate limited by CoinGecko. Retrying in {delay:.2f} seconds (attempt {attempt+1}/{max_retries})...")
+                time.sleep(delay)
+            
+            params = {
+                'ids': COINGECKO_AERO_ID,
+                'vs_currencies': 'usd'
+            }
+            
+            # Add a custom user agent to avoid being blocked
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
+                'Accept': 'application/json'
+            }
+            
+            response = requests.get(COINGECKO_SIMPLE_PRICE_URL, params=params, headers=headers, timeout=10)
+            
+            # Check for rate limiting response
+            if response.status_code == 429:
+                logger.warning(f"CoinGecko rate limit hit. Will retry...")
+                continue
+                
+            response.raise_for_status()
+            data = response.json()
+            
+            price = Decimal(str(data.get(COINGECKO_AERO_ID, {}).get('usd', 0)))
+            logger.info(f"ℹ️ AERO price: ${price}")
+            return price
+            
+        except requests.exceptions.RequestException as e:
+            logger.warning(f"CoinGecko API request failed (attempt {attempt+1}/{max_retries}): {e}")
+            # Only continue retrying for specific errors
+            if "429" in str(e) or "timeout" in str(e).lower():
+                continue
+            else:
+                logger.error(f"❌ Failed to get AERO price (non-retriable error): {e}")
+                break
+        except Exception as e:
+            logger.error(f"❌ Failed to get AERO price: {e}")
+            break
+    
+    # If we've exhausted all retries or hit a non-retriable error, use fallback price
+    # You might want to use a hardcoded recent price as a last resort
+    logger.warning("Using fallback AERO price after all retries failed")
+    return Decimal('1.01')  # Approximate recent price as fallback
+
+
+def get_weekly_emissions():
+    """Get weekly emissions from Minter contract"""
+    w3 = get_web3()
+    if not w3:
+        return Decimal('0')
+    
+    try:
+        minter = w3.eth.contract(
+            address=w3.to_checksum_address(MINTER_ADDRESS),
+            abi=MINTER_ABI
+        )
+        
+        weekly_wei = minter.functions.weekly().call()
+        weekly = from_wei(weekly_wei)
+        logger.info(f"ℹ️ Weekly emissions: {weekly} AERO")
+        return weekly
+    except Exception as e:
+        logger.error(f"❌ Failed to get weekly emissions: {e}")
+        return Decimal('0')
 
 def fetch_all_pools(w3):
     """Fetch all pools from LpSugar contract"""
@@ -405,15 +505,41 @@ def fetch_relay_votes(w3, enriched_pools):
         relays_raw = relay_sugar.functions.all(w3.to_checksum_address(relay_account)).call()
         logger.info(f"Retrieved {len(relays_raw)} Relay entries")
         
+        # Debug: Log the structure of the first relay if available
+        if relays_raw and len(relays_raw) > 0:
+            logger.info(f"First relay data structure: {len(relays_raw[0])} elements")
+            logger.info(f"Field mapping (first few and last few elements):")
+            logger.info(f"  [0] venft_id: {relays_raw[0][0]}")
+            logger.info(f"  [1] decimals: {relays_raw[0][1]}")
+            logger.info(f"  [3] voting_amount: {relays_raw[0][3]}")
+            
+            # Log the last few elements to verify name and relay address positions
+            if len(relays_raw[0]) >= 6:
+                logger.info(f"  [-6] manager: {relays_raw[0][-6]}")
+                logger.info(f"  [-5] relay: {relays_raw[0][-5]}")
+                logger.info(f"  [-2] name: {relays_raw[0][-2]}")
+        
         parsed_relays = []
         for raw in relays_raw:
-            # Parse relay struct
-            decimals_raw = raw[1]
-            voting_amount_raw = raw[3]
-            votes_arr = raw[6] if isinstance(raw[6], list) else []
-            relay_address = raw[11]
-            raw_name = raw[14]
-            name = raw_name if isinstance(raw_name, str) else ""
+            # Parse relay struct based on field order described in documentation
+            try:
+                venft_id = raw[0]  # Token ID of the Relay veNFT
+                decimals_raw = raw[1]  # Relay veNFT token decimals
+                voting_amount_raw = raw[3]  # Relay veNFT voting power
+                votes_arr = raw[6] if isinstance(raw[6], list) else []  # Dynamic array of pool addresses and vote weights
+                
+                # The relay address is the 5th element from the end
+                # Assuming structure as [... manager, relay_address, compounder, inactive, name, account_venfts]
+                relay_address = raw[-5] if len(raw) >= 5 else None
+                manager_address = raw[-6] if len(raw) >= 6 else None
+                
+                # Name is the second to last element, before account_venfts
+                raw_name = raw[-2] if len(raw) >= 2 else ""
+                name = raw_name if isinstance(raw_name, str) else ""
+            except Exception as e:
+                logger.warning(f"Error parsing relay struct: {e}")
+                logger.warning(f"Raw relay data: {raw}")
+                continue
             
             voting_amount_hr = Decimal(voting_amount_raw) / (Decimal(10) ** int(decimals_raw))
             
@@ -435,7 +561,9 @@ def fetch_relay_votes(w3, enriched_pools):
             voting_amount_str = f"{voting_amount_hr:,.6f}".rstrip("0").rstrip(".")
             
             parsed_relays.append({
-                "relay": relay_address.lower(),
+                "venft_id": venft_id,  # Add the NFT ID
+                "relay": relay_address.lower() if relay_address else "",
+                "manager": manager_address.lower() if manager_address else "",
                 "name": name,
                 "voting_amount": voting_amount_str,
                 "voting_amount_raw": float(voting_amount_hr),
@@ -559,6 +687,8 @@ def create_votes_dashboard(w3, pools, relays=None):
         "total_weight": float(total_weight),
         "our_voting_power": float(our_nft_weight),
         "pool_summed_weights": float(pool_summed_weights),
+        "lp_address_list": LP_ADDRESS_LIST,  # Include LP addresses in the dashboard
+        "protocol_pools": PROTOCOL_POOLS_LIST,  # Include protocol pools list in the dashboard
         "pools": augmented_pools
     }
     
@@ -570,7 +700,7 @@ def create_votes_dashboard(w3, pools, relays=None):
     dashboard["pools"].sort(key=lambda x: x["total_bribes_fees_usd"], reverse=True)
     
     logger.info(f"Created dashboard with {len(augmented_pools)} pools")
-    save_json(dashboard, DASHBOARD_PATH)
+    # Note: We're not saving the dashboard here anymore as we'll save it after adding LP data
     return dashboard
 
 def run_fetch(is_historical=False):
@@ -626,8 +756,134 @@ def run_fetch(is_historical=False):
     # Step 7: Fetch relay votes
     relay_data = fetch_relay_votes(w3, enriched_pools)
     
-    # Step 8: Create votes dashboard
+    # Step 8: Fetch LP positions data
+    logger.info("Fetching our LP positions...")
+    our_positions = fetch_our_positions(w3)
+    valued_positions = calculate_positions_value(w3, our_positions) if our_positions else []
+    
+    # Group positions by pool address
+    positions_by_pool = {}
+    for pos in valued_positions:
+        pool_addr = pos['pool'].lower()
+        if pool_addr not in positions_by_pool:
+            positions_by_pool[pool_addr] = []
+        positions_by_pool[pool_addr].append(pos)
+    
+    # Consolidate positions for the same pool
+    consolidated_positions = []
+    for pool_addr, pool_positions in positions_by_pool.items():
+        if len(pool_positions) == 1:
+            consolidated_positions.append(pool_positions[0])
+        else:
+            # Multiple positions in the same pool - combine them
+            combined = pool_positions[0].copy()
+            combined['addresses'] = [p.get('owner_address') for p in pool_positions]
+            
+            # Sum up the values and amounts
+            for key in ['amount0_human', 'amount1_human', 'value0_usd', 'value1_usd', 'total_value_usd']:
+                combined[key] = sum(p.get(key, 0) for p in pool_positions)
+            
+            consolidated_positions.append(combined)
+    
+    # Calculate total LP value
+    total_lp_value = sum(pos.get('total_value_usd', 0) for pos in consolidated_positions)
+    logger.info(f"Found {len(consolidated_positions)} pools with our LP positions, total value: ${total_lp_value:,.2f}")
+    
+    # Step 9: Create votes dashboard
     dashboard = create_votes_dashboard(w3, pools_with_fees, relay_data)
     
-    logger.info("Vote data fetch completed successfully")
+    # Step 10: Add LP data to dashboard
+    dashboard["lp_positions"] = consolidated_positions
+    dashboard["lp_total_value"] = float(total_lp_value)
+    dashboard["lp_addresses"] = list(set([p.get('owner_address') for p in valued_positions if p.get('owner_address')]))
+    
+    # Step 11: Get weekly emissions data directly from source
+    weekly_emissions = get_weekly_emissions()
+    aero_price = get_aero_price()
+    total_weekly_emissions_usd = weekly_emissions * aero_price
+    
+    # Add emissions data to dashboard
+    dashboard["total_weekly_emissions"] = float(weekly_emissions)
+    dashboard["aero_price"] = float(aero_price)
+    dashboard["total_weekly_emissions_usd"] = float(total_weekly_emissions_usd)
+    
+    logger.info(f"ℹ️ Weekly emissions: {weekly_emissions} AERO (${total_weekly_emissions_usd:,.2f} USD)")
+    
+    # Add LP flags to pools in the dashboard
+    lp_pools = {p['pool'].lower(): p for p in consolidated_positions}
+    
+    # Log protocol pools that we're tracking
+    logger.info(f"Tracking {len(PROTOCOL_POOLS_LIST)} protocol pools: {', '.join(PROTOCOL_POOLS_LIST) if PROTOCOL_POOLS_LIST else 'None'}")
+    
+    for pool in dashboard["pools"]:
+        pool_addr = pool.get("pool", "").lower()
+        is_protocol_pool = pool_addr in PROTOCOL_POOLS_LIST
+        
+        # Get total pool TVL from the pool data for all pools
+        total_pool_tvl = pool.get("tvl", 0)
+        
+        if pool_addr in lp_pools:
+            # We have LP positions in this pool
+            our_lp_value = lp_pools[pool_addr].get('total_value_usd', 0)
+            ownership_pct = 0
+            if total_pool_tvl > 0:
+                ownership_pct = (our_lp_value / total_pool_tvl) * 100
+            
+            pool["has_our_lp"] = True
+            # If it's also a protocol pool, mark it as such
+            if is_protocol_pool:
+                pool["is_protocol_pool"] = True
+            
+            pool["our_lp_data"] = {
+                "amount0_human": lp_pools[pool_addr].get('amount0_human', 0),
+                "amount1_human": lp_pools[pool_addr].get('amount1_human', 0),
+                "token0_symbol": lp_pools[pool_addr].get('token0_symbol', ''),
+                "token1_symbol": lp_pools[pool_addr].get('token1_symbol', ''),
+                "value0_usd": lp_pools[pool_addr].get('value0_usd', 0),
+                "value1_usd": lp_pools[pool_addr].get('value1_usd', 0),
+                "total_value_usd": lp_pools[pool_addr].get('total_value_usd', 0),
+                "total_pool_tvl": total_pool_tvl,
+                "ownership_percentage": float(ownership_pct)
+            }
+            
+            # Log our ownership percentage for pools we're in
+            logger.info(f"Our position in {pool.get('symbol')}: ${our_lp_value:,.2f} / ${total_pool_tvl:,.2f} = {ownership_pct:.2f}%")
+        elif is_protocol_pool:
+            # This is a protocol pool we want to track, but we don't have LP positions in it
+            pool["has_our_lp"] = False
+            pool["is_protocol_pool"] = True
+            pool["our_lp_data"] = {
+                "amount0_human": 0,
+                "amount1_human": 0,
+                "token0_symbol": get_token_symbol(w3, pool.get("token0", "")),
+                "token1_symbol": get_token_symbol(w3, pool.get("token1", "")),
+                "value0_usd": 0,
+                "value1_usd": 0,
+                "total_value_usd": 0,
+                "total_pool_tvl": total_pool_tvl,
+                "ownership_percentage": 0
+            }
+            logger.info(f"Protocol pool with no LP: {pool.get('symbol')}, TVL: ${total_pool_tvl:,.2f}")
+        else:
+            # Regular pool with no LP positions and not a protocol pool
+            pool["has_our_lp"] = False
+            pool["is_protocol_pool"] = False
+    
+    # Save the updated dashboard with LP data
+    save_json(dashboard, DASHBOARD_PATH)
+    
+    # Display summary of protocol pools
+    protocol_pool_info = [
+        pool for pool in dashboard["pools"] 
+        if pool.get("is_protocol_pool", False)
+    ]
+    protocol_pool_summary = ", ".join([
+        f"{p.get('symbol')} (TVL: ${p.get('tvl', 0):,.2f}, LP: {p.get('has_our_lp', False)})" 
+        for p in protocol_pool_info
+    ])
+    
+    if PROTOCOL_POOLS_LIST:
+        logger.info(f"Protocol pools included in dashboard: {protocol_pool_summary}")
+    
+    logger.info("Vote data fetch completed successfully with integrated LP positions")
     return dashboard
