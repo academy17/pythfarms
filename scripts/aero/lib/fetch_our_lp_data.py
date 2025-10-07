@@ -195,27 +195,48 @@ def fetch_our_positions(w3, addresses=None):
     
     for address in addresses:
         logger.info(f"Fetching positions for {address}...")
-        # Fetch positions in batches
-        offset = 0
         address_positions = []
         
-        while True:
+        # Do simple pagination with fixed values that will work across all RPC providers
+        offset = 0
+        max_offset = 20000  # Cap at this to avoid infinite loops
+        batch_size = 200    # Small enough batch size to work reliably
+        total_found = 0
+        
+        # Continue looping through ALL offset ranges up to max_offset
+        # Important: Don't stop on empty batches, as positions might be scattered
+        logger.info(f"Scanning position offsets for {address} (0 to {max_offset})...")
+        
+        while offset < max_offset:
             try:
                 batch = lp_sugar.functions.positions(
-                    PAGE_SIZE, 
-                    offset, 
+                    batch_size,
+                    offset,
                     w3.to_checksum_address(address)
                 ).call()
                 
-                if not batch:
-                    break
-                address_positions.extend(batch)
-                offset += PAGE_SIZE
+                # Add any positions found
+                if batch:
+                    total_found += len(batch)
+                    address_positions.extend(batch)
+                    logger.info(f"Found {len(batch)} positions at offset {offset} (total: {total_found})")
                 
-                logger.info(f"Retrieved {len(batch)} positions in batch for {address}")
+                # Always move to next batch, even if current batch is empty
+                offset += batch_size
+                
+                # Log progress every 2000 positions checked
+                if offset % 2000 == 0 and offset > 0:
+                    logger.info(f"Scanned up to offset {offset}, found {total_found} positions so far...")
+                
             except ContractLogicError as e:
-                logger.error(f"Error fetching positions for {address}: {e}")
+                logger.error(f"Error fetching positions at offset {offset}: {e}")
                 break
+        
+        logger.info(f"Total positions found for {address}: {len(address_positions)}")
+        
+        # Sanity check - warn if we hit the max offset
+        if offset >= max_offset:
+            logger.warning(f"Hit maximum offset ({max_offset}) for {address}. Some positions might be missing.")
         
         # Format positions for this address
         for entry in address_positions:
