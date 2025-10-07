@@ -134,8 +134,8 @@ def calculate_optimal_votes(vote_data, lp_data):
     for pool in vote_data.get("pools", []):
         pool_addr = pool.get("pool", "").lower()
         if pool_addr:
-            # Use total_bribes_fees_usd (bribes + fees) as the reward (updated field name)
-            reward = Decimal(str(pool.get("total_bribes_fees_usd", 0)))
+            # Use total_usd (bribes + fees) as the reward (updated field name)
+            reward = Decimal(str(pool.get("total_usd", 0)))
             # Current on-chain weight only (ignore relay votes)
             weight = Decimal(str(pool.get("weight", 0)))
             

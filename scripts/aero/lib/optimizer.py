@@ -22,7 +22,8 @@ logged_pools = set()
 
 # Default paths
 DEFAULT_DASHBOARD_PATH = "input_data/aero/votes_dashboard.json"
-DEFAULT_LP_DASHBOARD_PATH = "lp_dashboard/aero/lp_dashboard.json"
+# We don't need LP dashboard anymore as it's integrated into votes dashboard
+# DEFAULT_LP_DASHBOARD_PATH = "lp_dashboard/aero/lp_dashboard.json" 
 HUMAN_OUT_PATH = "optimized_votes/aero/optimized_votes_human.json"
 BOT_OUT_PATH = "optimized_votes/aero/optimized_votes_bot.txt"
 CALLDATA_OUT_PATH = "optimized_votes/aero/optimized_votes_calldata.json"
@@ -83,10 +84,20 @@ def equal_marginal_combined(pool_data, P, S_total, total_emissions=None, gamma=1
             return Decimal(0)
             
         # Apply volatility penalty if gamma > 0 and volatility > 0
-        # Higher volatility means lower effective reward
         volatility_penalty = max(Decimal(0), Decimal(1) - (volatility / Decimal(100) * gamma))
         adjusted_R = R * volatility_penalty
         
+        # Handle zero or very low weight pools properly
+        if W <= EPSILON:
+            # For pools with zero weight, marginal utility decreases as we add votes
+            # First vote gets full reward, subsequent votes get diminishing returns
+            if delta <= EPSILON:
+                return adjusted_R  # First vote gets full reward
+            else:
+                # Marginal utility decreases as 1/(delta+1) for zero-weight pools
+                return adjusted_R / (delta + Decimal(1))
+        
+        # Normal case: pools with existing weight
         denom = (W + delta)**2
         return adjusted_R * W / (denom if denom > EPSILON else EPSILON)
     
@@ -98,8 +109,12 @@ def equal_marginal_combined(pool_data, P, S_total, total_emissions=None, gamma=1
             return Decimal(0)
         
         v_i = W + delta
+        
+        # Special case for empty pools (W=0) - consider marginal of first vote
         if v_i <= EPSILON:
-            return Decimal(0)
+            # For display purposes, use a small value to show potential
+            test_delta = Decimal("1.0")  # Consider marginal of adding 1 vote
+            v_i = test_delta
             
         S = S_tot  # Total system votes
         
@@ -110,11 +125,14 @@ def equal_marginal_combined(pool_data, P, S_total, total_emissions=None, gamma=1
         # Calculate LP marginal utility based on how our votes direct emissions
         # Each vote increases the pool's share of total emissions
         # The marginal utility is our LP fraction times the change in emission share
-        # Note: weekly_rewards parameter is kept for compatibility but not used
+        # Use weekly_rewards parameter from the pool if available
+        
+        # Use total_emissions if available, otherwise fall back to weekly_rewards
+        emissions_to_use = total_emissions
         
         # The marginal utility is the derivative of (lp_frac * emissions * v_i / S)
         # with respect to adding votes, where v_i is our pool's votes and S is total votes
-        return lp_frac * total_emissions * (S - v_i) / (S * S)
+        return lp_frac * emissions_to_use * (S - v_i) / (S * S)
     
     # Store the top marginal utility values to compare
     top_marginals = []
@@ -257,13 +275,12 @@ def equal_marginal_combined(pool_data, P, S_total, total_emissions=None, gamma=1
     
     return out
 
-def run_optimization(dashboard, lp_dashboard=None, volatility_data=None, gamma=0):
+def run_optimization(dashboard, volatility_data=None, gamma=0):
     """
     Run the optimization algorithm
     
     Args:
-        dashboard: The votes dashboard with pool data
-        lp_dashboard: The LP dashboard with LP data
+        dashboard: The votes dashboard with pool data (now includes LP data)
         volatility_data: Volatility data for pools
         gamma: Volatility penalty coefficient (0 = no penalty, default)
     
@@ -276,15 +293,30 @@ def run_optimization(dashboard, lp_dashboard=None, volatility_data=None, gamma=0
     # Convert gamma to Decimal
     gamma = Decimal(str(gamma))
     
-    # Extract total weekly emissions from LP dashboard if available
-    total_emissions_usd = Decimal(0)
-    if lp_dashboard and "total_weekly_emissions_usd" in lp_dashboard:
-        total_emissions_usd = Decimal(str(lp_dashboard["total_weekly_emissions_usd"]))
-        logger.info(f"Using total weekly emissions from LP dashboard: ${total_emissions_usd:.2f}")
-    elif lp_dashboard:
-        # Calculate total emissions by summing from all pools
-        total_emissions_usd = sum(Decimal(str(p.get("weekly_rewards_usd", 0))) for p in lp_dashboard.get("pools", []))
-        logger.info(f"Calculated total weekly emissions from pool data: ${total_emissions_usd:.2f}")
+    # Check if Ouranous Foundation relay exists
+    ouranous_relay = None
+    if "relays" in dashboard:
+        for relay in dashboard["relays"]:
+            if relay.get("name") == "Ouranous Foundation":
+                ouranous_relay = relay
+                logger.info(f"Found Ouranous Foundation relay with {relay.get('voting_amount', '?')} voting power")
+                break
+    
+    # Get weekly emissions directly from votes dashboard
+    # If the emissions data is present, use it; otherwise fall back to estimating
+    if "total_weekly_emissions_usd" in dashboard:
+        total_emissions_usd = Decimal(str(dashboard.get("total_weekly_emissions_usd", 0)))
+        logger.info(f"Using actual weekly emissions from dashboard: ${total_emissions_usd:.2f}")
+    else:
+        # Fall back to estimating from fees if emissions data isn't available
+        total_fees = sum(Decimal(str(p.get("fees_usd", 0))) for p in dashboard["pools"])
+        total_emissions_usd = total_fees * 7 * 100  # Weekly estimate based on daily fees, scaled up for LP impact
+        
+        # Set a minimum value for better optimization
+        if total_emissions_usd < 1000000:
+            total_emissions_usd = Decimal(1000000)  # Reasonable default if calculated value is too low
+        
+        logger.info(f"Estimated weekly emissions (fallback): ${total_emissions_usd:.2f}")
         
     # Load volatility data if not provided
     if volatility_data is None and gamma > 0:
@@ -322,9 +354,9 @@ def run_optimization(dashboard, lp_dashboard=None, volatility_data=None, gamma=0
                 volatility_count += 1
                 
                 # Log pools with high volatility
-                if vol_pct > 10:
-                    symbol = pool_data.get("symbol", addr[:10])
-                    logger.info(f"High volatility detected: {symbol} - {vol_pct:.2f}%")
+                # if vol_pct > 10:
+                    # symbol = pool_data.get("symbol", addr[:10])
+                    # logger.info(f"High volatility detected: {symbol} - {vol_pct:.2f}%")
         
         logger.info(f"Loaded volatility data for {volatility_count} out of {pool_count} pools")
         
@@ -341,18 +373,33 @@ def run_optimization(dashboard, lp_dashboard=None, volatility_data=None, gamma=0
                 logger.info(f"Sample vote addresses: {list(votes_addresses)[:3]}")
                 logger.info(f"Sample volatility addresses: {list(volatility_addresses)[:3]}")
         
-    # Adjust each pool's on-chain weight by removing our existing votes
+    # First remove our votes and Ouranous Foundation's votes from the pools
+    # optim Ouranous Foundation's votes first, then our votes
     
     for p in pools:
+        pool_addr = p["pool"].lower()
         our_votes = Decimal(str(p.get("our_votes", 0)))
         current_weight = Decimal(str(p.get("on_chain_weight", p.get("weight", 0))))
         
-        # Subtract our votes from the pool's weight
-        adjusted_weight = max(current_weight - our_votes, Decimal(0))
+        # Remove Ouranous Foundation's current votes if they exist
+        ouranous_votes = Decimal(0)
+        if ouranous_relay:
+            for vote in ouranous_relay.get("votes", []):
+                if vote.get("pool", "").lower() == pool_addr:
+                    ouranous_votes = Decimal(str(vote.get("weight", 0)))
+                    break
         
-        if our_votes > 0:
-            logger.info(f"Removing {our_votes} of our votes from pool {p.get('symbol', '')} ({p['pool'][:10]}...)")
-            logger.info(f"  Original weight: {current_weight}, Adjusted weight: {adjusted_weight}")
+        # Subtract just*** Ouranous Foundation's votes from the pool's weight before we optim for them
+        adjusted_weight = max(current_weight - ouranous_votes, Decimal(0))
+        
+        # if our_votes > 0 or ouranous_votes > 0:
+            # logger.info(f"Adjusting pool {p.get('symbol', '')} ({p['pool'][:10]}...):")
+            # logger.info(f"  Original weight: {current_weight}")
+            # if ouranous_votes > 0:
+                 # logger.info(f"  Removing Ouranous votes: -{ouranous_votes}")
+            # if our_votes > 0:
+                # logger.info(f"  Removing our votes: -{our_votes}")
+            # logger.info(f"  Adjusted weight: {adjusted_weight}")
             
         # Add adjusted weight directly to the pool data
         p["adjusted_weight"] = adjusted_weight
@@ -362,37 +409,128 @@ def run_optimization(dashboard, lp_dashboard=None, volatility_data=None, gamma=0
     
     logger.info(f"Our total voting power: {P_our}")
     
-    # Create a mapping of LP data by pool address
+    # Create a mapping of LP data by pool address from the integrated LP data in votes dashboard
     lp_data = {}
-    if lp_dashboard and "pools" in lp_dashboard:
-        logger.info("Incorporating LP data into optimization...")
-        for lp_pool in lp_dashboard["pools"]:
-            addr = lp_pool.get("lp", "").lower()
-            if not addr:
-                continue
-                
-            # Get our LP fraction for this pool
-            has_our_lp = lp_pool.get("has_our_lp", False)
-            tvl_usd = Decimal(str(lp_pool.get("tvl_usd", 0)))
-            our_lp_value = Decimal(str(lp_pool.get("our_lp_data", {}).get("total_value_usd", 0))) if has_our_lp else Decimal(0)
+    logger.info("Extracting LP data from votes dashboard...")
+    
+    for pool in dashboard["pools"]:
+        addr = pool.get("pool", "").lower()
+        if not addr:
+            continue
+            
+        # Check if this pool has our LP or is a protocol pool
+        has_our_lp = pool.get("has_our_lp", False)
+        is_protocol_pool = pool.get("is_protocol_pool", False)
+        
+        if has_our_lp or is_protocol_pool:
+            # Get our LP data
+            our_lp_data = pool.get("our_lp_data", {})
+            tvl_usd = Decimal(str(our_lp_data.get("total_pool_tvl", 0)))
+            our_lp_value = Decimal(str(our_lp_data.get("total_value_usd", 0)))
             
             # Calculate our LP fraction
             lp_fraction = Decimal(0)
-            if has_our_lp and tvl_usd > 0:
-                lp_fraction = our_lp_value / tvl_usd
-                # logger.info(f"Pool {lp_pool.get('symbol')}: Our LP fraction = {lp_fraction:.6f}, value = ${our_lp_value}")
+            
+            if tvl_usd > 0:
+                # For protocol pools, we care about both our LP rewards and other LPs' rewards
+                if is_protocol_pool:
+                    # First, calculate our direct ownership percentage
+                    if has_our_lp:
+                        our_ownership = our_lp_value / tvl_usd
+                    else:
+                        our_ownership = Decimal(0)
+                    
+                    # Value other LPs' portion at 20% (0.2x)
+                    other_lp_value_weight = Decimal("0.2")
+                    other_lp_portion = Decimal(1) - our_ownership
+                    
+                    # Effective LP fraction = our_portion + (other_portion * 0.2)
+                    lp_fraction = our_ownership + (other_lp_portion * other_lp_value_weight)
+                    
+                    logger.info(f"Protocol pool {pool.get('symbol', '')}: Our ownership={float(our_ownership*100):.2f}%, " +
+                                f"Valuing other LP at 20% -> Effective LP fraction={float(lp_fraction*100):.2f}%")
                 
-            weekly_rewards_usd = Decimal(str(lp_pool.get("weekly_rewards_usd", 0)))
+                # For non-protocol pools with our LP, just use our ownership percentage
+                elif has_our_lp:
+                    lp_fraction = our_lp_value / tvl_usd
+                    # Or use the pre-calculated ownership percentage
+                    ownership_pct = Decimal(str(our_lp_data.get("ownership_percentage", 0)))
+                    if ownership_pct > 0:
+                        lp_fraction = ownership_pct / 100
+            
+            # Calculate weekly rewards based on daily fees
+            # Multiply by 7 to convert daily fees to weekly
+            weekly_rewards_usd = Decimal(str(pool.get("fees_usd", 0))) * 7  # Weekly = 7 * daily fees
             
             lp_data[addr] = {
                 "lp_fraction": lp_fraction,
                 "weekly_rewards_usd": weekly_rewards_usd
             }
     
-    # Calculate total system votes (note: pool weights now already have our votes subtracted)
+    # if Foundation exists, optimize their votes first
+    ouranous_allocations = {}
+    if ouranous_relay:
+        # Get Ouranous Foundation's voting power
+        P_ouranous = Decimal(str(ouranous_relay.get("voting_amount_raw", 0)))
+        
+        if P_ouranous > 0:
+            logger.info(f"Optimizing Ouranous Foundation votes first with {P_ouranous} voting power...")
+            
+            # Calculate initial system votes without our votes or Ouranous votes
+            S_initial = sum(Decimal(str(p.get("adjusted_weight", 0))) for p in pools)
+            logger.info(f"Initial system votes (without our votes or Ouranous votes): {S_initial}")
+            
+            # Build combined data for each pool for Ouranous optimization (use the same logic as for our optimization)
+            ouranous_pool_data = []
+            for p in pools:
+                addr = p["pool"].lower()
+                R = Decimal(str(p.get("total_usd", 0)))
+                W = Decimal(str(p.get("adjusted_weight", 0)))
+                
+                # Get LP data (Ouranous doesn't have LP positions, but keep structure the same)
+                lp_fraction = Decimal(0)
+                weekly_rewards_usd = Decimal(0)
+                
+                # Get volatility data if available
+                volatility = Decimal(0)
+                if gamma > 0 and addr in volatility_map:
+                    volatility = volatility_map[addr]
+                
+                ouranous_pool_data.append((addr, R, W, lp_fraction, weekly_rewards_usd, volatility))
+            
+            # Optimize Ouranous Foundation's votes (use the same algorithm as for our votes)
+            logger.info(f"Allocating {P_ouranous} votes for Ouranous Foundation using equal-marginal algorithm...")
+            ouranous_result = equal_marginal_combined(ouranous_pool_data, P_ouranous, S_initial + P_ouranous, total_emissions_usd, gamma)
+            
+            # Convert result to a dictionary for easier lookup
+            for addr, alloc in ouranous_result:
+                if alloc > 0:
+                    ouranous_allocations[addr] = alloc
+                    
+                    # Find the pool data to log the allocation
+                    pool = next((p for p in pools if p["pool"].lower() == addr), None)
+                    if pool:
+                        logger.info(f"Ouranous Foundation allocated {alloc} votes to {pool.get('symbol', addr[:10])}")
+                        
+                    # Add the allocation to the pool's adjusted weight for our optimization
+                    for p in pools:
+                        if p["pool"].lower() == addr:
+                            p["adjusted_weight"] += alloc
+                            break
+            
+            logger.info(f"Ouranous Foundation optimized votes applied to {len(ouranous_allocations)} pools")
+    
+    logger.info("Removing our votes from pool weights for our optimization...")
+    for p in pools:
+        our_votes = Decimal(str(p.get("our_votes", 0)))
+        if our_votes > 0:
+            p["adjusted_weight"] = max(p["adjusted_weight"] - our_votes, Decimal(0))
+            logger.info(f"Removed {our_votes} of our votes from {p.get('symbol', '')} (new adjusted_weight: {p['adjusted_weight']})")
+
+    # Calculate total system votes (now including optimized Ouranous votes but not our votes)
     S_total = sum(Decimal(str(p.get("adjusted_weight", p.get("on_chain_weight", p.get("weight", 0))))) for p in pools)
     S_total += P_our  # Add our votes to get total system votes
-    logger.info(f"Total system votes: {S_total}")
+    logger.info(f"Total system votes (with optimized Ouranous votes): {S_total}")
     
     # Build combined data for each pool (voter rewards + LP data + volatility)
     combined_data = []
@@ -426,18 +564,10 @@ def run_optimization(dashboard, lp_dashboard=None, volatility_data=None, gamma=0
         logger.error("❌ No voting power available to allocate. Exiting optimization.")
         return {"total_expected_usd": 0, "allocations": []}, ""
     
-    # Get total weekly emissions from the LP dashboard if available
-    total_emissions_usd = Decimal(0)
-    if lp_dashboard and "total_weekly_emissions_usd" in lp_dashboard:
-        total_emissions_usd = Decimal(str(lp_dashboard["total_weekly_emissions_usd"]))
-        logger.info(f"Using total weekly emissions from LP dashboard: ${total_emissions_usd:.2f}")
-    else:
-        # Fall back to calculating from pool data if not available directly
-        for _, pool_data in lp_data.items():
-            weekly_rewards = pool_data.get("weekly_rewards_usd", 0)
-            if weekly_rewards > 0:
-                total_emissions_usd += weekly_rewards
-        logger.info(f"Calculated total weekly emissions from pool data: ${total_emissions_usd:.2f}")
+    # We're already using total_emissions_usd from earlier in the function,
+    # so we don't need to recalculate it here.
+    
+    logger.info(f"Using weekly emissions for LP reward calculation: ${total_emissions_usd:.2f}")
     
     # Allocate our total votes across pools
     logger.info(f"Allocating {P_our} votes based on equal-marginal algorithm...")
@@ -484,19 +614,30 @@ def run_optimization(dashboard, lp_dashboard=None, volatility_data=None, gamma=0
         if addr in lp_data:
             has_lp_data = True
             lp_fraction = lp_data[addr]["lp_fraction"]
+            is_protocol_pool = next((p.get("is_protocol_pool", False) for p in pools if p["pool"].lower() == addr), False)
             
-            # Calculate our share of rewards from LP position
+            # Calculate our share of rewards from LP position (including protocol pool logic)
             if lp_fraction > 0 and total_emissions_usd > 0:
                 # Calculate this pool's share of emissions based on our vote allocation
                 pool_votes = current_pool_weight + d
-                pool_emission_share = pool_votes / S_total if S_total > 0 else Decimal(0)
+                
+                # Use S_total but scale if it's an e18 value (common in ve3,3 systems)
+                emission_baseline = S_total
+                # Check if S_total is very large (likely e18)
+                if emission_baseline > Decimal(1e15):  # If greater than 1e15, assume it's scaled by 1e18
+                    emission_baseline = emission_baseline / Decimal(1e18)
+                
+                pool_emission_share = pool_votes / emission_baseline if emission_baseline > 0 else Decimal(0)
                 pool_dynamic_rewards = total_emissions_usd * pool_emission_share
                 
                 # Our LP position's share of those rewards
                 lp_reward_usd = (lp_fraction * pool_dynamic_rewards).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
                 
                 # Add debugging information
-                # logger.info(f"LP Reward for {sym}: fraction={lp_fraction:.6f}, pool_votes={pool_votes:.2f}, emission_share={pool_emission_share:.6f}, rewards=${lp_reward_usd:.2f}")
+                if is_protocol_pool:
+                    logger.info(f"Protocol pool LP Reward for {sym}: effective_fraction={lp_fraction:.6f}, pool_votes={pool_votes:.2f}, emission_share={pool_emission_share:.6f}, rewards=${lp_reward_usd:.2f}")
+                else:
+                    logger.info(f"LP Reward for {sym}: fraction={lp_fraction:.6f}, pool_votes={pool_votes:.2f}, emission_share={pool_emission_share:.6f}, rewards=${lp_reward_usd:.2f}")
         
         # Total expected reward from both sources
         total_exp_usd = vote_reward_usd + lp_reward_usd
@@ -505,19 +646,48 @@ def run_optimization(dashboard, lp_dashboard=None, volatility_data=None, gamma=0
         # Include volatility penalty in the output if applicable
         volatility_penalty_output = float(volatility_penalty) if gamma > 0 and volatility > 0 else None
         
-        human.append({
+        # Check if this is a protocol pool
+        is_protocol_pool = next((p.get("is_protocol_pool", False) for p in pools if p["pool"].lower() == addr), False)
+        
+        # Prepare the output entry
+        output_entry = {
             "symbol": sym,
             "pool": addr,
             "votes": float(d),
             "pct": int(pct),
             "voter_reward_usd": float(vote_reward_usd),
             "lp_reward_usd": float(lp_reward_usd),
-            "total_reward_usd": float(total_exp_usd),
+            "total_reward_usd": float(vote_reward_usd + lp_reward_usd),
             "has_lp_position": has_lp_data and lp_fraction > 0,
+            "is_protocol_pool": is_protocol_pool,
             "lp_fraction": float(lp_fraction) if has_lp_data else 0.0,
             "volatility": float(volatility) if volatility > 0 else None,
             "volatility_penalty": volatility_penalty_output
-        })
+        }
+        
+        # Add protocol pool specific information if applicable
+        if is_protocol_pool:
+            # Calculate raw ownership vs effective ownership (with 20% boost)
+            raw_lp_ownership = float(lp_fraction) if has_lp_data else 0.0
+            # Get pool TVL to calculate other LP portion
+            p = next((x for x in pools if x["pool"].lower() == addr), None)
+            if p and has_lp_data:
+                tvl_usd = Decimal(str(p.get("tvl_usd", 0)))
+                if tvl_usd > 0:
+                    our_lp_value = raw_lp_ownership * tvl_usd
+                    other_lp_value = tvl_usd - our_lp_value
+                    other_lp_portion = (other_lp_value / tvl_usd) if tvl_usd > 0 else Decimal(0)
+                    other_lp_value_weight = Decimal("0.2")  # 20% valuation for other LPs
+                    effective_fraction = raw_lp_ownership + (other_lp_portion * other_lp_value_weight)
+                    
+                    output_entry["protocol_pool_info"] = {
+                        "raw_ownership": raw_lp_ownership,
+                        "effective_fraction": float(effective_fraction),
+                        "other_lp_portion": float(other_lp_portion),
+                        "other_lp_value_weight": float(other_lp_value_weight)
+                    }
+            
+        human.append(output_entry)
         
         # Scale to 100e18 total for bot output
         weight_i = (d / P_our * TOTAL_WEIGHT_TARGET).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
@@ -543,19 +713,45 @@ def run_optimization(dashboard, lp_dashboard=None, volatility_data=None, gamma=0
         "total_expected_usd": round(total_exp_usd, 2),
         "allocations": human
     }
+
+    
+    
+    # Add Ouranous Foundation optimization data if available
+    if ouranous_relay and ouranous_allocations:
+        # Convert allocations to a format similar to our result structure
+        ouranous_alloc_list = []
+        for addr, votes in ouranous_allocations.items():
+            pool = next((p for p in pools if p["pool"].lower() == addr), None)
+            if pool:
+                ouranous_alloc_list.append({
+                    "symbol": pool.get("symbol", ""),
+                    "pool": addr,
+                    "votes": float(votes),
+                    "pct": float((votes / Decimal(str(ouranous_relay["voting_amount_raw"])) * 100).quantize(Decimal('1'), rounding=ROUND_HALF_UP))
+                })
+        
+        # Sort by votes (descending)
+        ouranous_alloc_list.sort(key=lambda x: x["votes"], reverse=True)
+        
+        # Add to result
+        human_output["ouranous_foundation"] = {
+            "voting_power": float(ouranous_relay["voting_amount_raw"]),
+            "allocations": ouranous_alloc_list
+        }
+
+        
     
     bot_output = "\n".join(bot_lines)
     
     return human_output, bot_output
 
-def run_optimize(save=True, votes_path=None, lp_path=None, with_volatility=False, gamma=1):
+def run_optimize(save=True, votes_path=None, with_volatility=False, gamma=1):
     """
     Main entry point for optimizing votes
     
     Args:
         save: Whether to save results to file (True) or display them (False)
         votes_path: Path to the votes dashboard JSON file. If None, uses default path.
-        lp_path: Path to the LP dashboard JSON file. If None, uses default path.
         with_volatility: Whether to apply volatility penalty (default False)
         gamma: Volatility penalty coefficient if with_volatility is True (default 1)
     """
@@ -567,18 +763,14 @@ def run_optimize(save=True, votes_path=None, lp_path=None, with_volatility=False
     if not dashboard:
         return None
     
-    # Load LP dashboard if available
-    lp_dashboard = None
-    lp_dashboard_path = lp_path if lp_path else DEFAULT_LP_DASHBOARD_PATH
-    if os.path.exists(lp_dashboard_path):
-        logger.info(f"Loading LP dashboard from {lp_dashboard_path}")
-        lp_dashboard = load_json(lp_dashboard_path)
-        if lp_dashboard:
-            logger.info(f"✅ Loaded LP dashboard with {len(lp_dashboard.get('pools', []))} pools")
-        else:
-            logger.warning("❌ Failed to load LP dashboard")
+    # LP data is now integrated directly in the votes dashboard
+    logger.info(f"Using integrated LP data from votes dashboard")
+    # Check if LP data is present in the dashboard
+    lp_positions = dashboard.get("lp_positions", [])
+    if lp_positions:
+        logger.info(f"✅ Found {len(lp_positions)} LP positions in votes dashboard")
     else:
-        logger.info("⚠️ No LP dashboard found, optimizing based on voter rewards only")
+        logger.info("⚠️ No LP positions found in votes dashboard, optimizing based on voter rewards only")
     
     # Load volatility data if needed
     volatility_data = None
@@ -598,13 +790,13 @@ def run_optimize(save=True, votes_path=None, lp_path=None, with_volatility=False
     
     # Run optimization with parameters based on flags
     gamma_value = gamma if with_volatility else 0
-    result, bot_output = run_optimization(dashboard, lp_dashboard, volatility_data, gamma_value)
+    result, bot_output = run_optimization(dashboard, volatility_data, gamma_value)
     
     # If displaying results, show volatility impact on rewards if enabled
     if not save and with_volatility:
         # Run the optimization again without volatility for comparison
         logger.info("\nRunning comparison without volatility to show impact...")
-        result_no_vol, _ = run_optimization(dashboard, lp_dashboard, volatility_data, 0)
+        result_no_vol, _ = run_optimization(dashboard, volatility_data, 0)
         
         # Calculate the difference in expected rewards
         total_with_vol = result['total_expected_usd']
@@ -667,6 +859,7 @@ def run_optimize(save=True, votes_path=None, lp_path=None, with_volatility=False
             votes_without = without_vol_map[addr].get("votes", 0)
             pct_change = (diff / votes_without * 100) if votes_without > 0 else 0
             print(f"{symbol} {vol:5.1f}%  {votes_with:8.0f}  {votes_without:10.0f}  {diff:+6.0f}  {pct_change:+6.1f}%")
+    
     
     # Save or display results
     if save:

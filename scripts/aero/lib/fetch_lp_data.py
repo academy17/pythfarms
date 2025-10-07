@@ -711,21 +711,30 @@ def calculate_lp_data(pools, investment_sizes=None):
     for pool_addr, pool_data in our_lp_pools.items():
         logger.info(f"Summed LP in pool {pool_addr}: ${pool_data.get('total_value_usd', 0):.2f}")
     
-    logger.info("Optimizing pool processing...")
+    logger.info("Fetching weights for all pools...")
     
-    # First, fetch weights only for pools where we have LP positions
-    # This reduces RPC calls dramatically
-    our_lp_pool_addresses = list(our_lp_pools.keys())
-    
-    # Create a mapping of pool addresses to weights
-    # We only fetch weights for pools where we have LP positions
+    # Fetch weights for ALL pools to get accurate APR calculations
     pool_weights = {}
-    for addr in our_lp_pool_addresses:
-        weight = get_pool_weight(addr)
-        pool_weights[addr] = weight
-        logger.info(f"Fetched weight for our LP pool {addr}: {weight}")
+    batch_size = 50  # Process in batches to avoid too many concurrent RPC calls
     
-    # Batch process the rest of the pools
+    for i in range(0, len(pools), batch_size):
+        batch = pools[i:i + batch_size]
+        logger.info(f"Fetching weights for batch {i//batch_size + 1}/{(len(pools) + batch_size - 1)//batch_size} ({len(batch)} pools)...")
+        
+        for pool in batch:
+            pool_address = pool.get('pool')
+            if pool_address:
+                pool_address_lower = pool_address.lower()
+                weight = get_pool_weight(pool_address)
+                pool_weights[pool_address_lower] = weight
+                
+                # Log progress for significant weights
+                if weight > 1000:
+                    logger.info(f"Pool {pool.get('symbol', pool_address[:10])}: {weight} votes")
+    
+    logger.info(f"✅ Fetched weights for {len(pool_weights)} pools")
+    
+    # Process all pools with their actual weights
     updated_pools = []
     processed_count = 0
     
@@ -737,7 +746,7 @@ def calculate_lp_data(pools, investment_sizes=None):
         our_lp_data = our_lp_pools.get(pool_address_lower, {})
         has_our_lp = pool_address_lower in our_lp_pools
         
-        # Get weight - only fetch from chain for our LP pools, default to 0 for others
+        # Get weight from our fetched data
         weight = pool_weights.get(pool_address_lower, Decimal('0'))
         
         # Get relay votes for this pool
@@ -761,11 +770,10 @@ def calculate_lp_data(pools, investment_sizes=None):
         else:
             base_apr = (rewards * 52 / tvl_usd * 100)
         
-        # Calculate APR at different investment sizes - only if we have LP or it's a top pool
+        # Calculate APR at different investment sizes for ALL pools
         apr_by_investment = {}
-        if has_our_lp or processed_count < 50:  # Only calculate for our LP pools or top 50 pools
-            for size in investment_sizes:
-                apr_by_investment[str(size)] = calculate_apr_at_investment_size(pool, size, rewards)
+        for size in investment_sizes:
+            apr_by_investment[str(size)] = calculate_apr_at_investment_size(pool, size, rewards)
         
         if has_our_lp:
             logger.info(f"Processing pool with our LP: {pool.get('symbol')} ({pool_address})")
@@ -788,12 +796,25 @@ def calculate_lp_data(pools, investment_sizes=None):
         updated_pools.append(updated_pool)
         processed_count += 1
         
+        # Log progress for pools with significant weight or our LP
+        if weight > 1000 or has_our_lp:
+            logger.info(f"Processed {pool.get('symbol')}: Weight={weight}, APR={base_apr:.2f}%, Our LP: {has_our_lp}")
+        
         # Log progress periodically
-        if processed_count % 50 == 0:
+        if processed_count % 100 == 0:
             logger.info(f"Processed {processed_count}/{len(pools)} pools...")
     
     # Sort by APR, descending
     updated_pools.sort(key=lambda x: x.get('apr', 0), reverse=True)
+    
+    # Log summary statistics
+    pools_with_votes = [p for p in updated_pools if p.get('weight', 0) > 0]
+    pools_with_significant_apr = [p for p in updated_pools if p.get('apr', 0) > 1.0]
+    
+    logger.info(f"✅ Processed {len(updated_pools)} pools:")
+    logger.info(f"  - {len(pools_with_votes)} pools have votes")
+    logger.info(f"  - {len(pools_with_significant_apr)} pools have APR > 1.0%")
+    logger.info(f"  - {len([p for p in updated_pools if p.get('has_our_lp', False)])} pools have our LP positions")
     
     # Filter the fields to keep only what's needed
     cleaned_pools = []

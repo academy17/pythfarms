@@ -27,8 +27,6 @@ def main():
     optimize_parser.add_argument("--display", action="store_true", help="Display results instead of saving")
     optimize_parser.add_argument("--previous", action="store_true", help="Use previous epoch's votes dashboard")
     optimize_parser.add_argument("--votes", help="Path to votes dashboard JSON", default="input_data/aero/votes_dashboard.json")
-    optimize_parser.add_argument("--lp", help="Path to LP dashboard JSON", default="lp_dashboard/aero/lp_dashboard.json")
-    optimize_parser.add_argument("--no-lp", action="store_true", help="Optimize votes without considering LP positions")
     optimize_parser.add_argument("--with-volatility", action="store_true", help="Apply volatility penalty to volatile pools")
     optimize_parser.add_argument("--gamma", type=float, default=1.0, help="Volatility penalty coefficient (default 1.0, higher = stronger penalty)")
 
@@ -52,7 +50,6 @@ def main():
     # LP Optimized command
     lp_optimizer_parser = subparsers.add_parser("lp_optimizer", help="Generate optimized LP dashboard with simulated vote allocation")
     lp_optimizer_parser.add_argument("--votes", help="Path to votes dashboard JSON", default="input_data/aero/votes_dashboard.json")
-    lp_optimizer_parser.add_argument("--lp", help="Path to LP dashboard JSON", default="lp_dashboard/aero/lp_dashboard.json")
     lp_optimizer_parser.add_argument("--output", help="Path to save optimized LP dashboard", default="lp_optimized/aero/optimized_lp.json")
     lp_optimizer_parser.add_argument("--top", type=int, default=30, help="Number of top pools to display")
     lp_optimizer_parser.add_argument("--no-display", action="store_true", help="Don't display the dashboard in terminal")
@@ -79,21 +76,10 @@ def main():
         save = not args.display
         votes_path = "previous_votes/aero/previous_votes_dashboard.json" if args.previous else args.votes
         
-        # Determine LP dashboard path
-        if args.no_lp:
-            lp_path = None
-            logger.info("Skipping LP positions in optimization as requested")
-        else:
-            if args.lp:
-                lp_path = args.lp
-            else:
-                lp_path = "lp_dashboard_previous/aero/lp_dashboard.json" if args.previous else "lp_dashboard/aero/lp_dashboard.json"
-            
-            logger.info(f"Using votes dashboard: {votes_path}")
-            logger.info(f"Using LP dashboard: {lp_path}")
+        logger.info(f"Using votes dashboard: {votes_path}")
         
-        # Run the optimizer with LP positions data and volatility if requested
-        optimizer.run_optimize(save=save, votes_path=votes_path, lp_path=lp_path, 
+        # Run the optimizer with volatility if requested
+        optimizer.run_optimize(save=save, votes_path=votes_path,
                               with_volatility=args.with_volatility, gamma=args.gamma)
     elif args.command == "analyze":
         logger.info("Analyzing votes")
@@ -121,7 +107,6 @@ def main():
         logger.info("Generating optimized LP dashboard")
         lp_optimizer.run_lp_optimized(
             votes_path=args.votes,
-            lp_path=args.lp,
             output_path=args.output,
             display=not args.no_display,
             top_n=args.top

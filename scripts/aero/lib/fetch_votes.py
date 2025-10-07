@@ -465,7 +465,6 @@ def fetch_fees_and_bribes(w3, pool_info, contract_prices):
             "fees_usd": float(fees_usd),
             "bribes_usd": float(bribes_usd),
             "bribes": bribe_list,
-            "total_bribes_fees_usd": float(total_usd),
             "total_usd": float(total_usd),  # Adding for optimizer compatibility
             "token0_price": float(token0_price),
             "token1_price": float(token1_price),
@@ -474,7 +473,7 @@ def fetch_fees_and_bribes(w3, pool_info, contract_prices):
             "tvl": float(tvl)
         })
     
-    results.sort(key=lambda x: x["total_bribes_fees_usd"], reverse=True)
+    results.sort(key=lambda x: x["total_usd"], reverse=True)
     
     logger.info(f"Processed fees and bribes for {len(results)} pools")
     return results
@@ -696,8 +695,8 @@ def create_votes_dashboard(w3, pools, relays=None):
     if relays:
         dashboard["relays"] = relays
     
-    # Sort by total_bribes_fees_usd
-    dashboard["pools"].sort(key=lambda x: x["total_bribes_fees_usd"], reverse=True)
+    # Sort by total_usd
+    dashboard["pools"].sort(key=lambda x: x["total_usd"], reverse=True)
     
     logger.info(f"Created dashboard with {len(augmented_pools)} pools")
     # Note: We're not saving the dashboard here anymore as we'll save it after adding LP data
