@@ -469,6 +469,8 @@ def enrich_pools(w3, pools):
         if pool_type == 0:
             pool["type_name"] = "Stable"
         elif pool_type == 1:
+            pool["type_name"] = "Concentrated Stable"
+        elif pool_type == -1:
             pool["type_name"] = "Volatile"
         else:
             pool["type_name"] = "Concentrated Liquidity"
@@ -738,47 +740,77 @@ def calculate_lp_data(pools, investment_sizes=None):
     updated_pools = []
     processed_count = 0
     
+    seconds_per_year = Decimal('31536000')  # 365 * 24 * 60 * 60
     for pool in pools:
         pool_address = pool.get('pool')
         pool_address_lower = pool_address.lower()
-        
+
         # Check if we have LP position in this pool
         our_lp_data = our_lp_pools.get(pool_address_lower, {})
         has_our_lp = pool_address_lower in our_lp_pools
-        
+
         # Get weight from our fetched data
         weight = pool_weights.get(pool_address_lower, Decimal('0'))
-        
+
         # Get relay votes for this pool
         relay_weight = relay_votes.get(pool_address_lower, Decimal('0'))
-        
+
         # Store relay weight for reference but don't use it in calculations currently
         total_pool_weight = weight  # Remove relay_weight from this calculation
-        
+
         # Calculate weight percentage based on on-chain weight only
         weight_pct = (weight / on_chain_total_weight * 100) if on_chain_total_weight > 0 else Decimal('0')
-        
-        # Calculate rewards based on on-chain weight allocation only
+
+        # Calculate rewards based on on-chain weight allocation only (legacy)
         rewards = (weight / on_chain_total_weight) * weekly_emissions_usd if on_chain_total_weight > 0 else Decimal('0')
-        
-        # Calculate base APR
+
         tvl_usd = Decimal(str(pool.get('tvl_usd', 0)))
-        
-        # Calculate APR - prevent division by zero
-        if tvl_usd <= Decimal('0.01'):  # Very small TVL
-            base_apr = Decimal('0')
-        else:
-            base_apr = (rewards * 52 / tvl_usd * 100)
-        
-        # Calculate APR at different investment sizes for ALL pools
+
+        # --- New: Try to fetch rewardRate from gauge for LP APR ---
+        gauge_address = pool.get('gauge')
+        gauge_alive = pool.get('gauge_alive', False)
+        reward_rate = None
+        lp_apr = Decimal('0')
+        annual_rewards_usd = Decimal('0')
+        gauge_live = False
+        if gauge_address and gauge_alive:
+            try:
+                gauge_contract = w3.eth.contract(address=w3.to_checksum_address(gauge_address), abi=[
+                    {
+                        "constant": True,
+                        "inputs": [],
+                        "name": "rewardRate",
+                        "outputs": [{"name": "", "type": "uint256"}],
+                        "type": "function"
+                    }
+                ])
+                reward_rate_raw = gauge_contract.functions.rewardRate().call()
+                reward_rate = Decimal(str(reward_rate_raw))
+                # rewardRate is per second, in 1e18 AERO units
+                annual_rewards = reward_rate * seconds_per_year / Decimal('1e18')
+                annual_rewards_usd = annual_rewards * aero_price
+                if tvl_usd > Decimal('0.01'):
+                    lp_apr = (annual_rewards_usd / tvl_usd) * 100
+                    gauge_live = True
+            except Exception as e:
+                logger.warning(f"Could not fetch rewardRate for gauge {gauge_address}: {e}")
+
+        # Fallback: use old method if rewardRate not available
+        if lp_apr == 0 and tvl_usd > Decimal('0.01'):
+            lp_apr = (rewards * 52 / tvl_usd * 100)
+            annual_rewards_usd = rewards * 52
+            gauge_live = False
+
+        # Calculate APR at different investment sizes for ALL pools (using annual_rewards_usd)
         apr_by_investment = {}
         for size in investment_sizes:
-            apr_by_investment[str(size)] = calculate_apr_at_investment_size(pool, size, rewards)
-        
+            # Use annual_rewards_usd/52 as weekly rewards for investment APR calc
+            apr_by_investment[str(size)] = calculate_apr_at_investment_size(pool, size, annual_rewards_usd / 52)
+
         if has_our_lp:
             logger.info(f"Processing pool with our LP: {pool.get('symbol')} ({pool_address})")
             logger.info(f"  Value: ${our_lp_data.get('total_value_usd', 0):.2f}")
-        
+
         # Update pool with calculated data
         updated_pool = pool.copy()
         updated_pool.update({
@@ -786,20 +818,21 @@ def calculate_lp_data(pools, investment_sizes=None):
             'relay_votes': float(relay_weight),
             'total_pool_weight': float(total_pool_weight),
             'weight_pct': float(weight_pct),
-            'weekly_rewards_usd': float(rewards),
-            'apr': float(base_apr),
+            'weekly_rewards_usd': float(annual_rewards_usd / 52),
+            'apr': float(lp_apr),
             'apr_by_investment': {str(size): float(apr) for size, apr in apr_by_investment.items()},
             'has_our_lp': has_our_lp,
-            'our_lp_data': our_lp_data if has_our_lp else None
+            'our_lp_data': our_lp_data if has_our_lp else None,
+            'gauge_live': gauge_live
         })
-        
+
         updated_pools.append(updated_pool)
         processed_count += 1
-        
+
         # Log progress for pools with significant weight or our LP
         if weight > 1000 or has_our_lp:
-            logger.info(f"Processed {pool.get('symbol')}: Weight={weight}, APR={base_apr:.2f}%, Our LP: {has_our_lp}")
-        
+            logger.info(f"Processed {pool.get('symbol')}: Weight={weight}, APR={lp_apr:.2f}%, Our LP: {has_our_lp}, GaugeLive: {gauge_live}")
+
         # Log progress periodically
         if processed_count % 100 == 0:
             logger.info(f"Processed {processed_count}/{len(pools)} pools...")
