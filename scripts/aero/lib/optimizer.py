@@ -130,6 +130,7 @@ def equal_marginal_combined(pool_data, P, S_total, total_emissions=None, gamma=1
     
     def lp_marginal(lp_frac, weekly_rewards, W, delta, S_tot, on_chain_weight=None):
         """LP-side marginal utility per vote with adjusted reward rate"""
+        '''The Marginal wrt delta (our votes) is almost 1/P -- just one more vote on that pool'''
         
         if lp_frac <= 0 or weekly_rewards <= 0:
             return Decimal(0)
