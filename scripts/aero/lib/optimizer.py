@@ -105,19 +105,23 @@ def equal_marginal_combined(pool_data, P, S_total, total_emissions=None, gamma=1
             ocw_map[p["pool"].lower()] = Decimal(str(p.get("on_chain_weight", p.get("weight", 0))))
     
     def voter_marginal(R, W, delta, volatility=Decimal(0), S_tot=None):
+        # R are the value of rewards (bribes and fees), and delta are our votes; W the external votes
         if R <= 0:
             return Decimal(0)
         EPSILON = Decimal("1e-12")
-        effective_W = max(W, EPSILON)
+        effective_W = max(W, EPSILON) # making external vote non zero
 
         # base marginal
-        base = R * effective_W / (effective_W + delta)**2
+        base = R * effective_W / (effective_W + delta)**2 # marginal
 
         # exposure-aware penalty
         P_share = ((effective_W + delta) / S_tot) if S_tot and S_tot > 0 else Decimal(0)
-        sigma = Decimal(volatility) / Decimal(100)  # turn % into decimal
+        sigma = Decimal(volatility) / Decimal(100)  # turn % into decimal; volatility of the token reward
 
-        risk_mult = Decimal(1) - (gamma * (sigma**2) * (P_share**2))
+        risk_mult = Decimal(1) - (2 * gamma * (sigma**2) * P_share * (R**2)) # penalty for the volatility
+        # need to multiply by the value of the (risky) reward token
+        # We need to modify R in the risk multiplier, and only use the volatile rewards
+        # ( bcs the USDC/Eth/BTC rewards are not penalised
         if risk_mult < 0: risk_mult = Decimal(0)
         if risk_mult > 1: risk_mult = Decimal(1)
 
