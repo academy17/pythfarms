@@ -3,6 +3,7 @@
 import os
 import argparse
 import logging
+from decimal import Decimal
 from dotenv import load_dotenv
 from lib import fetch_votes, optimizer, analytics, fetch_lp_data, fetch_lp_data_previous_epoch, lp_optimizer, fetch_volatility
 

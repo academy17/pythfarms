@@ -76,9 +76,36 @@ ERC20_ABI = [
 _token_decimals_cache = {}
 _token_symbol_cache = {}
 
+# Global mapping from pool address to gauge information
+pool_gauge_map = {}
+
 def get_web3():
     """Initialize and return a Web3 instance"""
     return Web3(Web3.HTTPProvider(RPC_URL, request_kwargs={"timeout": 60}))
+    
+def get_reward_rate(w3, gauge_address):
+    """
+    Get the reward rate from a gauge contract.
+    Returns reward rate in raw form (wei per second) and None if it fails.
+    """
+    if not gauge_address or gauge_address.lower() == "0x0000000000000000000000000000000000000000":
+        return None
+        
+    try:
+        gauge_contract = w3.eth.contract(address=w3.to_checksum_address(gauge_address), abi=[
+            {
+                "constant": True,
+                "inputs": [],
+                "name": "rewardRate",
+                "outputs": [{"name": "", "type": "uint256"}],
+                "type": "function"
+            }
+        ])
+        reward_rate_raw = gauge_contract.functions.rewardRate().call()
+        return reward_rate_raw
+    except Exception as e:
+        logger.warning(f"Could not fetch rewardRate for gauge {gauge_address}: {e}")
+        return None
 
 def save_json(data, path):
     """Save data to a JSON file"""
@@ -675,6 +702,17 @@ def create_votes_dashboard(w3, pools, relays=None):
         e["our_votes"] = float(our_votes_hr)
         e["our_vote_impact"] = float(our_vote_impact)
         
+        # Add type_name based on pool type
+        pool_type = e.get("type", -1)
+        if pool_type == 0:
+            e["type_name"] = "Stable"
+        elif pool_type == 1:
+            e["type_name"] = "Concentrated Stable"
+        elif pool_type == -1:
+            e["type_name"] = "Volatile"
+        else:
+            e["type_name"] = "Concentrated Liquidity"
+        
         augmented_pools.append(e)
     
     logger.info(f"Sum of all pool weights: {pool_summed_weights}")
@@ -720,6 +758,11 @@ def run_fetch(is_historical=False):
     
     # Step 3: Enrich pools with symbols
     enriched_pools = enrich_pools(w3, votable_pools)
+    
+    # Create a mapping of pool address to original pool data to preserve gauge information
+    global pool_gauge_map
+    pool_gauge_map = {p.get("lp", "").lower(): {"gauge": p.get("gauge", ""), "gauge_alive": p.get("gauge_alive", False)} 
+                     for p in all_pools if "lp" in p}
     
     # Step 4: Get token list and fetch CoinGecko IDs
     tokens = set()
@@ -821,6 +864,15 @@ def run_fetch(is_historical=False):
         # Get total pool TVL from the pool data for all pools
         total_pool_tvl = pool.get("tvl", 0)
         
+        # Get the gauge address from our mapping
+        gauge_info = pool_gauge_map.get(pool_addr, {})
+        gauge_address = gauge_info.get("gauge", "")
+        gauge_alive = gauge_info.get("gauge_alive", False)
+        
+        # Include gauge information in the pool data
+        pool["gauge"] = gauge_address
+        pool["gauge_alive"] = gauge_alive
+        
         if pool_addr in lp_pools:
             # We have LP positions in this pool
             our_lp_value = lp_pools[pool_addr].get('total_value_usd', 0)
@@ -833,6 +885,31 @@ def run_fetch(is_historical=False):
             if is_protocol_pool:
                 pool["is_protocol_pool"] = True
             
+            # Fetch reward rate if the gauge is alive
+            reward_rate_raw = None
+            reward_rate_per_day = None
+            reward_rate_per_week = None
+            reward_usd_per_day = None
+            
+            if gauge_address and gauge_address != "0x0000000000000000000000000000000000000000" and gauge_alive:
+                reward_rate_raw = get_reward_rate(w3, gauge_address)
+                
+                # If we got a reward rate, calculate daily and weekly values
+                if reward_rate_raw is not None:
+                    # rewardRate is in AERO tokens per second (in wei)
+                    reward_rate_decimal = Decimal(str(reward_rate_raw)) / Decimal('1e18')
+                    seconds_per_day = Decimal('86400')
+                    seconds_per_week = Decimal('604800')
+                    
+                    # Calculate AERO per day and per week
+                    reward_rate_per_day = reward_rate_decimal * seconds_per_day
+                    reward_rate_per_week = reward_rate_decimal * seconds_per_week
+                    
+                    # Calculate USD value per day
+                    reward_usd_per_day = reward_rate_per_day * aero_price
+                    
+                    logger.info(f"Pool {pool.get('symbol')} reward rate: {float(reward_rate_per_day):.4f} AERO/day (${float(reward_usd_per_day):.2f})")
+            
             pool["our_lp_data"] = {
                 "amount0_human": lp_pools[pool_addr].get('amount0_human', 0),
                 "amount1_human": lp_pools[pool_addr].get('amount1_human', 0),
@@ -842,7 +919,11 @@ def run_fetch(is_historical=False):
                 "value1_usd": lp_pools[pool_addr].get('value1_usd', 0),
                 "total_value_usd": lp_pools[pool_addr].get('total_value_usd', 0),
                 "total_pool_tvl": total_pool_tvl,
-                "ownership_percentage": float(ownership_pct)
+                "ownership_percentage": float(ownership_pct),
+                "reward_rate_raw": str(reward_rate_raw) if reward_rate_raw is not None else None,
+                "reward_rate_per_day": float(reward_rate_per_day) if reward_rate_per_day is not None else None,
+                "reward_rate_per_week": float(reward_rate_per_week) if reward_rate_per_week is not None else None,
+                "reward_usd_per_day": float(reward_usd_per_day) if reward_usd_per_day is not None else None
             }
             
             # Log our ownership percentage for pools we're in
@@ -851,6 +932,31 @@ def run_fetch(is_historical=False):
             # This is a protocol pool we want to track, but we don't have LP positions in it
             pool["has_our_lp"] = False
             pool["is_protocol_pool"] = True
+            
+            # Fetch reward rate for protocol pools too
+            reward_rate_raw = None
+            reward_rate_per_day = None
+            reward_rate_per_week = None
+            reward_usd_per_day = None
+            
+            if gauge_address and gauge_address != "0x0000000000000000000000000000000000000000" and gauge_alive:
+                reward_rate_raw = get_reward_rate(w3, gauge_address)
+                
+                # If we got a reward rate, calculate daily and weekly values
+                if reward_rate_raw is not None:
+                    reward_rate_decimal = Decimal(str(reward_rate_raw)) / Decimal('1e18')
+                    seconds_per_day = Decimal('86400')
+                    seconds_per_week = Decimal('604800')
+                    
+                    # Calculate AERO per day and per week
+                    reward_rate_per_day = reward_rate_decimal * seconds_per_day
+                    reward_rate_per_week = reward_rate_decimal * seconds_per_week
+                    
+                    # Calculate USD value per day
+                    reward_usd_per_day = reward_rate_per_day * aero_price
+                    
+                    logger.info(f"Protocol pool {pool.get('symbol')} reward rate: {float(reward_rate_per_day):.4f} AERO/day (${float(reward_usd_per_day):.2f})")
+            
             pool["our_lp_data"] = {
                 "amount0_human": 0,
                 "amount1_human": 0,
@@ -860,7 +966,11 @@ def run_fetch(is_historical=False):
                 "value1_usd": 0,
                 "total_value_usd": 0,
                 "total_pool_tvl": total_pool_tvl,
-                "ownership_percentage": 0
+                "ownership_percentage": 0,
+                "reward_rate_raw": str(reward_rate_raw) if reward_rate_raw is not None else None,
+                "reward_rate_per_day": float(reward_rate_per_day) if reward_rate_per_day is not None else None,
+                "reward_rate_per_week": float(reward_rate_per_week) if reward_rate_per_week is not None else None,
+                "reward_usd_per_day": float(reward_usd_per_day) if reward_usd_per_day is not None else None
             }
             logger.info(f"Protocol pool with no LP: {pool.get('symbol')}, TVL: ${total_pool_tvl:,.2f}")
         else:
