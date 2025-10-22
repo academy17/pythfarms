@@ -1,5 +1,98 @@
 #!/usr/bin/env python3
 # filepath: d:\Pyth\pythfarms\scripts\aero\lib\fetch_volatility.py
+"""
+Aerodrome Pool Volatility Data Fetcher
+
+This module fetches historical price data for Aerodrome pools and calculates volatility metrics
+using standard deviation of hourly closing prices over a 7-day period. It requires a votes_dashboard to exist.
+
+DATA SOURCE:
+    - GeckoTerminal API (https://api.geckoterminal.com/api/v2)
+    - Network: Base
+    - Timeframe: 168 hours (7 days) of hourly OHLCV data
+
+INPUT:
+    - votes_dashboard.json: Pool list to fetch volatility for
+      Location: input_data/aero/votes_dashboard.json
+
+OUTPUT:
+    - volatility_data.json: Volatility metrics for all pools
+      Location: volatility_data/aero/volatility_data.json
+    - volatility_data_YYYYMMDD.json: Dated backup copy
+      Location: volatility_data/aero/volatility_data_YYYYMMDD.json
+
+VOLATILITY CALCULATION:
+    Using standard deviation of closing prices:
+    1. Fetch 168 hourly candles (7 days)
+    2. Calculate mean price
+    3. Calculate deviations from mean
+    4. Standard deviation = √(Σ(deviation²) / n)
+    5. Volatility % = (std_dev / current_price) × 100
+
+OUTPUT FORMAT:
+    {
+        "pools": {
+            "0x...pool_address": {
+                "symbol": "vAMM-WETH/USDC",
+                "current_price": 0.0003145,
+                "price_range": {
+                    "high": 0.0003200,
+                    "low": 0.0003100,
+                    "range": 0.0001,
+                    "mid_price": 0.0003150,
+                    "volatility_percentage": 6.42,  # Used by optimizer
+                    "std_dev": 0.0000202,
+                    "metrics": {
+                        "num_samples": 168,
+                        "variance": 4.08e-10
+                    }
+                },
+                "last_updated": "2025-10-22T10:30:00.123456"
+            }
+        },
+        "last_updated": "2025-10-22T10:35:00.123456",
+        "stats": {
+            "total_pools": 254,
+            "updated_pools": 45
+        }
+    }
+
+SMART CACHING:
+    - Only re-fetches data if it's older than 12 hours
+    - Use force_update=True to override and update all pools
+    - Skips pools with recent data to respect API rate limits
+
+RATE LIMITING:
+    - Default: 2 seconds between API calls
+    - Adjustable via rate_limit_seconds parameter
+    - Processes pools in order of importance (highest weight first)
+
+USAGE:
+
+Fetch all pools (respects 12-hour cache):
+    python scripts/aero/aero_manager.py volatility
+
+Fetch top 50 pools only:
+    from scripts.aero.lib.fetch_volatility import run_fetch_volatility
+    run_fetch_volatility(max_pools=50)
+
+Force update all pools:
+    run_fetch_volatility(force_update=True)
+
+Custom rate limiting:
+    run_fetch_volatility(rate_limit_seconds=3)
+
+INTEGRATION WITH OPTIMIZER:
+    The optimizer reads volatility_percentage from this file when run with:
+    python scripts/aero/aero_manager.py optimize --with-volatility --gamma 1.0
+    
+    Higher volatility_percentage = Higher penalty on voter rewards
+    (LP rewards are not affected by volatility)
+
+RECOMMENDED SCHEDULE:
+    - Run once per week (Sunday before voting)
+
+"""
 
 import os
 import json

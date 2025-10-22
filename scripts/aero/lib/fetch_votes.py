@@ -1,5 +1,144 @@
 #!/usr/bin/env python3
 # filepath: d:\Pyth\pythfarms\scripts\aero\lib\fetch_votes.py
+"""
+Aerodrome Votes Dashboard Data Fetcher
+
+This module fetches comprehensive voting data from Aerodrome Finance on-chain contracts,
+including pool weights, bribes, fees, LP positions, and relay voter information.
+
+DATA SOURCES:
+    - LpSugar Contract: Pool metadata and LP positions
+    - RewardsSugar Contract: Bribe and fee rewards per pool
+    - Voter Contract: Current pool weights and votes
+    - Ve Contract: NFT voting power and lock information
+    - Minter Contract: Weekly AERO emissions
+
+REQUIRED ENVIRONMENT VARIABLES (.env):
+    RPC_URL=<Base RPC endpoint>
+    LP_SUGAR_ADDRESS=<LpSugar contract address>
+    REWARDS_SUGAR_ADDRESS=<RewardsSugar contract address>
+    VOTER_ADDRESS=<Voter contract address>
+    VE_ADDRESS=<Ve/VotingEscrow contract address>
+    NFT_ID=<Your veAERO NFT ID>
+    MINTER_ADDRESS=<Minter contract for emissions>
+    PAGE_SIZE=200  # Optional: pools per page
+
+OUTPUT LOCATION:
+    - votes_dashboard.json
+      Location: input_data/aero/votes_dashboard.json
+      
+    This file is the PRIMARY INPUT for the optimizer and contains:
+    - All pool data (addresses, symbols, weights, rewards)
+    - Our LP positions integrated into pool data
+    - Relay voter information (e.g., Ouranous Foundation)
+    - Protocol pool designations
+    - Current voting state
+
+OUTPUT STRUCTURE:
+    {
+        "our_voting_power": 1615145.476967827,  # Our total voting power
+        "our_voting_power_raw": "1615145476967827000000000",
+        "protocol_pools": [  # Pools we own/control
+            "0x9e4cb8b916289864321661ce02cf66aa5ba63c94",  # WETH/DEUS
+            "0x982534133b2b71ab012404256be316344bb9f261"   # cbBTC/DEUS
+        ],
+        "pools": [
+            {
+                "pool": "0x...",
+                "symbol": "vAMM-WETH/USDC",
+                "gauge": "0x...",
+                "weight": 50000000.0,           # Current pool weight
+                "on_chain_weight": 50000000.0,  # Saved for reference
+                "total_usd": 5000.50,           # Total bribes + fees (USD)
+                "fees_usd": 1200.30,            # Trading fees (USD)
+                "bribes_usd": 3800.20,          # Protocol bribes (USD)
+                "our_votes": 100000.0,          # Our current votes on this pool
+                "has_our_lp": true,             # Do we have LP position?
+                "is_protocol_pool": false,      # Is this our protocol pool?
+                "our_lp_data": {                # Our LP position details
+                    "token0_address": "0x...",
+                    "token1_address": "0x...",
+                    "liquidity": "123456789",
+                    "total_value_usd": 50000.00,
+                    "total_pool_tvl": 500000.00,
+                    "ownership_percentage": 10.0,
+                    "reward_rate_raw": "1000000000000000000",  # Gauge reward rate
+                    "reward_usd_per_day": 850.50
+                }
+            }
+        ],
+        "relays": [  # Other major voters
+            {
+                "name": "Ouranous Foundation",
+                "voting_amount": "175.5M",
+                "voting_amount_raw": "175494134990275000000000000",
+                "votes": [
+                    {"pool": "0x...", "weight": 5000000.0}
+                ]
+            }
+        ],
+        "lp_positions": [  # Summary of our LP positions
+            {
+                "pool_address": "0x...",
+                "symbol": "vAMM-WETH/DEUS",
+                "total_value_usd": 50000.00
+            }
+        ]
+    }
+
+ADDING A NEW TOKEN LAUNCH TO votes_dashboard.json:
+
+When launching a new token pair, manually add a pool entry with estimated rewards:
+
+1. Find a similar pool in votes_dashboard.json to use as a template
+2. Duplicate that entry
+3. Update required fields:
+   {
+       "pool": "0xNEW_POOL_ADDRESS",           # New pool address
+       "symbol": "vAMM-WETH/NEWTOKEN",          # Pool symbol
+       "gauge": "0xNEW_GAUGE_ADDRESS",          # Gauge address (if exists)
+       "weight": 0,                              # Will be 0 for new pool
+       "on_chain_weight": 0,
+       "total_usd": 5000.0,                     # ESTIMATE expected bribes+fees
+       "fees_usd": 2000.0,                      # ESTIMATE trading fees
+       "bribes_usd": 3000.0,                    # ESTIMATE protocol bribes
+       "our_votes": 0,                          # No votes yet
+       "has_our_lp": true,                      # If you're providing liquidity
+       "is_protocol_pool": true,                # If it's your protocol token
+       "our_lp_data": {
+           "total_value_usd": 10000.0,          # Your LP position value
+           "total_pool_tvl": 50000.0,           # Estimated pool TVL
+           "ownership_percentage": 20.0,
+           "reward_usd_per_day": 100.0          # Estimated LP rewards
+       }
+   }
+
+4. If it's a protocol pool, add the address to "protocol_pools" array
+5. Run optimizer to see optimal allocation including new pool
+
+USAGE:
+
+Fetch all voting data:
+    python scripts/aero/aero_manager.py fetch
+
+Fetch with specific NFT:
+    (Set NFT_ID in .env file)
+
+RECOMMENDED SCHEDULE:
+    - Run daily or before each weekly vote
+    - Captures latest pool weights, rewards, and LP positions
+    - Takes ~2-5 minutes depending on number of pools
+    - Required before running optimizer
+
+INTEGRATION:
+    votes_dashboard.json → optimizer.py → optimized_votes_human.json
+    
+    The optimizer reads this file to make allocation decisions based on:
+    - Voter rewards (total_usd)
+    - LP position rewards (our_lp_data)
+    - Current pool weights (weight)
+    - Protocol pool designations (is_protocol_pool)
+"""
 import os
 import json
 import requests
