@@ -1,25 +1,25 @@
 #!/usr/bin/env python3
-# filepath: d:\Pyth\pythfarms\scripts\aero\lib\fetch_volatility.py
+# filepath: d:\Pyth\pythfarms\scripts\shadow\lib\fetch_volatility.py
 """
-Aerodrome Pool Volatility Data Fetcher
+Shadow Pool Volatility Data Fetcher
 
-This module fetches historical price data for Aerodrome pools and calculates volatility metrics
+This module fetches historical price data for Shadow pools on Sonic network and calculates volatility metrics
 using standard deviation of hourly closing prices over a 7-day period. It requires a votes_dashboard to exist.
 
 DATA SOURCE:
     - GeckoTerminal API (https://api.geckoterminal.com/api/v2)
-    - Network: Base
+    - Network: Sonic
     - Timeframe: 168 hours (7 days) of hourly OHLCV data
 
 INPUT:
     - votes_dashboard.json: Pool list to fetch volatility for
-      Location: input_data/aero/votes_dashboard.json
+      Location: input_data/shadow/votes_dashboard.json
 
 OUTPUT:
     - volatility_data.json: Volatility metrics for all pools
-      Location: volatility_data/aero/volatility_data.json
+      Location: volatility_data/shadow/volatility_data.json
     - volatility_data_YYYYMMDD.json: Dated backup copy
-      Location: volatility_data/aero/volatility_data_YYYYMMDD.json
+      Location: volatility_data/shadow/volatility_data_YYYYMMDD.json
 
 VOLATILITY CALCULATION:
     Using standard deviation of closing prices:
@@ -33,7 +33,7 @@ OUTPUT FORMAT:
     {
         "pools": {
             "0x...pool_address": {
-                "symbol": "vAMM-WETH/USDC",
+                "symbol": "CL-USDC-WETH-0.131%",
                 "current_price": 0.0003145,
                 "price_range": {
                     "high": 0.0003200,
@@ -47,13 +47,13 @@ OUTPUT FORMAT:
                         "variance": 4.08e-10
                     }
                 },
-                "last_updated": "2025-10-22T10:30:00.123456"
+                "last_updated": "2025-10-27T10:30:00.123456"
             }
         },
-        "last_updated": "2025-10-22T10:35:00.123456",
+        "last_updated": "2025-10-27T10:35:00.123456",
         "stats": {
-            "total_pools": 254,
-            "updated_pools": 45
+            "total_pools": 50,
+            "updated_pools": 25
         }
     }
 
@@ -65,16 +65,16 @@ SMART CACHING:
 RATE LIMITING:
     - Default: 2 seconds between API calls
     - Adjustable via rate_limit_seconds parameter
-    - Processes pools in order of importance (highest weight first)
+    - Processes pools in order of importance (highest TVL first)
 
 USAGE:
 
 Fetch all pools (respects 12-hour cache):
-    python scripts/aero/aero_manager.py volatility
+    python scripts/shadow/shadow_manager.py volatility
 
-Fetch top 50 pools only:
-    from scripts.aero.lib.fetch_volatility import run_fetch_volatility
-    run_fetch_volatility(max_pools=50)
+Fetch top 20 pools only:
+    from scripts.shadow.lib.fetch_volatility import run_fetch_volatility
+    run_fetch_volatility(max_pools=20)
 
 Force update all pools:
     run_fetch_volatility(force_update=True)
@@ -84,7 +84,7 @@ Custom rate limiting:
 
 INTEGRATION WITH OPTIMIZER:
     The optimizer reads volatility_percentage from this file when run with:
-    python scripts/aero/aero_manager.py optimize --with-volatility --gamma 1.0
+    python scripts/shadow/shadow_manager.py optimize --with-volatility --gamma 1.0
     
     Higher volatility_percentage = Higher penalty on voter rewards
     (LP rewards are not affected by volatility)
@@ -110,8 +110,8 @@ load_dotenv()
 
 # Constants
 GECKOTERMINAL_API_URL = 'https://api.geckoterminal.com/api/v2'
-DASHBOARD_PATH = "input_data/aero/votes_dashboard.json"
-VOLATILITY_DATA_PATH = "volatility_data/aero/volatility_data.json"
+DASHBOARD_PATH = "input_data/shadow/votes_dashboard.json"
+VOLATILITY_DATA_PATH = "volatility_data/shadow/volatility_data.json"
 
 def save_json(data, path):
     """Save data to a JSON file"""
@@ -197,8 +197,8 @@ def calculate_volatility_metrics(candles):
         }
     }
 
-def fetch_geckoterminal_volatility(pool_address, network="base"):
-    """Fetch and calculate 7-day volatility metrics from GeckoTerminal OHLCV data"""
+def fetch_geckoterminal_volatility(pool_address, network="sonic"):
+    """Fetch and calculate 7-day volatility metrics from GeckoTerminal OHLCV data for Sonic network"""
     try:
         url = f"{GECKOTERMINAL_API_URL}/networks/{network}/pools/{pool_address}/ohlcv/hour"
         params = {
@@ -238,7 +238,7 @@ def fetch_geckoterminal_volatility(pool_address, network="base"):
         if not metrics:
             return None
             
-        # Construct response with detailed metrics including volume
+        # Construct response with detailed metrics
         volatility = {
             'current_price': metrics['current_price'],
             'price_range': {
@@ -270,17 +270,24 @@ def fetch_geckoterminal_volatility(pool_address, network="base"):
         return None
 
 def fetch_pools_from_dashboard():
-    """Load pools from the latest votes dashboard"""
+    """Load pools from the latest Shadow votes dashboard"""
     dashboard = load_json(DASHBOARD_PATH)
     if not dashboard:
-        logger.error("❌ Failed to load votes dashboard")
+        logger.error("❌ Failed to load Shadow votes dashboard")
         return []
     
-    return dashboard.get('pools', [])
+    # Shadow dashboard structure is different - it's a list of pools directly
+    if isinstance(dashboard, list):
+        return dashboard
+    elif isinstance(dashboard, dict) and 'pools' in dashboard:
+        return dashboard.get('pools', [])
+    else:
+        logger.error("❌ Unexpected dashboard structure")
+        return []
 
 def run_fetch_volatility(max_pools=None, rate_limit_seconds=2, force_update=False):
     """
-    Fetch volatility data for pools in the votes dashboard
+    Fetch volatility data for pools in the Shadow votes dashboard
     
     Args:
         max_pools (int, optional): Maximum number of pools to process. If None, process all pools.
@@ -296,14 +303,14 @@ def run_fetch_volatility(max_pools=None, rate_limit_seconds=2, force_update=Fals
     # Get pools from the dashboard
     pools = fetch_pools_from_dashboard()
     if not pools:
-        logger.error("❌ No pools found in dashboard")
+        logger.error("❌ No pools found in Shadow dashboard")
         return existing_data
     
-    # Sort pools by weight/votes to prioritize the most important ones
-    if any('weight' in p for p in pools):
-        pools.sort(key=lambda x: x.get('weight', 0), reverse=True)
-    elif any('on_chain_weight' in p for p in pools):
-        pools.sort(key=lambda x: x.get('on_chain_weight', 0), reverse=True)
+    # Sort pools by TVL to prioritize the most important ones
+    if any('tvl' in p for p in pools):
+        pools.sort(key=lambda x: x.get('tvl', 0), reverse=True)
+    elif any('pool_votes_period' in p for p in pools):
+        pools.sort(key=lambda x: x.get('pool_votes_period', 0), reverse=True)
     
     # Limit the number of pools if specified
     if max_pools:
@@ -313,7 +320,7 @@ def run_fetch_volatility(max_pools=None, rate_limit_seconds=2, force_update=Fals
     updated_pools = existing_data.get("pools", {})
     num_updated = 0
     
-    logger.info(f"🔍 Fetching volatility data for {len(pools)} pools...")
+    logger.info(f"🔍 Fetching volatility data for {len(pools)} Shadow pools...")
     
     for i, pool in enumerate(pools):
         pool_addr = pool.get('pool', '').lower()
@@ -339,8 +346,8 @@ def run_fetch_volatility(max_pools=None, rate_limit_seconds=2, force_update=Fals
         if i > 0:
             time.sleep(rate_limit_seconds)
         
-        # Fetch volatility data
-        volatility_data = fetch_geckoterminal_volatility(pool_addr)
+        # Fetch volatility data from Sonic network
+        volatility_data = fetch_geckoterminal_volatility(pool_addr, network="sonic")
         
         if volatility_data:
             updated_pools[pool_addr] = {
@@ -371,12 +378,12 @@ def run_fetch_volatility(max_pools=None, rate_limit_seconds=2, force_update=Fals
     
     # Also save a dated version
     date_str = datetime.datetime.now().strftime("%Y%m%d")
-    dated_path = f"volatility_data/aero/volatility_data_{date_str}.json"
+    dated_path = f"volatility_data/shadow/volatility_data_{date_str}.json"
     save_json(result, dated_path)
     
-    logger.info(f"✅ Volatility data saved for {len(updated_pools)} pools ({num_updated} updated)")
+    logger.info(f"✅ Shadow volatility data saved for {len(updated_pools)} pools ({num_updated} updated)")
     
     return result
 
 if __name__ == "__main__":
-    run_fetch_volatility(max_pools=100)
+    run_fetch_volatility(max_pools=50)

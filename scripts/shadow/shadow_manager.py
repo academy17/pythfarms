@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 import argparse
 import logging
-from lib import fetch_votes, optimizer, analytics, lp_optimizer_old, fetch_lp_data
+import os
+from dotenv import load_dotenv
+from lib import fetch_votes, optimizer, analytics, lp_optimizer_old, fetch_lp_data, fetch_volatility
+
+# Load environment variables from .env file
+load_dotenv()
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -24,6 +29,8 @@ def main():
     optimize_parser.add_argument("--historical", action="store_true", help="Run historical optimization")
     optimize_parser.add_argument("--display", action="store_true", help="Display results without saving")
     optimize_parser.add_argument("--recompute", action="store_true", help="Recompute optimization with manually specified dashboard file")
+    optimize_parser.add_argument("--with-volatility", action="store_true", help="Apply volatility penalty to volatile pools")
+    optimize_parser.add_argument("--gamma", type=float, default=1.0, help="Volatility penalty coefficient (default 1.0, higher = stronger penalty)")
 
     # Analyze subcommand
     analyze_parser = subparsers.add_parser("analyze", help="Analyze vote performance")
@@ -45,6 +52,12 @@ def main():
     lp_dashboard_parser.add_argument("--no-save", action="store_true", help="Don't save dashboard to file")
     lp_dashboard_parser.add_argument("--no-display", action="store_true", help="Don't display dashboard")
 
+    # Fetch Volatility subcommand
+    fetch_volatility_parser = subparsers.add_parser("fetch_volatility", help="Fetch volatility data for Shadow pools from GeckoTerminal")
+    fetch_volatility_parser.add_argument("--max-pools", type=int, help="Maximum number of pools to process (default: all pools)")
+    fetch_volatility_parser.add_argument("--rate-limit", type=int, default=2, help="Seconds between API calls (default: 2)")
+    fetch_volatility_parser.add_argument("--force-update", action="store_true", help="Force update all pools regardless of cache")
+
     args = parser.parse_args()
 
     if args.command == "fetch":
@@ -58,9 +71,11 @@ def main():
         
         if args.historical:
             logger.info("Running historical optimization")
-            optimizer.run_optimize(args.period, save, True, args.recompute)
+            optimizer.run_optimize(args.period, save, True, args.recompute, 
+                                 with_volatility=args.with_volatility, gamma=args.gamma)
         else:
-            optimizer.run_optimize(args.period, save, False, args.recompute)
+            optimizer.run_optimize(args.period, save, False, args.recompute,
+                                 with_volatility=args.with_volatility, gamma=args.gamma)
     
     elif args.command == "analyze":
         logger.info(f"Analyzing performance for period {args.period if args.period else '[last voted]'}")
@@ -84,6 +99,14 @@ def main():
             display=not args.no_display,
             save=not args.no_save,
             top_n=args.top
+        )
+    
+    elif args.command == "fetch_volatility":
+        logger.info("Fetching volatility data for Shadow pools")
+        fetch_volatility.run_fetch_volatility(
+            max_pools=args.max_pools,
+            rate_limit_seconds=args.rate_limit,
+            force_update=args.force_update
         )
     
     else:

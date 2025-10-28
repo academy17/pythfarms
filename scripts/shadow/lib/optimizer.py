@@ -22,6 +22,7 @@ SHADOW_RPC_URL = os.getenv("SHADOW_RPC_URL")
 SHADOW_VOTER_ADDRESS = os.getenv("SHADOW_VOTER_ADDRESS")  
 VOTER_ABI_PATH = os.getenv('VOTER_ABI_PATH', 'abi/shadow/Voter.json')
 SHADOW_NFT_OWNER_ADDRESS = os.getenv("SHADOW_NFT_OWNER_ADDRESS", "")
+SHADOW_PROTOCOL_WALLET = os.getenv("SHADOW_PROTOCOL_WALLET", "")
 
 def load_json(path):
     """Load a JSON file from the given path."""
@@ -30,26 +31,82 @@ def load_json(path):
     with open(path) as f:
         return json.load(f)
 
-def equal_marginal(RW, P):
+def equal_marginal(RWV, P, with_volatility=False, gamma=Decimal(1), S_total=None):
     """
-    Equal marginal utility optimization algorithm.
-    Returns a list of (pool_address, vote_allocation) tuples.
+    Equal marginal utility optimization algorithm with optional volatility penalties.
+    
+    Args:
+        RWV: List of tuples (pool_address, reward, external_votes, volatility)
+        P: Total voting power to allocate
+        with_volatility: Whether to include volatility penalties
+        gamma: Volatility penalty coefficient
+        S_total: Total system votes (for volatility penalty calculation)
+        
+    Returns:
+        List of (pool_address, vote_allocation) tuples.
     """
-    active = [(p, R, W) for (p, R, W) in RW if R > 0 and W >= 0]
+    # Handle both old format (R, W) and new format (R, W, V)
+    if RWV and len(RWV[0]) == 3:
+        # Old format without volatility
+        active = [(p, R, W, Decimal(0)) for (p, R, W) in RWV if R > 0 and W >= 0]
+    else:
+        # New format with volatility
+        active = [(p, R, W, V) for (p, R, W, V) in RWV if R > 0 and W >= 0]
+    
     if not active:
-        return [(p, Decimal(0)) for (p, _, _) in RW]
+        return [(p, Decimal(0)) for (p, *_) in RWV]
+
+    def voter_marginal(R, W, our_votes, volatility=Decimal(0), S_tot=None):
+        """Calculate marginal utility with optional volatility penalty"""
+        if R <= 0:
+            return Decimal(0)
+        
+        EPSILON = Decimal("1e-12")
+        external_votes = max(W, EPSILON)
+        
+        # Base marginal utility
+        base = R * external_votes / (external_votes + our_votes)**2
+        
+        if not with_volatility or volatility <= 0 or not S_tot or S_tot <= 0:
+            return base
+            
+        # Apply volatility penalty
+        P_share = (external_votes + our_votes) / S_tot
+        sigma = volatility / Decimal(100)  # Convert percentage to decimal
+        
+        risk_mult = Decimal(1) - (2 * gamma * (sigma**2) * P_share * R)
+        risk_mult = max(Decimal(0), min(Decimal(1), risk_mult))
+        
+        return base * risk_mult
 
     def sum_delta(lam):
         total = Decimal(0)
-        for _, R, W in active:
-            num = R * W
-            if num <= 0:
+        for _, R, W, V in active:
+            if R <= 0:
                 continue
-            d = (num / lam).sqrt() - W
-            if d > 0:
-                total += d
+            
+            # Use binary search to find optimal delta for this pool
+            lo_delta, hi_delta = Decimal(0), P * 10  # generous upper bound
+            
+            for _ in range(50):  # Binary search iterations
+                mid_delta = (lo_delta + hi_delta) / 2
+                marginal = voter_marginal(R, W, mid_delta, V, S_total)
+                
+                if marginal > lam:
+                    lo_delta = mid_delta
+                else:
+                    hi_delta = mid_delta
+                    
+                if hi_delta - lo_delta < TOL:
+                    break
+            
+            delta = lo_delta
+            if delta > 0:
+                total += delta
+                
         return total
 
+    # Find lambda using binary search
     lo, hi = Decimal("1e-30"), Decimal("1")
     for _ in range(200):
         if sum_delta(hi) < P:
@@ -71,13 +128,36 @@ def equal_marginal(RW, P):
     else:
         lam = lo
 
+    # Calculate final allocations
     out = []
-    for p, R, W in RW:
+    for item in RWV:
+        if len(item) == 3:
+            p, R, W = item
+            V = Decimal(0)
+        else:
+            p, R, W, V = item
+            
         if R <= 0 or W < 0:
             out.append((p, Decimal(0)))
         else:
-            d = ((R * W) / lam).sqrt() - W
-            out.append((p, d if d > 0 else Decimal(0)))
+            # Find optimal delta for this pool given lambda
+            lo_delta, hi_delta = Decimal(0), P * 10
+            
+            for _ in range(50):
+                mid_delta = (lo_delta + hi_delta) / 2
+                marginal = voter_marginal(R, W, mid_delta, V, S_total)
+                
+                if marginal > lam:
+                    lo_delta = mid_delta
+                else:
+                    hi_delta = mid_delta
+                    
+                if hi_delta - lo_delta < TOL:
+                    break
+            
+            delta = lo_delta if lo_delta > 0 else Decimal(0)
+            out.append((p, delta))
+            
     return out
 
 def deduct_user_votes(dashboard, user_votes):
@@ -102,7 +182,7 @@ def deduct_user_votes(dashboard, user_votes):
         'pools': adjusted_pools
     }
 
-def run_optimization(dashboard, voting_power, re_run=False, previous_votes=None):
+def run_optimization(dashboard, voting_power, re_run=False, previous_votes=None, with_volatility=False, gamma=1.0):
     """
     Run the optimization algorithm on a dashboard with given voting power.
     
@@ -111,6 +191,8 @@ def run_optimization(dashboard, voting_power, re_run=False, previous_votes=None)
         voting_power: Decimal value of available voting power
         re_run: Whether this is a re-run (user already voted in this period)
         previous_votes: Dict mapping pool addresses to previous vote weights
+        with_volatility: Whether to include volatility penalties in optimization
+        gamma: Volatility penalty coefficient (default 1.0)
         
     Returns:
         Dictionary with optimization results
@@ -118,6 +200,42 @@ def run_optimization(dashboard, voting_power, re_run=False, previous_votes=None)
     pools = dashboard.get("pools", [])
     pools = sorted(pools, key=lambda p: p.get("bribes_usd", 0), reverse=True)[:10]
     logger.info(f"ℹ️ Allocating {voting_power} votes based on bribes_usd.")
+    
+    # Load volatility data if requested
+    volatility_data = {}
+    if with_volatility:
+        try:
+            # Load volatility data
+            raw_data = load_json('volatility_data/shadow/volatility_data.json')
+            
+            # The volatility data is nested under 'pools'
+            pool_volatility = raw_data.get('pools', {})
+            
+            # Map volatility data directly using pool addresses
+            volatility_data = {addr.lower(): data for addr, data in pool_volatility.items()}
+            
+            # Log which pools we found volatility data for
+            found_pools = []
+            missing_pools = []
+            for p in pools:
+                pool_addr = p["pool"].lower()
+                if pool_addr in volatility_data:
+                    found_pools.append(p.get("symbol", "Unknown"))
+                else:
+                    missing_pools.append(p.get("symbol", "Unknown"))
+            
+            logger.info(f"📊 Loaded volatility data for {len(found_pools)} pools")
+            if found_pools:
+                logger.info(f"✅ Found volatility for: {', '.join(found_pools)}")
+            if missing_pools:
+                logger.warning(f"⚠️ Missing volatility data for pools: {', '.join(missing_pools)}")
+                
+        except FileNotFoundError:
+            logger.warning("⚠️ Volatility data not found, proceeding without volatility penalties")
+            with_volatility = False
+        except Exception as e:
+            logger.error(f"❌ Error loading volatility data: {e}")
+            with_volatility = False
     
     base = []
     locked = {}
@@ -128,6 +246,15 @@ def run_optimization(dashboard, voting_power, re_run=False, previous_votes=None)
         R = Decimal(str(p.get("bribes_usd", 0)))
         W_total = Decimal(str(p.get("pool_votes_period", 0)))
         
+        # Get volatility for this pool
+        volatility = Decimal(0)
+        if with_volatility and addr in volatility_data:
+            vol_data = volatility_data[addr]
+            if 'price_range' in vol_data and 'volatility_percentage' in vol_data['price_range']:
+                volatility = Decimal(str(vol_data['price_range']['volatility_percentage']))
+                if volatility > 0:
+                    logger.info(f"📈 Pool {p.get('symbol', 'Unknown')}: {volatility}% volatility")
+        
         if re_run and previous_votes and addr in previous_votes:
             W = W_total - previous_votes[addr]
             if W < 0:
@@ -136,10 +263,13 @@ def run_optimization(dashboard, voting_power, re_run=False, previous_votes=None)
             W = W_total
             
         locked[addr] = W_total
-        base.append((addr, R, W))
+        base.append((addr, R, W, volatility))
+    
+    # Calculate total system votes for volatility penalty calculation
+    total_system_votes = sum(Decimal(str(p.get("pool_votes_period", 0))) for p in pools) + voting_power
     
     # Run optimization
-    alloc = equal_marginal(base, voting_power)
+    alloc = equal_marginal(base, voting_power, with_volatility, Decimal(str(gamma)), total_system_votes)
     total_alloc = sum(d for _, d in alloc)
     
     # Build outputs
@@ -224,14 +354,17 @@ def get_current_voting_power(owner):
         vote_module_abi = json.load(f)
     contract = w3.eth.contract(address=w3.to_checksum_address(VOTE_MODULE_ADDRESS), abi=vote_module_abi)
     raw_power = contract.functions.balanceOf(owner).call()
-    return Decimal(raw_power) / Decimal(10 ** 18)
+    power = Decimal(raw_power) / Decimal(10 ** 18)
+    logger.info(f"Current voting power for {owner[:10]}...: {power}")
+    return power
 
-def get_user_votes(period=None):
+def get_user_votes(period=None, wallet_address=None):
     """
-    Get the user's votes for a specific period.
+    Get a wallet's votes for a specific period.
     
     Args:
         period: Period to fetch votes for, or None to use last voted period
+        wallet_address: Wallet address to fetch votes for, or None to use NFT owner address
     
     Returns:
         Dict with period and votes
@@ -250,24 +383,26 @@ def get_user_votes(period=None):
     
     contract = w3.eth.contract(address=w3.to_checksum_address(SHADOW_VOTER_ADDRESS), abi=voter_abi)
     
-    if not SHADOW_NFT_OWNER_ADDRESS:
-        logger.error("❌ SHADOW_NFT_OWNER_ADDRESS not set in .env")
-        return None
-    
-    owner = w3.to_checksum_address(SHADOW_NFT_OWNER_ADDRESS)
+    if wallet_address:
+        owner = w3.to_checksum_address(wallet_address)
+    else:
+        if not SHADOW_NFT_OWNER_ADDRESS:
+            logger.error("❌ SHADOW_NFT_OWNER_ADDRESS not set in .env")
+            return None
+        owner = w3.to_checksum_address(SHADOW_NFT_OWNER_ADDRESS)
     
     # If period not specified, get last voted period
     if period is None:
         try:
             period = contract.functions.lastVoted(owner).call()
-            logger.info(f"Last voted period for {owner}: {period}")
+            logger.info(f"Last voted period for {owner[:10]}...: {period}")
         except Exception as e:
             logger.error(f"❌ Failed to get last voted period: {e}")
             return None
     
     try:
         num_pools = contract.functions.userVotedPoolsPerPeriodLength(owner, period).call()
-        logger.info(f"Number of pools voted for in period {period}: {num_pools}")
+        logger.info(f"Number of pools voted for by {owner[:10]}... in period {period}: {num_pools}")
         
         pools = []
         for i in range(num_pools):
@@ -324,7 +459,7 @@ def save_calldata(result, owner):
     logger.info(f"✅ Saved calldata output to {path}")
     return path
 
-def run_optimize(period=None, save=True, is_historical=False, recompute=False):
+def run_optimize(period=None, save=True, is_historical=False, recompute=False, with_volatility=False, gamma=1.0):
     """
     Main entry point for running the optimizer.
     
@@ -333,6 +468,8 @@ def run_optimize(period=None, save=True, is_historical=False, recompute=False):
         save: Whether to save results to file
         is_historical: Whether this is a historical optimization
         recompute: Whether to prompt for manual dashboard file input
+        with_volatility: Whether to apply volatility penalty to volatile pools
+        gamma: Volatility penalty coefficient (default 1.0, higher = stronger penalty)
     """
     if not (SHADOW_RPC_URL and SHADOW_VOTER_ADDRESS):
         logger.error("❌ RPC_URL or CONTRACT_ADDRESS not set in env.")
@@ -387,25 +524,107 @@ def run_optimize(period=None, save=True, is_historical=False, recompute=False):
         return None
     
     owner = w3.to_checksum_address(SHADOW_NFT_OWNER_ADDRESS)
-    raw_power = contract.functions.userVotingPowerPerPeriod(owner, period).call()
-    voting_power = Decimal(raw_power) / (Decimal(10) ** 18)
     
+    # Create a working copy of the dashboard that we can modify
+    working_dashboard = {
+        'period': dashboard.get('period'),
+        'total_votes_period': dashboard.get('total_votes_period'),
+        'pools': [p.copy() for p in dashboard.get('pools', [])]
+    }
+    
+    # Check if we have a protocol wallet defined
+    protocol_votes = None
+    protocol_voting_power = Decimal(0)
+    protocol_allocations = {}
+    
+    if SHADOW_PROTOCOL_WALLET:
+        protocol_wallet = w3.to_checksum_address(SHADOW_PROTOCOL_WALLET)
+        logger.info(f"Protocol wallet detected: {protocol_wallet[:10]}...")
+        
+        # Get protocol wallet's votes for the current period
+        protocol_votes = get_user_votes(period, protocol_wallet)
+        
+        # If protocol wallet has votes, deduct them from pool weights
+        if protocol_votes and protocol_votes.get('votes'):
+            logger.info(f"Found {len(protocol_votes['votes'])} pools with protocol wallet votes")
+            for vote in protocol_votes['votes']:
+                pool_addr = vote['pool'].lower()
+                vote_weight = Decimal(vote.get('weight', 0)) / (Decimal(10) ** 18)
+                logger.info(f"Protocol wallet has {vote_weight} votes on pool {pool_addr[:10]}...")
+                
+                # Find the pool and deduct the votes
+                for pool in working_dashboard['pools']:
+                    if pool['pool'].lower() == pool_addr:
+                        original_votes = Decimal(pool.get('pool_votes_period', 0))
+                        pool['pool_votes_period'] = float(max(Decimal(0), original_votes - vote_weight))
+                        logger.info(f"Deducted {vote_weight} protocol wallet votes from pool {pool.get('symbol', pool_addr[:10])} (original: {original_votes}, new: {pool['pool_votes_period']})")
+                        break
+        
+        # Get protocol wallet's voting power
+        try:
+            if is_historical:
+                raw_power = contract.functions.userVotingPowerPerPeriod(protocol_wallet, period).call()
+                protocol_voting_power = Decimal(raw_power) / (Decimal(10) ** 18)
+                logger.info(f"Protocol wallet historical voting power for period {period}: {protocol_voting_power}")
+            else:
+                protocol_voting_power = get_current_voting_power(protocol_wallet)
+                logger.info(f"Protocol wallet current voting power: {protocol_voting_power}")
+                
+            # If protocol wallet has voting power, optimize its votes first
+            if protocol_voting_power > 0:
+                logger.info(f"Optimizing protocol wallet votes first with {protocol_voting_power} voting power...")
+                
+                # Run optimization for protocol wallet
+                protocol_result, _ = run_optimization(working_dashboard, protocol_voting_power, False, None, with_volatility, gamma)
+                
+                if protocol_result and 'allocations' in protocol_result:
+                    # Store protocol wallet allocations for reference
+                    for alloc in protocol_result['allocations']:
+                        pool_addr = alloc['pool'].lower()
+                        votes = Decimal(alloc.get('votes', 0))
+                        protocol_allocations[pool_addr] = votes
+                        
+                        # Add these votes back to the working dashboard
+                        for pool in working_dashboard['pools']:
+                            if pool['pool'].lower() == pool_addr:
+                                pool['pool_votes_period'] = float(Decimal(pool.get('pool_votes_period', 0)) + votes)
+                                logger.info(f"Added {votes} protocol wallet optimized votes to pool {pool.get('symbol', pool_addr[:10])}, new total: {pool['pool_votes_period']}")
+                                break
+                    
+                    logger.info(f"Protocol wallet votes optimized across {len(protocol_allocations)} pools")
+        except Exception as e:
+            logger.error(f"Error optimizing protocol wallet votes: {e}")
+    
+    # Now get our voting power and optimize our votes
     if is_historical:
         raw_power = contract.functions.userVotingPowerPerPeriod(owner, period).call()
         voting_power = Decimal(raw_power) / (Decimal(10) ** 18)
-        logger.info(f"ℹ️ Historical voting power for {owner} at period {period}: {voting_power}")
+        logger.info(f"ℹ️ Historical voting power for {owner[:10]}... at period {period}: {voting_power}")
 
         user_votes = get_user_votes(period)
         if not user_votes:
             logger.error("❌ Failed to get user votes for historical period")
             return None
 
-        adjusted_dashboard = deduct_user_votes(dashboard, user_votes)
-        result, bot_output = run_optimization(adjusted_dashboard, voting_power, False, None)
+        # Apply our deductions to the working dashboard that may already have protocol wallet votes
+        for vote in user_votes.get('votes', []):
+            pool_addr = vote['pool'].lower()
+            vote_weight = Decimal(vote.get('weight', 0)) / (Decimal(10) ** 18)
+            
+            # Find the pool and deduct our votes
+            for pool in working_dashboard['pools']:
+                if pool['pool'].lower() == pool_addr:
+                    original_votes = Decimal(pool.get('pool_votes_period', 0))
+                    pool['pool_votes_period'] = float(max(Decimal(0), original_votes - vote_weight))
+                    logger.info(f"Deducted {vote_weight} of our votes from pool {pool.get('symbol', pool_addr[:10])}")
+                    break
+
+        # Run optimization with our votes on the working dashboard
+        result, bot_output = run_optimization(working_dashboard, voting_power, False, None, with_volatility, gamma)
     else:
         # Use VoteModule's balanceOf for current voting power
         voting_power = get_current_voting_power(owner)
-        logger.info(f"ℹ️ Current voting power for {owner}: {voting_power}")
+        logger.info(f"ℹ️ Current voting power for {owner[:10]}...: {voting_power}")
 
         re_run = False
         previous_votes = {}
@@ -417,9 +636,40 @@ def run_optimize(period=None, save=True, is_historical=False, recompute=False):
                 pool = v['pool'].lower()
                 weight = Decimal(v.get('weight', 0)) / (Decimal(10) ** 18)
                 previous_votes[pool] = weight
-            logger.info(f"ℹ️ Re-run detected: found {len(previous_votes)} pools with existing votes")
+                
+                # Deduct our current votes from the working dashboard
+                for p in working_dashboard['pools']:
+                    if p['pool'].lower() == pool:
+                        p['pool_votes_period'] = float(max(Decimal(0), Decimal(p.get('pool_votes_period', 0)) - weight))
+                        logger.info(f"Deducted {weight} of our existing votes from pool {p.get('symbol', pool[:10])}")
+                        break
+                        
+            logger.info(f"ℹ️ Re-run detected: found {len(previous_votes)} pools with our existing votes")
 
-        result, bot_output = run_optimization(dashboard, voting_power, re_run, previous_votes)
+        # Run optimization with our votes on the working dashboard
+        result, bot_output = run_optimization(working_dashboard, voting_power, re_run, previous_votes, with_volatility, gamma)
+
+    # If protocol wallet allocations exist, add them to the result for reference
+    if protocol_allocations:
+        protocol_allocs_list = []
+        for pool_addr, votes in protocol_allocations.items():
+            pool = next((p for p in dashboard['pools'] if p['pool'].lower() == pool_addr), None)
+            if pool:
+                protocol_allocs_list.append({
+                    "symbol": pool.get("symbol", ""),
+                    "pool": pool_addr,
+                    "votes": float(votes)
+                })
+        
+        # Sort by votes (descending)
+        protocol_allocs_list.sort(key=lambda x: x["votes"], reverse=True)
+        
+        # Add to result
+        result["protocol_wallet"] = {
+            "address": SHADOW_PROTOCOL_WALLET,
+            "voting_power": float(protocol_voting_power),
+            "allocations": protocol_allocs_list
+        }
 
     if save:
         save_optimization(result, bot_output, is_historical)
@@ -427,5 +677,23 @@ def run_optimize(period=None, save=True, is_historical=False, recompute=False):
             save_calldata(result, owner)
     else:
         display_optimization(result)
+        
+        # Also display protocol wallet allocations if available
+        if 'protocol_wallet' in result:
+            print("\n=========== PROTOCOL WALLET ALLOCATIONS ===========")
+            print(f"Protocol Wallet: {SHADOW_PROTOCOL_WALLET[:10]}...")
+            print(f"Voting Power: {result['protocol_wallet']['voting_power']}")
+            print("---------------------------------------------------")
+            print("Pool                                    Votes")
+            print("---------------------------------------------------")
+            
+            for alloc in result['protocol_wallet']['allocations'][:10]:
+                symbol = alloc.get("symbol", "").ljust(10)
+                votes = f"{alloc.get('votes', 0):.2f}".rjust(8)
+                print(f"{symbol} ({alloc.get('pool')[:10]}...) {votes}")
+            
+            if len(result['protocol_wallet']['allocations']) > 10:
+                print(f"... and {len(result['protocol_wallet']['allocations']) - 10} more pools")
+            print("===================================================\n")
 
     return result
