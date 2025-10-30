@@ -644,10 +644,8 @@ def run_optimization(dashboard, volatility_data=None, gamma=0, minimum_protocol_
                 lp_fraction = Decimal(0)
                 weekly_rewards_usd = Decimal(0)
                 
-                # Get volatility data if available
+                # Ouranous Foundation always optimizes without volatility - don't use volatility data
                 volatility = Decimal(0)
-                if gamma > 0 and addr in volatility_map:
-                    volatility = volatility_map[addr]
                 
                 ouranous_pool_data.append((addr, R, W, lp_fraction, weekly_rewards_usd, volatility))
                 
@@ -655,9 +653,9 @@ def run_optimization(dashboard, volatility_data=None, gamma=0, minimum_protocol_
             if ouranous_excluded_pools:
                 logger.info(f"Excluded {len(ouranous_excluded_pools)} blacklisted pools from Ouranous Foundation optimization:")
             
-            # Optimize Ouranous Foundation's votes (use the same algorithm as for our votes)
-            logger.info(f"Allocating {P_ouranous} votes for Ouranous Foundation using equal-marginal algorithm...")
-            ouranous_result = equal_marginal_combined(ouranous_pool_data, P_ouranous, S_initial + P_ouranous, None, gamma, pools)
+            # Optimize Ouranous Foundation's votes WITHOUT volatility penalties (always use gamma=0)
+            logger.info(f"Allocating {P_ouranous} votes for Ouranous Foundation (without volatility) using equal-marginal algorithm...")
+            ouranous_result = equal_marginal_combined(ouranous_pool_data, P_ouranous, S_initial + P_ouranous, None, 0, pools)
             
             # Convert result to a dictionary for easier lookup
             for addr, alloc in ouranous_result:

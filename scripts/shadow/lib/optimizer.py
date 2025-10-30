@@ -572,10 +572,10 @@ def run_optimize(period=None, save=True, is_historical=False, recompute=False, w
                 
             # If protocol wallet has voting power, optimize its votes first
             if protocol_voting_power > 0:
-                logger.info(f"Optimizing protocol wallet votes first with {protocol_voting_power} voting power...")
+                logger.info(f"Optimizing protocol wallet votes (without volatility) with {protocol_voting_power} voting power...")
                 
-                # Run optimization for protocol wallet
-                protocol_result, _ = run_optimization(working_dashboard, protocol_voting_power, False, None, with_volatility, gamma)
+                # Run optimization for protocol wallet WITHOUT volatility penalties
+                protocol_result, _ = run_optimization(working_dashboard, protocol_voting_power, False, None, False, 1.0)
                 
                 if protocol_result and 'allocations' in protocol_result:
                     # Store protocol wallet allocations for reference

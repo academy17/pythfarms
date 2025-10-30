@@ -57,7 +57,7 @@ def main():
     
     # Fetch Volatility command
     volatility_parser = subparsers.add_parser("fetch_volatility", help="Fetch volatility data for pools")
-    volatility_parser.add_argument("--max", type=int, default=30, help="Maximum number of pools to process")
+    volatility_parser.add_argument("--max", type=int, default=500, help="Maximum number of pools to process")
     volatility_parser.add_argument("--rate-limit", type=int, default=2, help="Seconds to wait between API calls to avoid rate limiting")
     volatility_parser.add_argument("--force", action="store_true", help="Force update for all pools")
     
