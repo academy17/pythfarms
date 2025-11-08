@@ -57,9 +57,10 @@ def main():
     
     # Fetch Volatility command
     volatility_parser = subparsers.add_parser("fetch_volatility", help="Fetch volatility data for pools")
-    volatility_parser.add_argument("--max", type=int, default=500, help="Maximum number of pools to process")
+    volatility_parser.add_argument("--max", type=int, default=1000, help="Maximum number of pools to process")
     volatility_parser.add_argument("--rate-limit", type=int, default=2, help="Seconds to wait between API calls to avoid rate limiting")
     volatility_parser.add_argument("--force", action="store_true", help="Force update for all pools")
+    volatility_parser.add_argument("--month", action="store_true", help="Fetch 30-day (720 hour) volatility instead of 7-day (168 hour)")
     
     args = parser.parse_args()
     
@@ -114,10 +115,13 @@ def main():
         )
     elif args.command == "fetch_volatility":
         logger.info("Fetching volatility data for pools")
+        timeframe = "30-day" if args.month else "7-day"
+        logger.info(f"Using {timeframe} volatility calculation")
         result = fetch_volatility.run_fetch_volatility(
             max_pools=args.max,
             rate_limit_seconds=args.rate_limit,
-            force_update=args.force
+            force_update=args.force,
+            use_monthly=args.month
         )
         # Display a summary of the volatility data
         if result and "pools" in result:
