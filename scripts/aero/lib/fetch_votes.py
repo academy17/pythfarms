@@ -121,13 +121,40 @@ USAGE:
 Fetch all voting data:
     python scripts/aero/aero_manager.py fetch
 
+Fetch with force refresh (ignore cache):
+    python scripts/aero/aero_manager.py fetch --force
+
 Fetch with specific NFT:
     (Set NFT_ID in .env file)
+
+CACHING & RESUMABILITY:
+    The fetch process now supports caching and resumability:
+    
+    - Each major step (pools, prices, fees, LP data) is cached separately
+    - Cache expires after 30 minutes (configurable via CACHE_STALENESS_SECONDS)
+    - If the process is interrupted, re-running will resume from cached data
+    - Cached data is stored in: input_data/aero/.cache/
+    
+    Cache management:
+        from lib.fetch_votes import get_cache_status, clear_all_cache
+        
+        # Check cache status
+        status = get_cache_status()
+        # Returns: {'all_pools': {'age_minutes': 15.2, 'is_stale': False}, ...}
+        
+        # Clear all cache to force fresh fetch
+        clear_all_cache()
+    
+    Benefits:
+        ✅ Resume from interruption (network issues, Ctrl+C, etc.)
+        ✅ Faster re-runs when data is fresh (<30 min)
+        ✅ Reduced API calls to CoinGecko and RPC endpoints
+        ✅ Better error recovery - don't lose progress
 
 RECOMMENDED SCHEDULE:
     - Run daily or before each weekly vote
     - Captures latest pool weights, rewards, and LP positions
-    - Takes ~2-5 minutes depending on number of pools
+    - Takes ~2-5 minutes for first run, <30 seconds for cached runs
     - Required before running optimizer
 
 INTEGRATION:
@@ -252,6 +279,115 @@ def save_json(data, path):
     with open(path, 'w') as f:
         json.dump(data, f, indent=2)
     logger.info(f"✅ Saved data to {path}")
+
+# ============================================================================
+# CACHE MANAGEMENT FOR RESUMABLE FETCHING
+# ============================================================================
+
+CACHE_DIR = "input_data/aero/.cache"
+CACHE_STALENESS_SECONDS = 30 * 60  # 30 minutes
+
+def get_cache_path(cache_key):
+    """Get the path for a cached data file"""
+    return os.path.join(CACHE_DIR, f"{cache_key}.json")
+
+def save_cache(cache_key, data):
+    """
+    Save data to cache with timestamp.
+    
+    Args:
+        cache_key: Identifier for the cached data (e.g., 'all_pools', 'prices')
+        data: Data to cache (must be JSON-serializable)
+    """
+    os.makedirs(CACHE_DIR, exist_ok=True)
+    cache_path = get_cache_path(cache_key)
+    cache_data = {
+        "timestamp": datetime.datetime.utcnow().timestamp(),
+        "data": data
+    }
+    with open(cache_path, 'w') as f:
+        json.dump(cache_data, f, indent=2)
+    logger.info(f"💾 Cached {cache_key} to {cache_path}")
+
+def load_cache(cache_key, max_age_seconds=CACHE_STALENESS_SECONDS):
+    """
+    Load data from cache if it exists and is not stale.
+    
+    Args:
+        cache_key: Identifier for the cached data
+        max_age_seconds: Maximum age in seconds before cache is considered stale
+    
+    Returns:
+        Cached data if fresh, None if stale or doesn't exist
+    """
+    cache_path = get_cache_path(cache_key)
+    
+    if not os.path.exists(cache_path):
+        logger.info(f"🔍 No cache found for {cache_key}")
+        return None
+    
+    try:
+        with open(cache_path, 'r') as f:
+            cache_data = json.load(f)
+        
+        timestamp = cache_data.get("timestamp")
+        data = cache_data.get("data")
+        
+        if timestamp is None:
+            logger.warning(f"⚠️ Cache {cache_key} has no timestamp, ignoring")
+            return None
+        
+        age_seconds = datetime.datetime.utcnow().timestamp() - timestamp
+        age_minutes = age_seconds / 60
+        
+        if age_seconds > max_age_seconds:
+            logger.info(f"⏰ Cache {cache_key} is stale ({age_minutes:.1f} minutes old), will re-fetch")
+            return None
+        
+        logger.info(f"✅ Using cached {cache_key} ({age_minutes:.1f} minutes old)")
+        return data
+    
+    except Exception as e:
+        logger.warning(f"⚠️ Failed to load cache {cache_key}: {e}")
+        return None
+
+def clear_all_cache():
+    """Clear all cached data"""
+    if os.path.exists(CACHE_DIR):
+        import shutil
+        shutil.rmtree(CACHE_DIR)
+        logger.info(f"🗑️ Cleared all cache from {CACHE_DIR}")
+
+def get_cache_status():
+    """Get status of all cached data"""
+    if not os.path.exists(CACHE_DIR):
+        return {}
+    
+    status = {}
+    for filename in os.listdir(CACHE_DIR):
+        if filename.endswith('.json'):
+            cache_key = filename[:-5]  # Remove .json extension
+            cache_path = os.path.join(CACHE_DIR, filename)
+            
+            try:
+                with open(cache_path, 'r') as f:
+                    cache_data = json.load(f)
+                
+                timestamp = cache_data.get("timestamp")
+                if timestamp:
+                    age_seconds = datetime.datetime.utcnow().timestamp() - timestamp
+                    age_minutes = age_seconds / 60
+                    is_stale = age_seconds > CACHE_STALENESS_SECONDS
+                    
+                    status[cache_key] = {
+                        "age_minutes": age_minutes,
+                        "is_stale": is_stale,
+                        "timestamp": timestamp
+                    }
+            except Exception as e:
+                logger.warning(f"Failed to read cache status for {cache_key}: {e}")
+    
+    return status
 
 def get_token_decimals(w3, token_addr):
     """Get token decimals, with caching"""
@@ -879,9 +1015,30 @@ def create_votes_dashboard(w3, pools, relays=None):
     # Note: We're not saving the dashboard here anymore as we'll save it after adding LP data
     return dashboard
 
-def run_fetch(is_historical=False):
-    """Main entry point for fetching votes data"""
-    logger.info("Starting vote data fetch process")
+def run_fetch(is_historical=False, force_refresh=False):
+    """
+    Main entry point for fetching votes data with resumability support.
+    
+    Args:
+        is_historical: Whether this is a historical fetch
+        force_refresh: If True, ignore cache and fetch all data fresh
+    
+    The function is resumable - if interrupted, it will resume from the last
+    completed step when run again. Cached data expires after 30 minutes.
+    """
+    logger.info("Starting vote data fetch process (resumable)")
+    
+    if force_refresh:
+        logger.info("🔄 Force refresh enabled - clearing all cache")
+        clear_all_cache()
+    else:
+        # Display cache status
+        cache_status = get_cache_status()
+        if cache_status:
+            logger.info("📊 Cache status:")
+            for key, status in cache_status.items():
+                freshness = "✅ FRESH" if not status["is_stale"] else "⏰ STALE"
+                logger.info(f"  {key}: {status['age_minutes']:.1f} min old - {freshness}")
     
     if not RPC_URL or not LP_SUGAR_ADDRESS:
         logger.error("Missing required environment variables")
@@ -889,21 +1046,33 @@ def run_fetch(is_historical=False):
     
     w3 = get_web3()
     
-    # Step 1: Fetch all pools
-    all_pools = fetch_all_pools(w3)
+    # Step 1: Fetch all pools (with cache)
+    all_pools = load_cache("all_pools")
+    if all_pools is None:
+        logger.info("📡 Fetching all pools via LpSugar...")
+        all_pools = fetch_all_pools(w3)
+        save_cache("all_pools", all_pools)
+    else:
+        logger.info(f"✅ Using cached all_pools ({len(all_pools)} pools)")
     
     # Step 2: Filter votable pools
     votable_pools = filter_votable_pools(all_pools)
     
-    # Step 3: Enrich pools with symbols
-    enriched_pools = enrich_pools(w3, votable_pools)
+    # Step 3: Enrich pools with symbols (with cache)
+    enriched_pools = load_cache("enriched_pools")
+    if enriched_pools is None:
+        logger.info("📡 Enriching pools with token symbols...")
+        enriched_pools = enrich_pools(w3, votable_pools)
+        save_cache("enriched_pools", enriched_pools)
+    else:
+        logger.info(f"✅ Using cached enriched_pools ({len(enriched_pools)} pools)")
     
     # Create a mapping of pool address to original pool data to preserve gauge information
     global pool_gauge_map
     pool_gauge_map = {p.get("lp", "").lower(): {"gauge": p.get("gauge", ""), "gauge_alive": p.get("gauge_alive", False)} 
                      for p in all_pools if "lp" in p}
     
-    # Step 4: Get token list and fetch CoinGecko IDs
+    # Step 4: Get token list and fetch CoinGecko IDs (with cache)
     tokens = set()
     for p in enriched_pools:
         t0 = p.get("token0", "").lower()
@@ -913,10 +1082,28 @@ def run_fetch(is_historical=False):
         if w3.is_address(t1):
             tokens.add(w3.to_checksum_address(t1).lower())
     
-    token_to_id = fetch_coingecko_token_ids(tokens)
+    token_to_id = load_cache("token_to_id")
+    if token_to_id is None:
+        logger.info("📡 Fetching CoinGecko token IDs...")
+        token_to_id = fetch_coingecko_token_ids(tokens)
+        save_cache("token_to_id", token_to_id)
+    else:
+        logger.info(f"✅ Using cached token_to_id ({len(token_to_id)} tokens)")
     
-    # Step 5: Fetch prices and calculate fees/bribes
-    contract_prices = fetch_prices_from_coingecko(token_to_id)
+    # Step 5: Fetch prices (with cache)
+    contract_prices_serializable = load_cache("contract_prices")
+    if contract_prices_serializable is None:
+        logger.info("📡 Fetching prices from CoinGecko...")
+        contract_prices = fetch_prices_from_coingecko(token_to_id)
+        # Convert Decimal to float for JSON serialization
+        contract_prices_serializable = {k: float(v) for k, v in contract_prices.items()}
+        save_cache("contract_prices", contract_prices_serializable)
+        # Convert back to Decimal for use
+        contract_prices = {k: Decimal(str(v)) for k, v in contract_prices_serializable.items()}
+    else:
+        logger.info(f"✅ Using cached contract_prices ({len(contract_prices_serializable)} tokens)")
+        # Convert to Decimal for use
+        contract_prices = {k: Decimal(str(v)) for k, v in contract_prices_serializable.items()}
     
     # Prepare pool info mapping
     pool_info = {
@@ -931,16 +1118,33 @@ def run_fetch(is_historical=False):
         for p in enriched_pools
     }
     
-    # Step 6: Fetch fees and bribes
-    pools_with_fees = fetch_fees_and_bribes(w3, pool_info, contract_prices)
+    # Step 6: Fetch fees and bribes (with cache)
+    pools_with_fees = load_cache("pools_with_fees")
+    if pools_with_fees is None:
+        logger.info("📡 Fetching live fees and bribes data...")
+        pools_with_fees = fetch_fees_and_bribes(w3, pool_info, contract_prices)
+        save_cache("pools_with_fees", pools_with_fees)
+    else:
+        logger.info(f"✅ Using cached pools_with_fees ({len(pools_with_fees)} pools)")
     
-    # Step 7: Fetch relay votes
-    relay_data = fetch_relay_votes(w3, enriched_pools)
+    # Step 7: Fetch relay votes (with cache)
+    relay_data = load_cache("relay_data")
+    if relay_data is None:
+        logger.info("📡 Fetching relay votes data...")
+        relay_data = fetch_relay_votes(w3, enriched_pools)
+        save_cache("relay_data", relay_data)
+    else:
+        logger.info(f"✅ Using cached relay_data ({len(relay_data)} relays)")
     
-    # Step 8: Fetch LP positions data
-    logger.info("Fetching our LP positions...")
-    our_positions = fetch_our_positions(w3)
-    valued_positions = calculate_positions_value(w3, our_positions) if our_positions else []
+    # Step 8: Fetch LP positions data (with cache)
+    valued_positions = load_cache("valued_positions")
+    if valued_positions is None:
+        logger.info("📡 Fetching our LP positions...")
+        our_positions = fetch_our_positions(w3)
+        valued_positions = calculate_positions_value(w3, our_positions) if our_positions else []
+        save_cache("valued_positions", valued_positions)
+    else:
+        logger.info(f"✅ Using cached valued_positions ({len(valued_positions)} positions)")
     
     # Group positions by pool address
     positions_by_pool = {}
@@ -970,7 +1174,8 @@ def run_fetch(is_historical=False):
     total_lp_value = sum(pos.get('total_value_usd', 0) for pos in consolidated_positions)
     logger.info(f"Found {len(consolidated_positions)} pools with our LP positions, total value: ${total_lp_value:,.2f}")
     
-    # Step 9: Create votes dashboard
+    # Step 9: Create votes dashboard (always fresh to get latest on-chain weights)
+    logger.info("📡 Creating votes dashboard with latest on-chain weights...")
     dashboard = create_votes_dashboard(w3, pools_with_fees, relay_data)
     
     # Step 10: Add LP data to dashboard
@@ -978,9 +1183,22 @@ def run_fetch(is_historical=False):
     dashboard["lp_total_value"] = float(total_lp_value)
     dashboard["lp_addresses"] = list(set([p.get('owner_address') for p in valued_positions if p.get('owner_address')]))
     
-    # Step 11: Get weekly emissions data directly from source
-    weekly_emissions = get_weekly_emissions()
-    aero_price = get_aero_price()
+    # Step 11: Get weekly emissions data (with cache, but short-lived)
+    emissions_data = load_cache("emissions_data")
+    if emissions_data is None:
+        logger.info("📡 Fetching weekly emissions and AERO price...")
+        weekly_emissions = get_weekly_emissions()
+        aero_price = get_aero_price()
+        emissions_data = {
+            "weekly_emissions": float(weekly_emissions),
+            "aero_price": float(aero_price)
+        }
+        save_cache("emissions_data", emissions_data)
+    else:
+        logger.info(f"✅ Using cached emissions_data")
+        weekly_emissions = Decimal(str(emissions_data["weekly_emissions"]))
+        aero_price = Decimal(str(emissions_data["aero_price"]))
+    
     total_weekly_emissions_usd = weekly_emissions * aero_price
     
     # Add emissions data to dashboard
@@ -1134,4 +1352,6 @@ def run_fetch(is_historical=False):
         logger.info(f"Protocol pools included in dashboard: {protocol_pool_summary}")
     
     logger.info("Vote data fetch completed successfully with integrated LP positions")
+    logger.info("💡 Tip: Run again to use cached data, or use force_refresh=True to clear cache")
+    
     return dashboard

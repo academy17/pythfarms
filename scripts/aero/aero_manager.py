@@ -5,7 +5,7 @@ import argparse
 import logging
 from decimal import Decimal
 from dotenv import load_dotenv
-from lib import fetch_votes, optimizer, analytics, fetch_lp_data, fetch_lp_data_previous_epoch, lp_optimizer, fetch_volatility
+from lib import fetch_votes, optimizer, analytics, fetch_lp_data, fetch_lp_data_previous_epoch, lp_optimizer, fetch_volatility, fetch_raw_volatility
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -19,6 +19,7 @@ def main():
     # Fetch command
     fetch_parser = subparsers.add_parser("fetch", help="Fetch vote data and create dashboard")
     fetch_parser.add_argument("--historical", action="store_true", help="Fetch historical data")
+    fetch_parser.add_argument("--force", action="store_true", help="Force refresh (ignore cache)")
 
     # Fetch Previous command
     fetch_previous_parser = subparsers.add_parser("fetch-previous", help="Fetch vote data from previous epoch")
@@ -61,6 +62,13 @@ def main():
     volatility_parser.add_argument("--rate-limit", type=int, default=2, help="Seconds to wait between API calls to avoid rate limiting")
     volatility_parser.add_argument("--force", action="store_true", help="Force update for all pools")
     volatility_parser.add_argument("--month", action="store_true", help="Fetch 30-day (720 hour) volatility instead of 7-day (168 hour)")
+    
+    # Fetch Raw Volatility command (DataFrame-based incremental fetcher)
+    fetch_raw_volatility_parser = subparsers.add_parser("fetch_raw_volatility", help="Incrementally fetch raw OHLCV data for covariance/correlation analysis")
+    fetch_raw_volatility_parser.add_argument("--max", type=int, default=600, help="Maximum number of pools to process (default: 500)")
+    fetch_raw_volatility_parser.add_argument("--rate-limit", type=float, default=2.0, help="Seconds to wait between API calls (default: 2.0)")
+    fetch_raw_volatility_parser.add_argument("--force", action="store_true", help="Force refetch all data from scratch (ignore existing data)")
+    fetch_raw_volatility_parser.add_argument("--initial-hours", type=int, default=1000, help="Number of hours to fetch on first run (max: 1000, default: 1000)")
     
     args = parser.parse_args()
     
@@ -139,6 +147,19 @@ def main():
                 vol_pct = data["price_range"]["volatility_percentage"]
                 price = data.get("current_price", 0)
                 logger.info(f"{i+1}. {symbol} - Volatility: {vol_pct:.4f}% - Price: ${price:.6f}")
+    elif args.command == "fetch_raw_volatility":
+        logger.info("Fetching raw OHLCV data for pools (DataFrame mode)")
+        logger.info(f"Initial fetch: {args.initial_hours} hours (max: 1000)")
+        result = fetch_raw_volatility.run_fetch_raw_volatility(
+            max_pools=args.max,
+            rate_limit_seconds=args.rate_limit,
+            force_update=args.force,
+            initial_hours=args.initial_hours
+        )
+        if result:
+            logger.info(f"\n✅ Fetch complete!")
+            logger.info(f"   Data stored in: {result.get('data_directory', 'N/A')}")
+            logger.info(f"   Total candles added: {result.get('total_candles_added', 0):,}")
     else:
         parser.print_help()
 

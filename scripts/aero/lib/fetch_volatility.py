@@ -316,42 +316,39 @@ def fetch_geckoterminal_volatility(pool_address, network="base", use_monthly=Fal
         # Calculate volatility metrics
         metrics = calculate_volatility_metrics(candles)
         if not metrics:
+            logger.warning(f"Could not calculate metrics for pool {pool_address}")
             return None
         
         # Fetch current price from DexScreener for more accuracy
         dexscreener_price = fetch_dexscreener_price(pool_address, chain_id=network)
-        current_price = dexscreener_price if dexscreener_price is not None else metrics['current_price']
+        current_price = dexscreener_price if dexscreener_price is not None else metrics.get('current_price', 0)
         
-        # If we got a DexScreener price, recalculate volatility percentage with it
-        if dexscreener_price is not None:
-            std_dev = metrics['std_dev']
-            volatility_percentage = (std_dev / current_price) * 100 if current_price > 0 else metrics['volatility_percentage']
-        else:
-            volatility_percentage = metrics['volatility_percentage']
+        # Use volatility percentage from metrics (no need to recalculate - parquet system handles this)
+        volatility_percentage = metrics.get('volatility_percentage', 0)
             
         # Construct response with detailed metrics including volume
+        # Note: std_dev removed - optimizer now uses parquet-based return volatility
         volatility = {
             'current_price': current_price,
             'price_source': 'dexscreener' if dexscreener_price is not None else 'geckoterminal',
             'price_range': {
-                'high': metrics['high_close'],
-                'low': metrics['low_close'],
-                'range': metrics['high_close'] - metrics['low_close'],
-                'mid_price': metrics['mean_price'],
+                'high': metrics.get('high_close', 0),
+                'low': metrics.get('low_close', 0),
+                'range': metrics.get('high_close', 0) - metrics.get('low_close', 0),
+                'mid_price': metrics.get('mean_price', 0),
                 'volatility_percentage': round(volatility_percentage, 4),
-                'std_dev': metrics['std_dev'],
                 'metrics': {
-                    'num_samples': metrics['debug']['num_samples'],
-                    'variance': metrics['debug']['variance']
+                    'num_samples': metrics.get('debug', {}).get('num_samples', 0),
+                    'variance': metrics.get('debug', {}).get('variance', 0)
                 }
             },
             'volume': {
-                'total': metrics['volume_metrics']['total_volume'],
-                'avg_hourly': metrics['volume_metrics']['average_volume'],
-                'highest_hourly': metrics['volume_metrics']['highest_volume'],
-                'lowest_hourly': metrics['volume_metrics']['lowest_volume'],
-                'hours_sampled': metrics['volume_metrics']['sampling_hours'],
-                'weekly': metrics['volume_metrics'].get('weekly', [])
+                'total': metrics.get('volume_metrics', {}).get('total_volume', 0),
+                'avg_hourly': metrics.get('volume_metrics', {}).get('average_volume', 0),
+                'highest_hourly': metrics.get('volume_metrics', {}).get('highest_volume', 0),
+                'lowest_hourly': metrics.get('volume_metrics', {}).get('lowest_volume', 0),
+                'hours_sampled': metrics.get('volume_metrics', {}).get('sampling_hours', 0),
+                'weekly': metrics.get('volume_metrics', {}).get('weekly', [])
             },
             'timeframe': timeframe_desc,
             'last_updated': datetime.datetime.now().isoformat()
