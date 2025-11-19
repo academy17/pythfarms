@@ -5,12 +5,7 @@ Aerodrome Raw OHLCV Data Fetcher (Incremental)
 
 This module builds an incremental database of raw OHLCV (Open, High, Low, Close, Volume) 
 data for Aerodrome pools. Instead of fetching and discarding data each time, it maintains
-a growing historical dataset that can be used for:
-- Covariance matrix calculations
-- Correlation analysis
-- Rolling window volatility
-- Advanced risk models
-- Backtesting
+a growing historical dataset:
 
 INCREMENTAL FETCHING STRATEGY:
     1. First run: Fetch last 1000 hours of OHLCV data for each pool
@@ -48,32 +43,6 @@ DATA STRUCTURE:
         }
     }
 
-HOW INCREMENTAL UPDATES WORK:
-    
-    Example Timeline:
-    
-    Run 1 (Monday):
-        - Fetch 1000 hours (Oct 1 - Nov 11)
-        - Store all candles
-        - last_timestamp = Nov 11, 00:00
-    
-    Run 2 (Tuesday):
-        - Check: last_timestamp = Nov 11, 00:00
-        - Current time = Nov 12, 10:00
-        - Gap = 34 hours
-        - Fetch only 34 NEW hours (Nov 11, 01:00 - Nov 12, 10:00)
-        - Prepend to existing data (newest first)
-        - Update last_timestamp = Nov 12, 10:00
-    
-    Run 3 (Wednesday):
-        - Check: last_timestamp = Nov 12, 10:00
-        - Current time = Nov 13, 10:00
-        - Gap = 24 hours
-        - Fetch only 24 NEW hours
-        - Prepend to existing data
-        - Update last_timestamp = Nov 13, 10:00
-    
-    Result: After 3 runs, you have 1058 hours of continuous data
 
 PREVENTING DUPLICATES:
     - Track last_timestamp for each pool
@@ -87,23 +56,6 @@ API OPTIMIZATION:
     - Weekly updates: ~168 hours per pool
     - Dramatically reduces API calls over time
 
-USE CASES:
-
-1. Covariance Matrix:
-    from scripts.aero.lib.fetch_raw_volatility import load_raw_data
-    data = load_raw_data()
-    
-    # Get returns for multiple pools
-    pool_returns = {}
-    for pool_addr, pool_data in data['pools'].items():
-        closes = [c['close'] for c in pool_data['ohlcv']]
-        returns = [(closes[i]/closes[i+1])-1 for i in range(len(closes)-1)]
-        pool_returns[pool_addr] = returns
-    
-    # Calculate covariance matrix
-    import numpy as np
-    return_matrix = np.array([pool_returns[p] for p in pool_returns.keys()])
-    cov_matrix = np.cov(return_matrix)
 
 2. Rolling Window Volatility:
     # Calculate 7-day rolling volatility
@@ -134,55 +86,6 @@ Force refetch all data:
 Fetch specific number of hours initially:
     python scripts/aero/aero_manager.py fetch_raw_volatility --initial-hours 2000
 
-WHY PANDAS DATAFRAMES?
-    
-    Pandas DataFrames are MUCH better for financial time series than raw JSON:
-    
-    ✅ Efficient Operations:
-       - Vectorized calculations (100x faster than loops)
-       - Built-in time series functions
-       - Memory-efficient storage (parquet ~ 1/10th size of JSON)
-    
-    ✅ Time Series Features:
-       - DateTime indexing for easy time-based slicing
-       - Rolling windows: df.rolling(window=168).std()
-       - Resampling: df.resample('1D').mean()
-    
-    ✅ Financial Calculations:
-       - Returns: (close / close.shift(1)) - 1
-       - Volatility: returns.std() * sqrt(periods)
-       - Correlation: df.corr()
-       - Covariance: df.cov()
-    
-    ✅ Data Alignment:
-       - Automatically aligns multiple pools by timestamp
-       - Handles missing data gracefully
-       - Easy to merge/join datasets
-    
-    Example - Calculate 30-day rolling volatility:
-        df = load_pool_dataframe('0x...')
-        returns = (df['close'] / df['close'].shift(-1)) - 1
-        rolling_vol = returns.rolling(window=720).std() * 100
-    
-    Example - Correlation between two pools:
-        pool1 = load_pool_dataframe('0xabc...')
-        pool2 = load_pool_dataframe('0xdef...')
-        correlation = calculate_returns(pool1).corr(calculate_returns(pool2))
-    
-    Example - Covariance matrix for portfolio:
-        pools = ['0xabc...', '0xdef...', '0x123...']
-        cov_matrix = calculate_covariance_matrix(pools, window_hours=672)
-
-API LIMIT HANDLING:
-    
-    ⚠️ GeckoTerminal has HARD LIMIT of 1000 candles per request!
-    
-    - Initial fetch: Max 1000 hours (automatically capped)
-    - Subsequent fetches: Only NEW data since last update
-    - Daily cron: ~24 hours per pool (well under limit)
-    - Weekly cron: ~168 hours per pool (under limit)
-    
-    Incremental approach = API-efficient + comprehensive historical database
 
 """
 
