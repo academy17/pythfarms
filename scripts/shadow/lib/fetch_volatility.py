@@ -110,6 +110,7 @@ load_dotenv()
 
 # Constants
 GECKOTERMINAL_API_URL = 'https://api.geckoterminal.com/api/v2'
+DEXSCREENER_API_URL = 'https://api.dexscreener.com/latest/dex/pairs'
 DASHBOARD_PATH = "input_data/shadow/votes_dashboard.json"
 VOLATILITY_DATA_PATH = "volatility_data/shadow/volatility_data.json"
 
@@ -127,6 +128,37 @@ def load_json(path):
         return None
     with open(path, 'r') as f:
         return json.load(f)
+
+def fetch_dexscreener_price(pool_address, chain_id="sonic"):
+    """Fetch current price from DexScreener API
+    
+    Args:
+        pool_address: The pool/pair address
+        chain_id: Chain identifier (e.g., "base", "sonic")
+    
+    Returns:
+        float: Current price, or None if fetch fails
+    """
+    try:
+        url = f"{DEXSCREENER_API_URL}/{chain_id}/{pool_address}"
+        resp = requests.get(url, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+        
+        # DexScreener returns a 'pair' or 'pairs' structure
+        pair_data = data.get('pair') or (data.get('pairs', [{}])[0] if data.get('pairs') else None)
+        
+        if pair_data and 'priceUsd' in pair_data:
+            price = float(pair_data['priceUsd'])
+            logger.debug(f"DexScreener price for {pool_address}: ${price}")
+            return price
+        else:
+            logger.warning(f"No price data found in DexScreener response for {pool_address}")
+            return None
+            
+    except Exception as e:
+        logger.warning(f"Failed to fetch DexScreener price for {pool_address}: {e}")
+        return None
 
 def calculate_volatility_metrics(candles):
     """Calculate volatility and volume metrics from OHLCV candles
@@ -176,6 +208,24 @@ def calculate_volatility_metrics(candles):
     non_zero_volumes = [v for v in volumes if v > 0]
     min_volume = min(non_zero_volumes) if non_zero_volumes else 0
     
+    # Weekly breakdown (assumes hourly candles). We split into 4-week buckets of 168 hours.
+    week_hours = 168
+    weekly = []
+    for w in range(4):
+        start = w * week_hours
+        end = start + week_hours
+        week_slice = volumes[start:end]
+        if not week_slice:
+            break
+        w_total = sum(week_slice)
+        w_avg = (w_total / len(week_slice)) if week_slice else 0
+        weekly.append({
+            'week_index': w + 1,
+            'total_volume': round(w_total, 2),
+            'avg_hourly': round(w_avg, 2),
+            'hours_sampled': len(week_slice)
+        })
+    
     # Return detailed metrics for analysis
     return {
         'high_close': period_high,
@@ -189,7 +239,8 @@ def calculate_volatility_metrics(candles):
             'average_volume': round(avg_volume, 2),
             'highest_volume': round(max_volume, 2),
             'lowest_volume': round(min_volume, 2),
-            'sampling_hours': len(volumes)
+            'sampling_hours': len(volumes),
+            'weekly': weekly
         },
         'debug': {
             'num_samples': len(closes),
@@ -197,13 +248,23 @@ def calculate_volatility_metrics(candles):
         }
     }
 
-def fetch_geckoterminal_volatility(pool_address, network="sonic"):
-    """Fetch and calculate 7-day volatility metrics from GeckoTerminal OHLCV data for Sonic network"""
+def fetch_geckoterminal_volatility(pool_address, network="sonic", use_monthly=False):
+    """Fetch and calculate volatility metrics from GeckoTerminal OHLCV data for Sonic network
+    
+    Args:
+        pool_address: The pool address to fetch data for
+        network: Network name (default: "sonic")
+        use_monthly: If True, fetch 30-day (720 hour) data instead of 7-day (168 hour)
+    """
     try:
+        # Default to 672 hours (4 weeks). If use_monthly is requested keep 720.
+        hours_limit = 720 if use_monthly else 672
+        timeframe_desc = "30-day" if use_monthly else "28-day"
+        
         url = f"{GECKOTERMINAL_API_URL}/networks/{network}/pools/{pool_address}/ohlcv/hour"
         params = {
             'aggregate': '1',
-            'limit': '168'  # 7 days worth of hourly candles
+            'limit': str(hours_limit)  # 720 hours (30 days) or 168 hours (7 days)
         }
         
         resp = requests.get(url, params=params, timeout=30)
@@ -237,16 +298,28 @@ def fetch_geckoterminal_volatility(pool_address, network="sonic"):
         metrics = calculate_volatility_metrics(candles)
         if not metrics:
             return None
+        
+        # Fetch current price from DexScreener for more accuracy
+        dexscreener_price = fetch_dexscreener_price(pool_address, chain_id=network)
+        current_price = dexscreener_price if dexscreener_price is not None else metrics['current_price']
+        
+        # If we got a DexScreener price, recalculate volatility percentage with it
+        if dexscreener_price is not None:
+            std_dev = metrics['std_dev']
+            volatility_percentage = (std_dev / current_price) * 100 if current_price > 0 else metrics['volatility_percentage']
+        else:
+            volatility_percentage = metrics['volatility_percentage']
             
         # Construct response with detailed metrics
         volatility = {
-            'current_price': metrics['current_price'],
+            'current_price': current_price,
+            'price_source': 'dexscreener' if dexscreener_price is not None else 'geckoterminal',
             'price_range': {
                 'high': metrics['high_close'],
                 'low': metrics['low_close'],
                 'range': metrics['high_close'] - metrics['low_close'],
                 'mid_price': metrics['mean_price'],
-                'volatility_percentage': metrics['volatility_percentage'],
+                'volatility_percentage': round(volatility_percentage, 4),
                 'std_dev': metrics['std_dev'],
                 'metrics': {
                     'num_samples': metrics['debug']['num_samples'],
@@ -254,12 +327,14 @@ def fetch_geckoterminal_volatility(pool_address, network="sonic"):
                 }
             },
             'volume': {
-                'total_7d': metrics['volume_metrics']['total_volume'],
+                'total': metrics['volume_metrics']['total_volume'],
                 'avg_hourly': metrics['volume_metrics']['average_volume'],
                 'highest_hourly': metrics['volume_metrics']['highest_volume'],
                 'lowest_hourly': metrics['volume_metrics']['lowest_volume'],
-                'hours_sampled': metrics['volume_metrics']['sampling_hours']
+                'hours_sampled': metrics['volume_metrics']['sampling_hours'],
+                'weekly': metrics['volume_metrics'].get('weekly', [])
             },
+            'timeframe': timeframe_desc,
             'last_updated': datetime.datetime.now().isoformat()
         }
         
@@ -285,7 +360,7 @@ def fetch_pools_from_dashboard():
         logger.error("❌ Unexpected dashboard structure")
         return []
 
-def run_fetch_volatility(max_pools=None, rate_limit_seconds=2, force_update=False):
+def run_fetch_volatility(max_pools=None, rate_limit_seconds=2, force_update=False, use_monthly=False):
     """
     Fetch volatility data for pools in the Shadow votes dashboard
     
@@ -293,6 +368,7 @@ def run_fetch_volatility(max_pools=None, rate_limit_seconds=2, force_update=Fals
         max_pools (int, optional): Maximum number of pools to process. If None, process all pools.
         rate_limit_seconds (int, optional): Seconds to wait between API calls to avoid rate limiting.
         force_update (bool, optional): If True, update all pools regardless of existing data.
+        use_monthly (bool, optional): If True, fetch 30-day (720 hour) volatility instead of 7-day (168 hour).
     
     Returns:
         dict: Dictionary of pool addresses mapped to their volatility data
@@ -319,57 +395,82 @@ def run_fetch_volatility(max_pools=None, rate_limit_seconds=2, force_update=Fals
     # Process each pool
     updated_pools = existing_data.get("pools", {})
     num_updated = 0
+    error_occurred = False
     
-    logger.info(f"🔍 Fetching volatility data for {len(pools)} Shadow pools...")
+    timeframe_desc = "30-day" if use_monthly else "28-day"
+    logger.info(f"🔍 Fetching {timeframe_desc} volatility data for {len(pools)} Shadow pools...")
     
-    for i, pool in enumerate(pools):
-        pool_addr = pool.get('pool', '').lower()
-        pool_symbol = pool.get('symbol', 'Unknown')
-        
-        # Skip if we already have recent data for this pool and not forcing update
-        if not force_update and pool_addr in updated_pools:
-            last_updated = updated_pools[pool_addr].get('last_updated')
-            if last_updated:
-                try:
-                    update_time = datetime.datetime.fromisoformat(last_updated)
-                    now = datetime.datetime.now()
-                    # Skip if updated within the last 12 hours
-                    if (now - update_time).total_seconds() < 12 * 3600:
-                        logger.info(f"Skipping {pool_symbol} ({pool_addr}): already updated recently")
-                        continue
-                except (ValueError, TypeError):
-                    pass
-        
-        logger.info(f"Processing {i+1}/{len(pools)}: {pool_symbol} ({pool_addr})")
-        
-        # Rate limiting
-        if i > 0:
-            time.sleep(rate_limit_seconds)
-        
-        # Fetch volatility data from Sonic network
-        volatility_data = fetch_geckoterminal_volatility(pool_addr, network="sonic")
-        
-        if volatility_data:
-            updated_pools[pool_addr] = {
-                **volatility_data,
-                'symbol': pool_symbol
-            }
-            num_updated += 1
-            vol_metrics = volatility_data['volume']
-            logger.info(f"✅ Updated {pool_symbol}:")
-            logger.info(f"   📈 Volatility: {volatility_data['price_range']['volatility_percentage']}%")
-            logger.info(f"   💧 Volume: {vol_metrics['total_7d']:.2f} total (avg {vol_metrics['avg_hourly']:.2f}/hr)")
-        else:
-            # Keep existing data if fetch failed
-            logger.warning(f"⚠️ Failed to fetch volatility data for {pool_symbol}")
+    try:
+        for i, pool in enumerate(pools):
+            pool_addr = pool.get('pool', '').lower()
+            pool_symbol = pool.get('symbol', 'Unknown')
+            
+            # Skip if we already have recent data for this pool and not forcing update
+            if not force_update and pool_addr in updated_pools:
+                last_updated = updated_pools[pool_addr].get('last_updated')
+                if last_updated:
+                    try:
+                        update_time = datetime.datetime.fromisoformat(last_updated)
+                        now = datetime.datetime.now()
+                        # Skip if updated within the last 12 hours
+                        if (now - update_time).total_seconds() < 12 * 3600:
+                            logger.info(f"Skipping {pool_symbol} ({pool_addr}): already updated recently")
+                            continue
+                    except (ValueError, TypeError):
+                        pass
+            
+            logger.info(f"Processing {i+1}/{len(pools)}: {pool_symbol} ({pool_addr})")
+            
+            # Rate limiting
+            if i > 0:
+                time.sleep(rate_limit_seconds)
+            
+            # Fetch volatility data from Sonic network
+            volatility_data = fetch_geckoterminal_volatility(pool_addr, network="sonic", use_monthly=use_monthly)
+            
+            if volatility_data:
+                updated_pools[pool_addr] = {
+                    **volatility_data,
+                    'symbol': pool_symbol
+                }
+                num_updated += 1
+                vol_metrics = volatility_data['volume']
+                logger.info(f"✅ Updated {pool_symbol}:")
+                logger.info(f"   📈 Volatility: {volatility_data['price_range']['volatility_percentage']}%")
+                logger.info(f"   💧 Volume: {vol_metrics['total']:.2f} total (avg {vol_metrics['avg_hourly']:.2f}/hr)")
+                
+                # Save progress incrementally after each successful fetch
+                # This ensures data is not lost if the process is interrupted
+                intermediate_result = {
+                    "pools": updated_pools,
+                    "last_updated": datetime.datetime.now().isoformat(),
+                    "stats": {
+                        "total_pools": len(updated_pools),
+                        "updated_pools": num_updated,
+                        "in_progress": True
+                    }
+                }
+                save_json(intermediate_result, VOLATILITY_DATA_PATH)
+                logger.info(f"💾 Progress saved ({num_updated}/{len(pools)} pools updated)")
+            else:
+                # Keep existing data if fetch failed
+                logger.warning(f"⚠️ Failed to fetch volatility data for {pool_symbol}")
     
-    # Update the result
+    except KeyboardInterrupt:
+        logger.warning("\n⚠️ Process interrupted by user! Saving progress...")
+        error_occurred = True
+    except Exception as e:
+        logger.error(f"\n❌ Error during fetch: {e}. Saving progress...")
+        error_occurred = True
+    
+    # Update the result with final status
     result = {
         "pools": updated_pools,
         "last_updated": datetime.datetime.now().isoformat(),
         "stats": {
             "total_pools": len(updated_pools),
-            "updated_pools": num_updated
+            "updated_pools": num_updated,
+            "in_progress": False
         }
     }
     

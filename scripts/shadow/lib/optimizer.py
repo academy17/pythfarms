@@ -3,6 +3,7 @@ import os
 import json
 import logging
 from decimal import Decimal, getcontext, ROUND_HALF_UP
+from lib import fetch_raw_volatility
 from dotenv import load_dotenv
 from web3 import Web3
 from datetime import datetime
@@ -205,14 +206,8 @@ def run_optimization(dashboard, voting_power, re_run=False, previous_votes=None,
     volatility_data = {}
     if with_volatility:
         try:
-            # Load volatility data
-            raw_data = load_json('volatility_data/shadow/volatility_data.json')
-            
-            # The volatility data is nested under 'pools'
-            pool_volatility = raw_data.get('pools', {})
-            
-            # Map volatility data directly using pool addresses
-            volatility_data = {addr.lower(): data for addr, data in pool_volatility.items()}
+            logger.info("📊 Loading volatility data from Parquet (Return Volatility)...")
+            volatility_data = fetch_raw_volatility.get_volatility_map()
             
             # Log which pools we found volatility data for
             found_pools = []
@@ -230,9 +225,6 @@ def run_optimization(dashboard, voting_power, re_run=False, previous_votes=None,
             if missing_pools:
                 logger.warning(f"⚠️ Missing volatility data for pools: {', '.join(missing_pools)}")
                 
-        except FileNotFoundError:
-            logger.warning("⚠️ Volatility data not found, proceeding without volatility penalties")
-            with_volatility = False
         except Exception as e:
             logger.error(f"❌ Error loading volatility data: {e}")
             with_volatility = False
@@ -249,11 +241,10 @@ def run_optimization(dashboard, voting_power, re_run=False, previous_votes=None,
         # Get volatility for this pool
         volatility = Decimal(0)
         if with_volatility and addr in volatility_data:
-            vol_data = volatility_data[addr]
-            if 'price_range' in vol_data and 'volatility_percentage' in vol_data['price_range']:
-                volatility = Decimal(str(vol_data['price_range']['volatility_percentage']))
-                if volatility > 0:
-                    logger.info(f"📈 Pool {p.get('symbol', 'Unknown')}: {volatility}% volatility")
+            vol_val = volatility_data[addr]
+            volatility = Decimal(str(vol_val))
+            if volatility > 0:
+                logger.info(f"📈 Pool {p.get('symbol', 'Unknown')}: {volatility:.2f}% volatility")
         
         if re_run and previous_votes and addr in previous_votes:
             W = W_total - previous_votes[addr]

@@ -3,7 +3,7 @@ import argparse
 import logging
 import os
 from dotenv import load_dotenv
-from lib import fetch_votes, optimizer, analytics, lp_optimizer_old, fetch_lp_data, fetch_volatility
+from lib import fetch_votes, optimizer, analytics, lp_optimizer_old, fetch_lp_data, fetch_volatility, fetch_raw_volatility
 
 # Load environment variables from .env file
 load_dotenv()
@@ -54,9 +54,16 @@ def main():
 
     # Fetch Volatility subcommand
     fetch_volatility_parser = subparsers.add_parser("fetch_volatility", help="Fetch volatility data for Shadow pools from GeckoTerminal")
-    fetch_volatility_parser.add_argument("--max-pools", type=int, help="Maximum number of pools to process (default: all pools)")
+    fetch_volatility_parser.add_argument("--max-pools", type=int, default=500, help="Maximum number of pools to process (default: 500)")
     fetch_volatility_parser.add_argument("--rate-limit", type=int, default=2, help="Seconds between API calls (default: 2)")
     fetch_volatility_parser.add_argument("--force-update", action="store_true", help="Force update all pools regardless of cache")
+    fetch_volatility_parser.add_argument("--month", action="store_true", help="Fetch 30-day (720 hour) volatility instead of 7-day (168 hour)")
+
+    # Fetch Raw Volatility (Parquet/Incremental) subcommand
+    fetch_raw_volatility_parser = subparsers.add_parser("fetch_raw_volatility", help="Fetch raw OHLCV data incrementally (Parquet)")
+    fetch_raw_volatility_parser.add_argument("--max", type=int, help="Maximum number of pools to process")
+    fetch_raw_volatility_parser.add_argument("--force", action="store_true", help="Force update all pools regardless of cache")
+    fetch_raw_volatility_parser.add_argument("--initial-hours", type=int, default=1000, help="Number of hours to fetch on first run")
 
     args = parser.parse_args()
 
@@ -103,10 +110,21 @@ def main():
     
     elif args.command == "fetch_volatility":
         logger.info("Fetching volatility data for Shadow pools")
+        timeframe = "30-day" if args.month else "7-day"
+        logger.info(f"Using {timeframe} volatility calculation")
         fetch_volatility.run_fetch_volatility(
             max_pools=args.max_pools,
             rate_limit_seconds=args.rate_limit,
-            force_update=args.force_update
+            force_update=args.force_update,
+            use_monthly=args.month
+        )
+
+    elif args.command == "fetch_raw_volatility":
+        logger.info("Fetching raw OHLCV data (Incremental/Parquet)")
+        fetch_raw_volatility.run_fetch_raw_volatility(
+            max_pools=args.max,
+            force_update=args.force,
+            initial_hours=args.initial_hours
         )
     
     else:

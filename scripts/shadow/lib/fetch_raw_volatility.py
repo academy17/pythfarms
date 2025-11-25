@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-# filepath: d:\Pyth\pythfarms\scripts\aero\lib\fetch_raw_volatility.py
+# filepath: scripts/shadow/lib/fetch_raw_volatility.py
 """
-Aerodrome Raw OHLCV Data Fetcher (Incremental)
+Shadow Raw OHLCV Data Fetcher (Incremental)
 
 This module builds an incremental database of raw OHLCV (Open, High, Low, Close, Volume) 
-data for Aerodrome pools. Instead of fetching and discarding data each time, it maintains
+data for Shadow pools on Sonic network. Instead of fetching and discarding data each time, it maintains
 a growing historical dataset:
 
 INCREMENTAL FETCHING STRATEGY:
@@ -17,7 +17,7 @@ DATA STRUCTURE:
     {
         "pools": {
             "0x...pool_address": {
-                "symbol": "vAMM-WETH/USDC",
+                "symbol": "CL-USDC-WETH-0.131%",
                 "ohlcv": [
                     {
                         "timestamp": 1699401600,
@@ -37,7 +37,7 @@ DATA STRUCTURE:
             }
         },
         "metadata": {
-            "total_pools": 254,
+            "total_pools": 50,
             "last_updated": "2025-11-11T10:35:00",
             "data_version": "1.0"
         }
@@ -68,23 +68,22 @@ API OPTIMIZATION:
     correlations = np.corrcoef(return_matrix)
 
 STORAGE:
-    - Output: volatility_data/aero/raw_ohlcv_data.json
-    - Backup: volatility_data/aero/raw_ohlcv_data_YYYYMMDD.json (daily)
+    - Output: volatility_data/shadow/raw_ohlcv/*.parquet
     - Size estimate: ~1MB per 100 pools per 1000 hours
 
 USAGE:
 
 Initial fetch (1000 hours for top 50 pools):
-    python scripts/aero/aero_manager.py fetch_raw_volatility --max 50
+    python scripts/shadow/shadow_manager.py fetch_raw_volatility --max 50
 
 Update with new data only:
-    python scripts/aero/aero_manager.py fetch_raw_volatility
+    python scripts/shadow/shadow_manager.py fetch_raw_volatility
 
 Force refetch all data:
-    python scripts/aero/aero_manager.py fetch_raw_volatility --force
+    python scripts/shadow/shadow_manager.py fetch_raw_volatility --force
 
 Fetch specific number of hours initially:
-    python scripts/aero/aero_manager.py fetch_raw_volatility --initial-hours 2000
+    python scripts/shadow/shadow_manager.py fetch_raw_volatility --initial-hours 2000
 
 
 """
@@ -107,8 +106,8 @@ load_dotenv()
 
 # Constants
 GECKOTERMINAL_API_URL = 'https://api.geckoterminal.com/api/v2'
-DASHBOARD_PATH = "input_data/aero/votes_dashboard.json"
-RAW_OHLCV_DIR = "volatility_data/aero/raw_ohlcv"
+DASHBOARD_PATH = "input_data/shadow/votes_dashboard.json"
+RAW_OHLCV_DIR = "volatility_data/shadow/raw_ohlcv"
 DEFAULT_INITIAL_HOURS = 1000  # Max allowed by GeckoTerminal API
 MAX_API_LIMIT = 1000  # GeckoTerminal API absolute max per request
 
@@ -187,12 +186,12 @@ def save_pool_dataframe(pool_address, df, symbol=None):
     
     logger.debug(f"Saved {len(df)} candles to {pool_file}")
 
-def fetch_geckoterminal_ohlcv(pool_address, network="base", limit_hours=1000, before_timestamp=None):
+def fetch_geckoterminal_ohlcv(pool_address, network="sonic", limit_hours=1000, before_timestamp=None):
     """Fetch raw OHLCV data from GeckoTerminal as a DataFrame
     
     Args:
         pool_address: The pool address to fetch data for
-        network: Network name (default: "base")
+        network: Network name (default: "sonic")
         limit_hours: Number of hours to fetch (max 1000 per API call - hard limit!)
         before_timestamp: Only fetch candles before this timestamp (for pagination)
     
@@ -267,13 +266,20 @@ def fetch_geckoterminal_ohlcv(pool_address, network="base", limit_hours=1000, be
         return None
 
 def fetch_pools_from_dashboard():
-    """Load pools from the latest votes dashboard"""
+    """Load pools from the latest Shadow votes dashboard"""
     dashboard = load_json(DASHBOARD_PATH)
     if not dashboard:
         logger.error("❌ Failed to load votes dashboard")
         return []
     
-    return dashboard.get('pools', [])
+    # Shadow dashboard structure is different - it's a list of pools directly
+    if isinstance(dashboard, list):
+        return dashboard
+    elif isinstance(dashboard, dict) and 'pools' in dashboard:
+        return dashboard['pools']
+    else:
+        logger.error("❌ Unknown dashboard format")
+        return []
 
 def merge_ohlcv_dataframes(existing_df, new_df):
     """Merge new OHLCV data with existing DataFrame, avoiding duplicates
@@ -332,10 +338,10 @@ def run_fetch_raw_volatility(max_pools=None, rate_limit_seconds=2, force_update=
         return {"error": "No pools found"}
     
     # Sort by importance
-    if any('weight' in p for p in pools):
-        pools.sort(key=lambda x: x.get('weight', 0), reverse=True)
-    elif any('on_chain_weight' in p for p in pools):
-        pools.sort(key=lambda x: x.get('on_chain_weight', 0), reverse=True)
+    if any('tvl' in p for p in pools):
+        pools.sort(key=lambda x: x.get('tvl', 0), reverse=True)
+    elif any('pool_votes_period' in p for p in pools):
+        pools.sort(key=lambda x: x.get('pool_votes_period', 0), reverse=True)
     
     # Limit pools if specified
     if max_pools:
@@ -346,7 +352,7 @@ def run_fetch_raw_volatility(max_pools=None, rate_limit_seconds=2, force_update=
     num_skipped = 0
     total_candles_added = 0
     
-    logger.info(f"🔍 Fetching raw OHLCV data for {len(pools)} pools (DataFrame mode)...")
+    logger.info(f"🔍 Fetching raw OHLCV data for {len(pools)} Shadow pools (DataFrame mode)...")
     logger.info(f"📁 Storage: {RAW_OHLCV_DIR}")
     logger.info(f"🔢 Initial fetch limit: {initial_hours} hours (API max: {MAX_API_LIMIT})\n")
     
@@ -422,8 +428,8 @@ def run_fetch_raw_volatility(max_pools=None, rate_limit_seconds=2, force_update=
     logger.info(f"🔄 Pools updated:        {num_updated}")
     logger.info(f"🆕 New pools:            {num_new}")
     logger.info(f"⏭️  Pools skipped:        {num_skipped}")
-    logger.info(f"� Total candles added:  {total_candles_added:,}")
-    logger.info(f"� Data directory:       {RAW_OHLCV_DIR}")
+    logger.info(f" Total candles added:  {total_candles_added:,}")
+    logger.info(f" Data directory:       {RAW_OHLCV_DIR}")
     logger.info(f"{'='*60}\n")
     
     return {
@@ -470,6 +476,38 @@ def calculate_returns(df, periods=1):
     # Note: DataFrame is sorted newest first, so we use shift(-periods)
     returns = (df['close'] / df['close'].shift(-periods)) - 1
     return returns.dropna()
+
+def calculate_volatility(df, window_hours=672, return_periods=1):
+    """Calculate return volatility from OHLCV DataFrame
+    
+    Args:
+        df: OHLCV DataFrame
+        window_hours: Window size for volatility calculation (default: 672 = 28 days)
+        return_periods: Periods for return calculation (default: 1 = hourly returns)
+    
+    Returns:
+        float: Annualized volatility percentage
+    """
+    # Get most recent window_hours candles
+    recent_df = df.head(window_hours)
+    
+    if len(recent_df) < 3:
+        logger.warning("Not enough data for volatility calculation")
+        return None
+    
+    # Calculate returns
+    returns = calculate_returns(recent_df, periods=return_periods)
+    
+    if len(returns) < 2:
+        logger.warning("Not enough returns for volatility calculation")
+        return None
+    
+    # Calculate volatility (std dev of returns)
+    vol = returns.std()
+    
+    # Return hourly volatility percentage (matching Aero optimizer logic)
+    # Note: We do NOT annualize here because the optimizer expects raw hourly std dev
+    return vol * 100
 
 def calculate_covariance_matrix(pool_addresses, window_hours=672):
     """Calculate covariance matrix for multiple pools
@@ -533,8 +571,37 @@ def calculate_correlation_matrix(pool_addresses, window_hours=672):
     
     return corr_matrix
 
+def get_volatility_map(window_hours=168):
+    """Get volatility map for all pools
+    
+    Returns:
+        dict: {pool_address: volatility_percent}
+    """
+    pools = load_all_pools()
+    vol_map = {}
+    
+    for addr, df in pools.items():
+        vol = calculate_volatility(df, window_hours=window_hours)
+        if vol is not None:
+            vol_map[addr.lower()] = vol
+            
+    return vol_map
+
 
 if __name__ == "__main__":
     # Example: Fetch data for top 10 pools
     result = run_fetch_raw_volatility(max_pools=10)
-
+    
+    # Example: Load and analyze data
+    print("\n" + "="*60)
+    print("Example Analysis:")
+    print("="*60)
+    
+    pools = load_all_pools()
+    if pools:
+        # Show volatilities
+        print("\nPool Volatilities (28-day, annualized):")
+        for addr, df in list(pools.items())[:5]:
+            vol = calculate_volatility(df)
+            if vol:
+                print(f"  {addr[:10]}... : {vol:.2f}%")
